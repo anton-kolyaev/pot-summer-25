@@ -1,6 +1,6 @@
 # pot-summer-25
 ## Authors
-- Edgar
+- Edgar Miloš
 - Kasparas
 - Mykyta Tishkin
 - Mark Andžejevski
