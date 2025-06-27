@@ -5,3 +5,6 @@
 - Mykyta Tishkin
 - Mark Andžejevski
 - Agilė Astapovičiūtė  
+
+## Tech stack:
+- Java 21
