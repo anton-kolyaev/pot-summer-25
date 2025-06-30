@@ -9,3 +9,4 @@
 ## Tech stack:
 - Java 21
 - Gradle 8+ (Groovy DSL)
+- Spring Authorization Server 1.5+
