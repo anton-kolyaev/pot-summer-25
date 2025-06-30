@@ -80,3 +80,4 @@ GET    /companies/{id}/enrollments   # View enrollments for a specific company
 
 ## Tech stack:
 - Java 21
+- [PostgreSql 16.9 [Docker Image]](https://hub.docker.com/_/postgres)
