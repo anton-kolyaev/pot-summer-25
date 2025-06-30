@@ -8,4 +8,4 @@
 
 ## Tech stack:
 - Java 21
-- Gradle 8.14.2 (Groovy DSL)
+- Gradle 8+ (Groovy DSL)
