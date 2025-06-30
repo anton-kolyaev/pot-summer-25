@@ -8,4 +8,4 @@
 
 ## Tech stack:
 - Java 21
-- [PostgreSql 16.9 [Docker Image]](https://hub.docker.com/_/postgres)
+- PostgreSql 16.9
