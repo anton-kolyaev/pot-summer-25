@@ -1,5 +1,5 @@
 # pot-summer-25
-## Authors
+## Authors:
 - Edgar Miloš
 - Kasparas Murmokas
 - Mykyta Tishkin
@@ -8,3 +8,4 @@
 
 ## Tech stack:
 - Java 21
+- Gradle 8.14.2 (Groovy DSL)
