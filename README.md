@@ -10,4 +10,4 @@
 - Java 21
 - PostgreSql 16.9
 - Gradle 8+ (Groovy DSL)
-
+- JUnit 5
