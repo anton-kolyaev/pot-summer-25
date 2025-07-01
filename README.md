@@ -8,5 +8,7 @@
 
 ## Tech stack:
 - Java 21
+- PostgreSql 16.9
 - Gradle 8+ (Groovy DSL)
-- Spring Authorization Server 1.5+
+- Auth0 
+- JUnit 5
