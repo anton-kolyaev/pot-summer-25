@@ -1,4 +1,4 @@
-package com.insurance.pot.coherent_solutions.insurance_service;
+package com.coherentsolutions.pot.insurance_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
