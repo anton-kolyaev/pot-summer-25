@@ -12,3 +12,4 @@
 - Gradle 8+ (Groovy DSL)
 - Auth0 
 - JUnit 5
+- GitHub Actions
