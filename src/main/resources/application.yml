@@ -6,3 +6,4 @@ management:
     web:
       exposure:
         include: ${ACTUATOR_ENDPOINTS:health,info}
+        
