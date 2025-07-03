@@ -10,3 +10,4 @@
 - Java 21
 - Gradle 8+ (Groovy DSL)
 - JUnit 5
+
