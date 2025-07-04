@@ -1,15 +1,18 @@
-package com.coherentsolutions.pot.insurance_service.model;
+ package com.coherentsolutions.pot.insurance_service.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.UUID;
 
 @Entity
+@NoArgsConstructor
 @Getter
 @Setter
+@Table(name = "addresses")
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

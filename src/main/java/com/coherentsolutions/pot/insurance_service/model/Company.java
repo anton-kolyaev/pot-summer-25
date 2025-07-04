@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -18,8 +19,10 @@ import java.util.UUID;
 
 
 @Entity
+@NoArgsConstructor
 @Getter
 @Setter
+@Table(name = "companies")
 public class Company {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Id
@@ -54,7 +57,7 @@ public class Company {
     private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "who_created_id")
     private User whoCreated;
 
     @CreationTimestamp

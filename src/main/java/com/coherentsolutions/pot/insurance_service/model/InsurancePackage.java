@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,8 +15,10 @@ import java.util.UUID;
 
 
 @Entity
+@NoArgsConstructor
 @Getter
 @Setter
+@Table(name = "insurance_packages")
 public class InsurancePackage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,7 +50,7 @@ public class InsurancePackage {
     private Status status = Status.INITIALIZED;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "who_created_id")
     private User whoCreated;
 
     @CreationTimestamp
