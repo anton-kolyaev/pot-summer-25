@@ -12,6 +12,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -19,63 +20,44 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "claims")
-public class Claim {
+@Table(name = "enrollments")
+public class Enrollment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotBlank
-    @Column(name = "claim_number" ,nullable = false, unique = true,length = 50)
-    private String claimNumber;
-
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-
     @ManyToOne
-    @JoinColumn(name = "enrollment_id")
-    private Enrollment enrollment;
+    @JoinColumn(name = "insurance_package_id", nullable = false)
+    private InsurancePackage insurancePackage;
+
+    @NotNull
+    @Column(name = "election_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal electionAmount;
+
+    @NotNull
+    @Column(name = "contribution_amount",nullable = false, precision = 10, scale = 2)
+    private BigDecimal contributionAmount;
 
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(nullable = false, length = 20)
-    private ClaimType type;
+    private Status status = Status.PENDING;
 
     @NotNull
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal amount;
+    @Column(name = "effective_date",nullable = false)
+    private LocalDate effectiveDate;
 
-    @NotBlank
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private ClaimStatus status = ClaimStatus.PENDING;
-
-    @Column(name = "submitted_date")
-    private LocalDateTime submittedDate;
-
-    @Column(name = "processed_date")
-    private LocalDateTime processedDate;
-
-    @Column(name = "approved_amount")
-    private BigDecimal approvedAmount;
-
-    @Column(name = "denied_reason", columnDefinition = "TEXT")
-    private String deniedReason;
-
-    @Column(columnDefinition = "TEXT")
-    private String notes;
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @CreatedBy
     @Column(name = "created_by")
@@ -93,16 +75,9 @@ public class Claim {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public enum ClaimType {
-        MEDICAL,
-        PHARMACY,
-        DENTAL,
-        VISION
-    }
-
-    public enum ClaimStatus {
-        PENDING,
-        APPROVED,
-        DENIED
+    public enum Status {
+        ACTIVE,
+        INACTIVE,
+        PENDING
     }
 }

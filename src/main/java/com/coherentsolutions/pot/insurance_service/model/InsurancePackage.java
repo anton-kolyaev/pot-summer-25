@@ -13,7 +13,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 
@@ -31,6 +30,10 @@ public class InsurancePackage {
     @Column(nullable = false)
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
     @NotNull
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -43,9 +46,6 @@ public class InsurancePackage {
     @Enumerated(EnumType.STRING)
     @Column(name = "payroll_frequency", nullable = false, length = 20)
     private PayrollFrequency payrollFrequency;
-
-    @OneToMany(mappedBy = "insurancePackage")
-    private List<Plan> plans;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
@@ -69,6 +69,7 @@ public class InsurancePackage {
 
     public enum PayrollFrequency {
         WEEKLY,
+        BIWEEKLY,
         MONTHLY
     }
 
@@ -78,4 +79,3 @@ public class InsurancePackage {
         INACTIVE
     }
 }
-
