@@ -13,3 +13,5 @@
 - Auth0 
 - JUnit 5
 - GitHub Actions
+- Swagger UI
+
