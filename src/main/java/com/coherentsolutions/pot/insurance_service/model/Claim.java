@@ -40,16 +40,6 @@ public class Claim {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-
-    @ManyToOne
-    @JoinColumn(name = "enrollment_id")
-    private Enrollment enrollment;
-
-    @Enumerated(EnumType.STRING)
-    @NotNull
-    @Column(nullable = false, length = 20)
-    private ClaimType type;
-
     @NotNull
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
@@ -93,16 +83,11 @@ public class Claim {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public enum ClaimType {
-        MEDICAL,
-        PHARMACY,
-        DENTAL,
-        VISION
-    }
-
     public enum ClaimStatus {
         PENDING,
         APPROVED,
-        DENIED
+        DENIED,
+        HOLD
     }
 }
+
