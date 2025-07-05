@@ -3,9 +3,7 @@ package com.coherentsolutions.pot.insurance_service.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -15,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
 
 @Entity
 @NoArgsConstructor
@@ -53,7 +52,6 @@ public class User {
     @Column(length = 11, unique = true, nullable = false)
     private String ssn;
 
-
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
@@ -83,9 +81,5 @@ public class User {
         ACTIVE,
         INACTIVE
     }
-
-
-
-
-
 }
+

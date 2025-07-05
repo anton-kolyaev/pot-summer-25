@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -38,8 +39,7 @@ public class Address {
 
     private String room;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
-
+    @ManyToMany(mappedBy = "addresses")
+    private List<Company> companies;
 }
+

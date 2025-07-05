@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insurance_service.model;
 
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -30,7 +31,6 @@ public class Company {
     @Id
     private UUID id;
 
-
     @NotBlank
     @Column(nullable = false)
     private String name;
@@ -39,9 +39,12 @@ public class Company {
     @Column(name = "country_code", nullable = false, length = 3)
     private String countryCode;
 
-    @NotEmpty
-    @OneToMany(mappedBy = "company")
-    @Size(min = 1)
+    @ManyToMany
+    @JoinTable(
+            name = "company_address",
+            joinColumns = @JoinColumn(name = "company_id"),
+            inverseJoinColumns = @JoinColumn(name = "address_id")
+    )
     private List<Address> addresses;
 
     @NotEmpty
@@ -53,6 +56,10 @@ public class Company {
     private String email;
 
     private String website;
+
+    @OneToMany
+    @JoinColumn(name = "company_id")
+    private List<InsurancePackage> insurancePackages;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
@@ -80,3 +87,4 @@ public class Company {
 
 
 }
+
