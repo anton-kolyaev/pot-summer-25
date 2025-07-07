@@ -12,7 +12,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadRequestException(BadRequestException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
-                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
                 e.getMessage(),
                 e.getDetails()
         );
@@ -21,7 +21,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<ErrorResponseDTO> handleInsufficientAuthenticationException(InsufficientAuthenticationException e) {
         ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
-                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.name(),
                 e.getMessage(),
                 e.getDetails()
         );
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponseDTO> handleForbiddenException(ForbiddenException e) {
         ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
-                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.name(),
                 e.getMessage(),
                 e.getDetails()
         );
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponseDTO> handleConflictException(ConflictException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
-                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.name(),
                 e.getMessage(),
                 e.getDetails()
         );
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
-                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.name(),
                 e.getMessage(),
                 e.getDetails()
         );
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponseDTO> handleValidationException(ValidationException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                HttpStatus.UNPROCESSABLE_ENTITY.name(),
                 e.getMessage(),
                 e.getDetails()
         );
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(InternalServerErrorException.class)
     public ResponseEntity<ErrorResponseDTO> handleInternalServerErrorException(ValidationException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                HttpStatus.INTERNAL_SERVER_ERROR.name(),
                 e.getMessage(),
                 e.getDetails()
         );
