@@ -34,6 +34,15 @@ public class GlobalExceptionHandler{
         );
         return new ResponseEntity<>(new ErrorResponse(errorDetails), HttpStatus.FORBIDDEN);
     }
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ConflictException e) {
+        ErrorDetails details = new ErrorDetails(
+                HttpStatus.CONFLICT.value(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponse(details), HttpStatus.CONFLICT);
+    }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException e) {
         ErrorDetails errorDetails = new ErrorDetails(
