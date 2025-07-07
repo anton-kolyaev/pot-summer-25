@@ -55,12 +55,21 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.NOT_FOUND);
     }
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleValidation(ValidationException e) {
+    public ResponseEntity<ErrorResponseDTO> handleValidationException(ValidationException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 e.getMessage(),
                 e.getDetails()
         );
         return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+    @ExceptionHandler(InternalServerErrorException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInternalServerErrorException(ValidationException e) {
+        ErrorDetailsDTO details = new ErrorDetailsDTO(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
