@@ -47,11 +47,20 @@ public class GlobalExceptionHandler{
     }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException e) {
-        ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
+        ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.NOT_FOUND.value(),
                 e.getMessage(),
                 e.getDetails()
         );
-        return new ResponseEntity<>(new ErrorResponseDTO(errorDetailsDTO), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleValidation(ValidationException e) {
+        ErrorDetailsDTO details = new ErrorDetailsDTO(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.UNPROCESSABLE_ENTITY);
     }
 }
