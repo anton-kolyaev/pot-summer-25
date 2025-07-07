@@ -1,7 +1,11 @@
 package com.coherentsolutions.pot.insurance_service.dto.user;
 
-import java.util.UUID;
 import java.time.LocalDate;
+import java.util.UUID;
+
+import com.coherentsolutions.pot.insurance_service.model.Status.UserStatus;
+import com.coherentsolutions.pot.insurance_service.model.UserFunction;
+
 import lombok.Data;
 
 @Data
