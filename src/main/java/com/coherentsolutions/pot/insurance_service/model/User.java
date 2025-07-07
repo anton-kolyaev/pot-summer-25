@@ -54,10 +54,12 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany
+    @JoinColumn(name = "user_id") 
     private List<Phone> phones;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany
+    @JoinColumn(name = "user_id")
     private List<Address> addresses;
 
     @NotNull
