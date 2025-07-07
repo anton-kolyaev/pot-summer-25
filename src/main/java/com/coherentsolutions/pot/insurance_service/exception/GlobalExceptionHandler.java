@@ -1,0 +1,20 @@
+package com.coherentsolutions.pot.insurance_service.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler{
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException e) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponse(errorDetails), HttpStatus.NOT_FOUND);
+    }
+}
