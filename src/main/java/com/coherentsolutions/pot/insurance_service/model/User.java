@@ -57,6 +57,9 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Phone> phones;
 
+    @OneToMany(mappedBy = "user")
+    private List<Address> addresses;
+
     @NotNull
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
@@ -72,6 +75,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private UserFunction function;
+
     @CreatedBy
     @Column(name = "created_by")
     private UUID createdBy;
@@ -79,7 +85,6 @@ public class User {
     @LastModifiedBy
     @Column(name = "updated_by")
     private UUID updatedBy;
-
 
     @CreatedDate
     @Column(name = "created_at",nullable = false, updatable = false)
