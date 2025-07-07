@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler{
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponseDTO> handleBadRequest(BadRequestException e) {
+    public ResponseEntity<ErrorResponseDTO> handleBadRequestException(BadRequestException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.BAD_REQUEST.value(),
                 e.getMessage(),
@@ -19,7 +19,7 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(InsufficientAuthenticationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleInsufficientAuthentication(InsufficientAuthenticationException e) {
+    public ResponseEntity<ErrorResponseDTO> handleInsufficientAuthenticationException(InsufficientAuthenticationException e) {
         ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
                 HttpStatus.UNAUTHORIZED.value(),
                 e.getMessage(),
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(new ErrorResponseDTO(errorDetailsDTO), HttpStatus.UNAUTHORIZED);
     }
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponseDTO> handleForbidden(ForbiddenException e) {
+    public ResponseEntity<ErrorResponseDTO> handleForbiddenException(ForbiddenException e) {
         ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
                 HttpStatus.FORBIDDEN.value(),
                 e.getMessage(),
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(new ErrorResponseDTO(errorDetailsDTO), HttpStatus.FORBIDDEN);
     }
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ErrorResponseDTO> handleConflict(ConflictException e) {
+    public ResponseEntity<ErrorResponseDTO> handleConflictException(ConflictException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.CONFLICT.value(),
                 e.getMessage(),
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.CONFLICT);
     }
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleResourceNotFound(ResourceNotFoundException e) {
+    public ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException e) {
         ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
                 HttpStatus.NOT_FOUND.value(),
                 e.getMessage(),
@@ -54,5 +54,4 @@ public class GlobalExceptionHandler{
         );
         return new ResponseEntity<>(new ErrorResponseDTO(errorDetailsDTO), HttpStatus.NOT_FOUND);
     }
-    
 }
