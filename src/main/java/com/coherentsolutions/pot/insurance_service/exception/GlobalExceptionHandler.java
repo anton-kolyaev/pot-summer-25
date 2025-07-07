@@ -16,6 +16,15 @@ public class GlobalExceptionHandler{
         );
         return new ResponseEntity<>(new ErrorResponse(details), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientAuthentication(InsufficientAuthenticationException e) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                HttpStatus.UNAUTHORIZED.value(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponse(errorDetails), HttpStatus.UNAUTHORIZED);
+    }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException e) {
         ErrorDetails errorDetails = new ErrorDetails(
@@ -25,4 +34,5 @@ public class GlobalExceptionHandler{
         );
         return new ResponseEntity<>(new ErrorResponse(errorDetails), HttpStatus.NOT_FOUND);
     }
+    
 }
