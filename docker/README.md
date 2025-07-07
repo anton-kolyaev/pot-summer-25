@@ -32,25 +32,6 @@ The PostgreSQL container is configured with:
 - **Data persistence:** Docker volume `postgres_data`
 - **Initialization:** SQL scripts in `docker/postgres/init/`
 
-## Application Configuration
-
-Update your `application.yml` to connect to the database:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/insurance_service
-    username: insurance_app
-    password: insurance_app_password
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-```
-
 ## Useful Commands
 
 - **Start database:** `docker compose up -d postgres`
