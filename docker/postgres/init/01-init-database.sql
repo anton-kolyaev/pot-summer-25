@@ -10,6 +10,9 @@ GRANT CONNECT ON DATABASE insurance_service TO insurance_app;
 -- Connect to the insurance_service database
 \c insurance_service;
 
+-- Enable uuid-ossp extension for UUID generation
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- Grant schema privileges on the insurance_service database
 GRANT USAGE ON SCHEMA public TO insurance_app;
 GRANT CREATE ON SCHEMA public TO insurance_app;
