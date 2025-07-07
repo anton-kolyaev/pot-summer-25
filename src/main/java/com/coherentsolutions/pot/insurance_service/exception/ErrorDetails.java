@@ -4,5 +4,4 @@ public record ErrorDetails(
         int code,
         String message,
         Object details
-){
-}
+){ }
