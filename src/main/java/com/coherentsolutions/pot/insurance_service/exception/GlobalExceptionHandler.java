@@ -1,7 +1,7 @@
 package com.coherentsolutions.pot.insurance_service.exception;
 
-import com.coherentsolutions.pot.insurance_service.dto.ErrorDetailsDTO;
-import com.coherentsolutions.pot.insurance_service.dto.ErrorResponseDTO;
+import com.coherentsolutions.pot.insurance_service.dto.exception.ErrorDetailsDTO;
+import com.coherentsolutions.pot.insurance_service.dto.exception.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,21 +20,21 @@ public class GlobalExceptionHandler{
     }
     @ExceptionHandler(InsufficientAuthenticationException.class)
     public ResponseEntity<ErrorResponseDTO> handleInsufficientAuthenticationException(InsufficientAuthenticationException e) {
-        ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
+        ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.UNAUTHORIZED.name(),
                 e.getMessage(),
                 e.getDetails()
         );
-        return new ResponseEntity<>(new ErrorResponseDTO(errorDetailsDTO), HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.UNAUTHORIZED);
     }
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponseDTO> handleForbiddenException(ForbiddenException e) {
-        ErrorDetailsDTO errorDetailsDTO = new ErrorDetailsDTO(
+        ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.FORBIDDEN.name(),
                 e.getMessage(),
                 e.getDetails()
         );
-        return new ResponseEntity<>(new ErrorResponseDTO(errorDetailsDTO), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.FORBIDDEN);
     }
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponseDTO> handleConflictException(ConflictException e) {
@@ -64,12 +64,21 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.UNPROCESSABLE_ENTITY);
     }
     @ExceptionHandler(InternalServerErrorException.class)
-    public ResponseEntity<ErrorResponseDTO> handleInternalServerErrorException(ValidationException e) {
+    public ResponseEntity<ErrorResponseDTO> handleInternalServerErrorException(InternalServerErrorException e) {
         ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.INTERNAL_SERVER_ERROR.name(),
                 e.getMessage(),
                 e.getDetails()
         );
         return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(GenericApiException.class)
+    public ResponseEntity<ErrorResponseDTO> handleGenericApiException(GenericApiException e) {
+        ErrorDetailsDTO details = new ErrorDetailsDTO(
+                e.getCode(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.BAD_REQUEST);
     }
 }

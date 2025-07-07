@@ -1,20 +1,10 @@
 package com.coherentsolutions.pot.insurance_service.exception;
 
-public class ResourceNotFoundException extends RuntimeException {
-    private final Object details;
-
+public class ResourceNotFoundException extends ApiException {
     public ResourceNotFoundException(String message) {
         super(message);
-        this.details = null;
-    }
-    public ResourceNotFoundException(Object details) {
-        this.details = details;
     }
     public ResourceNotFoundException(String message, Object details) {
-        super(message);
-        this.details = details;
-    }
-    public Object getDetails() {
-        return details;
+        super(message, details);
     }
 }

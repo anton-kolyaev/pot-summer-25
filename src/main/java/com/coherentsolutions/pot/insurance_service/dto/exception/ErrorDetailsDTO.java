@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.dto;
+package com.coherentsolutions.pot.insurance_service.dto.exception;
 
 public record ErrorDetailsDTO(
         String code,

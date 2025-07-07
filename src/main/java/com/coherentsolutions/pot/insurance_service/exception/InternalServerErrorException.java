@@ -1,18 +1,10 @@
 package com.coherentsolutions.pot.insurance_service.exception;
 
-public class InternalServerErrorException extends RuntimeException {
-    private final Object details;
-    
+public class InternalServerErrorException extends ApiException {
     public InternalServerErrorException(String message) {
-        super(message); this.details = null;
-    }
-    public InternalServerErrorException(Object details) {
-        this.details = details;
+        super(message);
     }
     public InternalServerErrorException(String message, Object details) {
-        super(message); this.details = details;
-    }
-    public Object getDetails() {
-        return details;
+        super(message, details);
     }
 }
