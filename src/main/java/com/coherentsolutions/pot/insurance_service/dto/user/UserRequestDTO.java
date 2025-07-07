@@ -14,7 +14,7 @@ public class UserRequestDTO {
     private String lastName;
     private String userName;
     private String email;
-    private LocalDate DoB; //Date of Birth
+    private LocalDate dateOfBirth;
     private String SSN;
     private UserFunction function;
     private UserStatus status;
