@@ -15,7 +15,7 @@ public class UserRequestDTO {
     private String userName;
     private String email;
     private LocalDate dateOfBirth;
-    private String SSN;
+    private String ssn;
     private UserFunction function;
     private UserStatus status;
     private UUID companyId; 
