@@ -1,7 +1,17 @@
 package com.coherentsolutions.pot.insurance_service.model;
 
 
-import jakarta.persistence.*;
+import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,11 +19,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +39,6 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Id
     private UUID id;
-
 
     @NotBlank
     @Column(nullable = false)
@@ -52,24 +63,28 @@ public class Company {
 
     private String website;
 
+//    @OneToMany
+//    @JoinColumn(name = "company_id")
+//    private List<InsurancePackage> insurancePackages;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private Status status;
+    private CompanyStatus status;
 
-    @ManyToOne
-    @JoinColumn(name = "who_created_id")
-    private User whoCreated;
+    @CreatedBy
+    @Column(name = "created_by")
+    private UUID createdBy;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @LastModifiedBy
+    @Column(name = "updated_by")
+    private UUID updatedBy;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-    public enum Status {
-        ACTIVE,
-        INACTIVE
-    }
-
-
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }
+
