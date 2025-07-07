@@ -25,6 +25,15 @@ public class GlobalExceptionHandler{
         );
         return new ResponseEntity<>(new ErrorResponse(errorDetails), HttpStatus.UNAUTHORIZED);
     }
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException e) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                HttpStatus.FORBIDDEN.value(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponse(errorDetails), HttpStatus.FORBIDDEN);
+    }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException e) {
         ErrorDetails errorDetails = new ErrorDetails(
