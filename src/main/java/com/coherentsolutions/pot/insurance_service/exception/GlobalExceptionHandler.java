@@ -7,7 +7,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler{
-
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException e) {
+        ErrorDetails details = new ErrorDetails(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage(),
+                e.getDetails()
+        );
+        return new ResponseEntity<>(new ErrorResponse(details), HttpStatus.BAD_REQUEST);
+    }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(ResourceNotFoundException e) {
         ErrorDetails errorDetails = new ErrorDetails(
