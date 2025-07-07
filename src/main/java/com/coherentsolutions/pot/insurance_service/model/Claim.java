@@ -1,18 +1,28 @@
 package com.coherentsolutions.pot.insurance_service.model;
 
-import jakarta.persistence.*;
+import com.coherentsolutions.pot.insurance_service.model.enums.ClaimStatus;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
@@ -48,15 +58,11 @@ public class Claim {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private ClaimStatus status = ClaimStatus.PENDING;
-
     @Column(name = "submitted_date")
-    private LocalDateTime submittedDate;
+    private LocalDate submittedDate;
 
     @Column(name = "processed_date")
-    private LocalDateTime processedDate;
+    private LocalDate processedDate;
 
     @Column(name = "approved_amount")
     private BigDecimal approvedAmount;
@@ -75,19 +81,29 @@ public class Claim {
     @Column(name = "updated_by")
     private UUID updatedBy;
 
-    @CreationTimestamp
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
-    public enum ClaimStatus {
-        PENDING,
-        APPROVED,
-        DENIED,
-        HOLD
+    @Transient
+    public ClaimStatus getStatus() {
+        if(deniedReason != null && !deniedReason.isBlank()) {
+            return ClaimStatus.DENIED;
+        }
+        else if(approvedAmount != null && approvedAmount.compareTo(BigDecimal.ZERO) > 0) {
+            return ClaimStatus.APPROVED;
+        }
+        else if (submittedDate != null && processedDate == null) {
+            return ClaimStatus.PENDING;
+        }
+        else{
+            return ClaimStatus.HOLD;
+        }
+
     }
 }
 

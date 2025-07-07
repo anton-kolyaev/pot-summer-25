@@ -1,8 +1,17 @@
 package com.coherentsolutions.pot.insurance_service.model;
 
 
-import jakarta.persistence.*;
-import jakarta.persistence.criteria.CriteriaBuilder;
+import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,13 +19,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,12 +48,9 @@ public class Company {
     @Column(name = "country_code", nullable = false, length = 3)
     private String countryCode;
 
-    @ManyToMany
-    @JoinTable(
-            name = "company_address",
-            joinColumns = @JoinColumn(name = "company_id"),
-            inverseJoinColumns = @JoinColumn(name = "address_id")
-    )
+    @NotEmpty
+    @OneToMany(mappedBy = "company")
+    @Size(min = 1)
     private List<Address> addresses;
 
     @NotEmpty
@@ -63,7 +69,7 @@ public class Company {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private Status status;
+    private CompanyStatus status;
 
     @CreatedBy
     @Column(name = "created_by")
@@ -73,17 +79,14 @@ public class Company {
     @Column(name = "updated_by")
     private UUID updatedBy;
 
-    @CreationTimestamp
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
-    public enum Status {
-        ACTIVE,
-        INACTIVE
-    }
 
 
 }

@@ -1,18 +1,20 @@
 package com.coherentsolutions.pot.insurance_service.model;
 
+import com.coherentsolutions.pot.insurance_service.model.enums.PackageStatus;
+import com.coherentsolutions.pot.insurance_service.model.enums.PayrollFrequency;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ public class InsurancePackage {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private Status status = Status.INITIALIZED;
+    private PackageStatus status;
 
     @CreatedBy
     @Column(name = "created_by")
@@ -59,23 +61,27 @@ public class InsurancePackage {
     @Column(name = "updated_by")
     private UUID updatedBy;
 
-    @CreationTimestamp
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    @UpdateTimestamp
+    @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
-    public enum PayrollFrequency {
-        WEEKLY,
-        MONTHLY
+    @Transient
+    public PackageStatus getStatus() {
+        if(endDate != null && LocalDate.now().isAfter(endDate)) {
+            return PackageStatus.DEACTIVATED;
+        }
+        else if(startDate != null && LocalDate.now().isAfter(startDate) && LocalDate.now().isBefore(endDate)) {
+            return PackageStatus.ACTIVE;
+        }
+        else {
+            return PackageStatus.INITIALIZED;
+        }
     }
 
-    public enum Status {
-        INITIALIZED,
-        ACTIVE,
-        INACTIVE
-    }
+
 }
 
