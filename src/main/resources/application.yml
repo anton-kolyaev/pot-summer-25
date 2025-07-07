@@ -1,6 +1,17 @@
 spring:
   application:
     name: Insurance Service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/insurance_service
+    username: insurance_app
+    password: insurance_app_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 management:
   endpoints:
     web:
