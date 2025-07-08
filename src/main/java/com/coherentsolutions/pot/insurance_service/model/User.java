@@ -19,7 +19,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -49,27 +48,25 @@ public class User {
     private String lastName;
 
     @NotBlank
-    @Column(length = 50, unique = true, nullable = false)
+    @Column(name = "username", length = 50, unique = true, nullable = false)
     private String username;
 
     @NotBlank
-    @Column(unique = true, nullable = false)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @OneToMany
-    @JoinColumn(name = "user_id") 
+    @OneToMany(mappedBy = "user")
     private List<Phone> phones;
 
-    @OneToMany
-    @JoinColumn(name = "user_id")
-    private List<Address> addresses;
+    @OneToMany(mappedBy = "user")
+    private List<Address> address;
 
     @NotNull
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
     @NotBlank
-    @Column(length = 11, unique = true, nullable = false)
+    @Column(name = "ssn", length = 11, unique = true, nullable = false)
     private String ssn;
 
     // @ManyToOne
