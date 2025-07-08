@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.model;
+package com.coherentsolutions.pot.insurance_service.enums;
 
     public enum UserFunction {
         COMPANY_MANAGER,

@@ -6,8 +6,8 @@ import java.util.UUID;
 
 import org.springframework.boot.autoconfigure.amqp.RabbitConnectionDetails.Address;
 
-import com.coherentsolutions.pot.insurance_service.model.Status.UserStatus;
-import com.coherentsolutions.pot.insurance_service.model.UserFunction;
+import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
+import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 
 import lombok.Data;
 
