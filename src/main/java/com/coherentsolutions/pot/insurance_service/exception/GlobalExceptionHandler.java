@@ -7,11 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -109,5 +111,24 @@ public class GlobalExceptionHandler{
                 Map.of("fields", fieldErrors)
         );
         return new ResponseEntity<>(new ErrorResponseDTO(details), HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponseDTO> handleHttpMediaTypeNotSupported(
+            HttpMediaTypeNotSupportedException ex) {
+        String received = Optional.ofNullable(ex.getContentType())
+                .map(Object::toString)
+                .orElse("null");
+        String supportedList = ex.getSupportedMediaTypes().stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
+        Map<String, Object> details = Map.of(
+                "received", received,
+                "supported", supportedList);
+        ErrorDetailsDTO error = new ErrorDetailsDTO(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE.name(),
+                "Unsupported media type",
+                details
+        );
+        return new ResponseEntity<>(new ErrorResponseDTO(error), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 }
