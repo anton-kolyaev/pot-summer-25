@@ -32,7 +32,6 @@ public class CompanyManagementService {
         this.phoneService = phoneService;
     }
 
-
     public CreateCompanyResponse createCompany(CreateCompanyRequest companyDto) {
         Company company = new Company();
         company.setName(companyDto.getName());
