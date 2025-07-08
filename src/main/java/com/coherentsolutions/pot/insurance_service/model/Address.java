@@ -33,17 +33,17 @@ public class Address {
     private UUID id;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(name = "country", nullable = false)
     private String country;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(name = "city", nullable = false)
     private String city;
 
     private String state;
 
     @NotBlank
-    @Column(nullable = false)
+    @Column(name = "street", nullable = false)
     private String street;
 
     @NotBlank
