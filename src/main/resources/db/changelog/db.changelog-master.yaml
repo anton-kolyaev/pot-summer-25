@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changeset/create-companies.yaml
+  - include:
+      file: db/changelog/changeset/create-addresses.yaml
+  - include:
+      file: db/changelog/changeset/create-phones.yaml
