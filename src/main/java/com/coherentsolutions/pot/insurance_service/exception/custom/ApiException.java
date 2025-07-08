@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.exception;
+package com.coherentsolutions.pot.insurance_service.exception.custom;
 
 public abstract class ApiException extends RuntimeException {
     private final Object details;

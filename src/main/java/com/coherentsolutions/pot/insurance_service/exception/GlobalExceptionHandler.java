@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insurance_service.exception;
 
 import com.coherentsolutions.pot.insurance_service.dto.exception.ErrorDetailsDTO;
 import com.coherentsolutions.pot.insurance_service.dto.exception.ErrorResponseDTO;
+import com.coherentsolutions.pot.insurance_service.exception.custom.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
