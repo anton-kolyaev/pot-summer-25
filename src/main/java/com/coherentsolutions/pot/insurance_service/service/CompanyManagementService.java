@@ -4,6 +4,7 @@ import com.coherentsolutions.pot.insurance_service.dto.*;
 import com.coherentsolutions.pot.insurance_service.model.Address;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.model.Phone;
+import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
 import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class CompanyManagementService {
         company.setCountryCode(companyDto.getCountryCode());
         company.setEmail(companyDto.getEmail());
         company.setWebsite(companyDto.getWebsite());
+        company.setStatus(CompanyStatus.ACTIVE);
         company.setCreatedBy(companyDto.getCreatedBy());
         company.setWebsite(companyDto.getWebsite());
         Company savedCompany = companyRepository.save(company);
@@ -46,7 +48,7 @@ public class CompanyManagementService {
 
         companyRepository.save(savedCompany);
 
-        CreateCompanyResponse response = CreateCompanyResponse.builder()
+        return CreateCompanyResponse.builder()
                 .id(savedCompany.getId())
                 .name(savedCompany.getName())
                 .countryCode(savedCompany.getCountryCode())
@@ -75,8 +77,6 @@ public class CompanyManagementService {
                 .createdAt(savedCompany.getCreatedAt())
                 .updatedAt(savedCompany.getUpdatedAt())
                 .build();
-
-        return response;
     }
 
     public Optional<CompanyDetailsResponse> getCompanyDetails(UUID id) {
