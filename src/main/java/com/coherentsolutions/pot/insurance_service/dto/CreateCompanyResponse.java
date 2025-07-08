@@ -4,14 +4,14 @@ import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Data
 @Builder
 public class CreateCompanyResponse {
-    private UUID Id;
+    private UUID id;
     private String name;
     private String countryCode;
     private List<AddressDto> addresses;
@@ -20,7 +20,7 @@ public class CreateCompanyResponse {
     private String website;
     private CompanyStatus companyStatus;
     private UUID createdBy;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 }
 

@@ -8,7 +8,7 @@ import java.util.List;
 @Builder
 public class CompanyEnrollmentsResponse {
     private List<EnrollmentDto> enrollments;
-    private int total;
+    private int total = enrollments.size();
     private int size;
 }
 

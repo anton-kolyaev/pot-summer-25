@@ -2,20 +2,9 @@ package com.coherentsolutions.pot.insurance_service.model;
 
 
 import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +12,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 import java.time.Instant;
@@ -31,6 +21,7 @@ import java.util.UUID;
 
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @Getter
 @Setter
@@ -48,14 +39,14 @@ public class Company {
     @Column(name = "country_code", nullable = false, length = 3)
     private String countryCode;
 
-    @NotEmpty
+//    @NotEmpty
     @OneToMany(mappedBy = "company")
-    @Size(min = 1)
+//    @Size(min = 1)
     private List<Address> addresses;
 
-    @NotEmpty
+//    @NotEmpty
     @OneToMany(mappedBy = "company")
-    @Size(min = 1)
+//    @Size(min = 1)
     private List<Phone> phones;
 
     @Email

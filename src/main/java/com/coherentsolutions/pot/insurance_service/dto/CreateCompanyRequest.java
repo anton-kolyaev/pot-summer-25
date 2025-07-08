@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insurance_service.dto;
 
-import com.coherentsolutions.pot.insurance_service.model.Phone;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,8 +12,9 @@ public class CreateCompanyRequest {
     private String name;
     private String countryCode;
     private List<AddressDto> addresses;
-    private List<Phone> phones;
+    private List<PhoneDto> phones;
     private String email;
+    private String website;
     private UUID createdBy;
 }
 
