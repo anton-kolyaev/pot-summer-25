@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insurance_service.dto.user;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import com.coherentsolutions.pot.insurance_service.model.Status.UserStatus;
