@@ -105,6 +105,7 @@ public class GlobalExceptionHandler{
                 .getFieldErrors()
                 .stream()
                 .collect(Collectors.toMap(FieldError::getField, fe-> Objects.requireNonNull(fe.getDefaultMessage(), "null")));
+        logger.warn("MethodArgumentNotValidException: validation failed, field errors = {}", fieldErrors, ex);
         ErrorDetailsDTO details = new ErrorDetailsDTO(
                 HttpStatus.BAD_REQUEST.name(),
                 "Validation failed",
@@ -121,6 +122,7 @@ public class GlobalExceptionHandler{
         String supportedList = ex.getSupportedMediaTypes().stream()
                 .map(Object::toString)
                 .collect(Collectors.joining(", "));
+        logger.warn("HttpMediaTypeNotSupportedException: received {}, supported types = {}", received, supportedList, ex);
         Map<String, Object> details = Map.of(
                 "received", received,
                 "supported", supportedList);
