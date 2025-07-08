@@ -11,7 +11,6 @@ public abstract class ApiException extends RuntimeException {
         super(message);
         this.details = details;
     }
-    
     public Object getDetails() {
         return details;
     }
