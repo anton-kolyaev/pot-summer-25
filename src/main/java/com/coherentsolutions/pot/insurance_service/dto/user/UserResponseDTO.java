@@ -16,8 +16,8 @@ public class UserResponseDTO {
     private String lastName;
     private String userName;
     private String email;
-    private LocalDate DoB; //Date of Birth
-    private String SSN;
+    private LocalDate dateOfBirth; 
+    private String ssn;
     private Address address;
     private String phone;
     private UserFunction function;
