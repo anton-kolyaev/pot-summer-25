@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insurance_service.service;
 import com.coherentsolutions.pot.insurance_service.dto.*;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
 import com.coherentsolutions.pot.insurance_service.dto.UpdateCompanyRequest;
+import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
 import com.coherentsolutions.pot.insurance_service.model.Address;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.model.Phone;
@@ -121,29 +122,29 @@ public class CompanyManagementService {
         return Optional.of(companyResponse);
     }
 
-    public List<CompanyResponseDto> getCompaniesWithFilters(String name, String countryCode, String status, Instant createdFrom, Instant createdTo, Instant updatedFrom, Instant updatedTo) {
+    public List<CompanyResponseDto> getCompaniesWithFilters(CompanyFilter filter) {
         List<Company> companies = companyRepository.findAll();
         return companies.stream()
                 .filter(company -> {
-                    if (StringUtils.hasText(name) && (company.getName() == null || !company.getName().toLowerCase().contains(name.toLowerCase()))) {
+                    if (StringUtils.hasText(filter.getName()) && (company.getName() == null || !company.getName().toLowerCase().contains(filter.getName().toLowerCase()))) {
                         return false;
                     }
-                    if (StringUtils.hasText(countryCode) && (company.getCountryCode() == null || !company.getCountryCode().toLowerCase().contains(countryCode.toLowerCase()))) {
+                    if (StringUtils.hasText(filter.getCountryCode()) && (company.getCountryCode() == null || !company.getCountryCode().toLowerCase().contains(filter.getCountryCode().toLowerCase()))) {
                         return false;
                     }
-                    if (StringUtils.hasText(status) && (company.getStatus() == null || !company.getStatus().name().equalsIgnoreCase(status))) {
+                    if (StringUtils.hasText(filter.getStatus()) && (company.getStatus() == null || !company.getStatus().name().equalsIgnoreCase(filter.getStatus()))) {
                         return false;
                     }
-                    if (createdFrom != null && (company.getCreatedAt() == null || company.getCreatedAt().isBefore(createdFrom))) {
+                    if (filter.getCreatedFrom() != null && (company.getCreatedAt() == null || company.getCreatedAt().isBefore(filter.getCreatedFrom()))) {
                         return false;
                     }
-                    if (createdTo != null && (company.getCreatedAt() == null || company.getCreatedAt().isAfter(createdTo))) {
+                    if (filter.getCreatedTo() != null && (company.getCreatedAt() == null || company.getCreatedAt().isAfter(filter.getCreatedTo()))) {
                         return false;
                     }
-                    if (updatedFrom != null && (company.getUpdatedAt() == null || company.getUpdatedAt().isBefore(updatedFrom))) {
+                    if (filter.getUpdatedFrom() != null && (company.getUpdatedAt() == null || company.getUpdatedAt().isBefore(filter.getUpdatedFrom()))) {
                         return false;
                     }
-                    if (updatedTo != null && (company.getUpdatedAt() == null || company.getUpdatedAt().isAfter(updatedTo))) {
+                    if (filter.getUpdatedTo() != null && (company.getUpdatedAt() == null || company.getUpdatedAt().isAfter(filter.getUpdatedTo()))) {
                         return false;
                     }
                     return true;
