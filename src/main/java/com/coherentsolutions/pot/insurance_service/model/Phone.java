@@ -1,60 +1,13 @@
 package com.coherentsolutions.pot.insurance_service.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.Instant;
 import java.util.UUID;
 
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
-@Setter
 @Getter
-@Table(name ="phones")
+@Setter
 public class Phone {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @NotBlank
-    @Column(nullable = false)
     private String code;
-
-    @NotBlank
-    @Column(nullable = false)
     private String number;
-
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
-
-//    @ManyToOne
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
-
-    @CreatedBy
-    @Column(name = "created_by")
-    private UUID createdBy;
-
-    @LastModifiedBy
-    @Column(name = "updated_by")
-    private UUID updatedBy;
-
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
 }
-

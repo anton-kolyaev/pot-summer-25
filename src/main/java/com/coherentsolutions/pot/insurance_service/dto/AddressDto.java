@@ -8,7 +8,6 @@ import java.util.UUID;
 @Data
 @Builder
 public class AddressDto {
-    private UUID id;
     private String country;
     private String city;
     private String state;

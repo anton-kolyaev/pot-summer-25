@@ -8,7 +8,6 @@ import java.util.UUID;
 @Data
 @Builder
 public class PhoneDto {
-    private UUID id;
     private String code;
     private String number;
 }
