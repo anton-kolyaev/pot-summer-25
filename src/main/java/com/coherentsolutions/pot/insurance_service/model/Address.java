@@ -1,6 +1,6 @@
  package com.coherentsolutions.pot.insurance_service.model;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.annotation.CreatedBy;
@@ -65,11 +65,11 @@ public class Address {
 
     @CreatedDate
     @Column(name = "created_at",nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
