@@ -5,6 +5,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import com.coherentsolutions.pot.insurance_service.converter.AddressListConverter;
+import com.coherentsolutions.pot.insurance_service.converter.PhoneListConverter;
+import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -12,16 +15,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -49,14 +42,12 @@ public class Company {
     @Column(name = "country_code", nullable = false, length = 3)
     private String countryCode;
 
-    @NotEmpty
-    @OneToMany(mappedBy = "company")
-    @Size(min = 1)
+    @Convert(converter = AddressListConverter.class)
+    @Column(columnDefinition = "json")
     private List<Address> addresses;
 
-    @NotEmpty
-    @OneToMany(mappedBy = "company")
-    @Size(min = 1)
+    @Convert(converter = PhoneListConverter.class)
+    @Column(columnDefinition = "json")
     private List<Phone> phones;
 
     @Email
@@ -87,8 +78,6 @@ public class Company {
     @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-
 
 }
 
