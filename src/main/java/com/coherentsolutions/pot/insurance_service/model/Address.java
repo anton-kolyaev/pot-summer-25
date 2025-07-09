@@ -3,6 +3,8 @@
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
  @Getter
  @Setter
 public class Address {
@@ -12,5 +14,7 @@ public class Address {
     private String street;
     private String building;
     private String room;
+    private UUID companyId;
+    private UUID userId;
 }
 
