@@ -14,14 +14,14 @@ public class UserService {
     private UserRepository userRepository;
 
 
-    public List<UserDto> getAllUserRequestDtos() {
+    public List<UserDto> getAllUserDtos() {
         return userRepository.findAll()
                 .stream()
-                .map(this::convertEntityToRequestDto)
+                .map(this::convertEntityToDto)
                 .collect(Collectors.toList());
     }
 
-    private UserDto convertEntityToRequestDto(User user) {
+    private UserDto convertEntityToDto(User user) {
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());
         userDto.setFirstName(user.getFirstName());
