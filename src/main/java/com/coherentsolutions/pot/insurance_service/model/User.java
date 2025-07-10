@@ -5,6 +5,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import com.coherentsolutions.pot.insurance_service.converter.AddressListConverter;
+import com.coherentsolutions.pot.insurance_service.converter.PhoneListConverter;
+import jakarta.persistence.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -12,25 +15,16 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import com.coherentsolutions.pot.insurance_service.model.enums.Status;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @Getter
 @Setter
@@ -56,7 +50,12 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @OneToMany(mappedBy = "user")
+    @Convert(converter = AddressListConverter.class)
+    @Column(columnDefinition = "json")
+    private List<Address> addresses;
+
+    @Convert(converter = PhoneListConverter.class)
+    @Column(columnDefinition = "json")
     private List<Phone> phones;
 
     @NotNull
