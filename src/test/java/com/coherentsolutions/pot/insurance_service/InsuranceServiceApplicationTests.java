@@ -1,13 +1,12 @@
 package com.coherentsolutions.pot.insurance_service;
 
-import org.junit.jupiter.api.Disabled;
+import com.coherentsolutions.pot.insurance_service.containers.PostgresTestContainer;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class InsuranceServiceApplicationTests {
+class InsuranceServiceApplicationTests extends PostgresTestContainer {
 
-	@Disabled
 	@Test
 	void contextLoads() {
 	}

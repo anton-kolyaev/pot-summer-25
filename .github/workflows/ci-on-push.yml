@@ -1,6 +1,6 @@
 name: CI on Push
-on: []
-
+on:
+  push:
 
 jobs:
   build:
