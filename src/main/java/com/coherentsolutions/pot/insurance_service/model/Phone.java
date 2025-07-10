@@ -10,7 +10,5 @@ import java.util.UUID;
 public class Phone {
     private String code;
     private String number;
-    private UUID companyId;
-    private UUID userId;
 }
 
