@@ -8,6 +8,8 @@ import java.util.UUID;
 import com.coherentsolutions.pot.insurance_service.converter.AddressListConverter;
 import com.coherentsolutions.pot.insurance_service.converter.PhoneListConverter;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -42,11 +44,11 @@ public class Company {
     @Column(name = "country_code", nullable = false, length = 3)
     private String countryCode;
 
-    @Convert(converter = AddressListConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private List<Address> addresses;
 
-    @Convert(converter = PhoneListConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")
     private List<Phone> phones;
 
