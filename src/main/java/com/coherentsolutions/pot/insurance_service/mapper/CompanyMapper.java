@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insurance_service.mapper;
 import com.coherentsolutions.pot.insurance_service.dto.AddressDto;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
+import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
 import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
@@ -27,6 +28,10 @@ public interface CompanyMapper {
     CreateCompanyResponse toCreateCompanyResponse(Company company);
 
     CompanyDetailsResponse toCompanyDetailsResponse(Company company);
+
+    @Mapping(target = "status", expression = "java(company.getStatus() != null ? company.getStatus().name() : null)")
+    @Mapping(target = "whoCreated", source = "createdBy")
+    CompanyResponseDto toCompanyResponseDto(Company company);
 
     default Map<String, Object> convertAddressListToMap(List<AddressDto> addresses) {
         Map<String, Object> map = new HashMap<>();
