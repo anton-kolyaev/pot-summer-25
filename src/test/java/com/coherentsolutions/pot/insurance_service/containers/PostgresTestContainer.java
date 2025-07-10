@@ -11,10 +11,7 @@ public abstract class PostgresTestContainer {
 
     @Container
     public static final PostgreSQLContainer<?> POSTGRES =
-            new PostgreSQLContainer<>("postgres:16.9")
-                    .withDatabaseName("insurance_service")
-                    .withUsername("insurance_app")
-                    .withPassword("insurance_app_password");
+            new PostgreSQLContainer<>("postgres:16.9");
 
     @DynamicPropertySource
     static void overrideProps(DynamicPropertyRegistry registry) {
