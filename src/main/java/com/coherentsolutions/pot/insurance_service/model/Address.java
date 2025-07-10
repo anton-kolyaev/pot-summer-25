@@ -14,7 +14,5 @@ public class Address {
     private String street;
     private String building;
     private String room;
-    private UUID companyId;
-    private UUID userId;
 }
 
