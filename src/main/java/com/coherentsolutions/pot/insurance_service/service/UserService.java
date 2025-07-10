@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private UserRepository userRepository;
 
+
     public List<UserDto> getAllUserRequestDtos() {
         return userRepository.findAll()
                 .stream()
