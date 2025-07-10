@@ -1,7 +1,4 @@
 databaseChangeLog:
   - include:
-      file: 001-create-table-user.yaml
-      relativeToChangelogFile: true
-  - include:
-      file: 002-create-table-phone.yaml
-      relativeToChangelogFile: true
+      file: db/changelog/001-create-table-user.sql
+
