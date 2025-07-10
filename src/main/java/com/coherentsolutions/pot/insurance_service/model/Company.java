@@ -21,14 +21,13 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-
 import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.Map;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
@@ -53,11 +52,11 @@ public class Company {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private List<Address> address_data;
+    private Map<String, Object> address_data;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
-    private List<Phone> phone_data;
+    private Map<String, Object> phone_data;
 
     @Email
     private String email;
