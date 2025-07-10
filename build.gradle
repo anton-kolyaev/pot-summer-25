@@ -16,7 +16,11 @@ java {
 repositories {
 	mavenCentral()
 }
-
+configurations.configureEach {
+	resolutionStrategy {
+		force 'org.apache.commons:commons-compress:1.27.1'
+	}
+}
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
