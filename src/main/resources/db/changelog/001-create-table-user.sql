@@ -14,5 +14,11 @@ CREATE TABLE users (
     updated_by UUID,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(id)
+    CONSTRAINT fk_company_id FOREIGN KEY (company_id) REFERENCES companies(id)
 );
+
+ALTER TABLE companies
+ADD CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES users(id);
+
+ALTER TABLE companies
+ADD CONSTRAINT fk_updated_by FOREIGN KEY (updated_by) REFERENCES users(id);
