@@ -19,13 +19,9 @@ import java.util.stream.Collectors;
 @Service
 public class CompanyManagementService {
     private final CompanyRepository companyRepository;
-    private final AddressService addressService;
-    private final PhoneService phoneService;
 
-    public CompanyManagementService(CompanyRepository companyRepository, AddressService addressService, PhoneService phoneService) {
+    public CompanyManagementService(CompanyRepository companyRepository) {
         this.companyRepository = companyRepository;
-        this.addressService = addressService;
-        this.phoneService = phoneService;
     }
 
 
@@ -37,24 +33,40 @@ public class CompanyManagementService {
         company.setWebsite(companyDto.getWebsite());
         company.setStatus(CompanyStatus.ACTIVE);
         company.setCreatedBy(companyDto.getCreatedBy());
-        company.setWebsite(companyDto.getWebsite());
-        Company savedCompany = companyRepository.save(company);
 
-        List<Address> addresses = new ArrayList<>(addressService.createAddresses(companyDto.getAddresses(), savedCompany)) ;
-        List<Phone> phones = new ArrayList<>(phoneService.createPhones(companyDto.getPhones(), savedCompany));
+        List<Address> addresses = companyDto.getAddresses().stream()
+                .map(dto -> {
+                    Address address = new Address();
+                    address.setCountry(dto.getCountry());
+                    address.setCity(dto.getCity());
+                    address.setState(dto.getState());
+                    address.setStreet(dto.getStreet());
+                    address.setBuilding(dto.getBuilding());
+                    address.setRoom(dto.getRoom());
+                    return address;
+                })
+                .toList();
 
-        savedCompany.setAddresses(addresses);
-        savedCompany.setPhones(phones);
+        List<Phone> phones = companyDto.getPhones().stream()
+                .map(dto -> {
+                    Phone phone = new Phone();
+                    phone.setCode(dto.getCode());
+                    phone.setNumber(dto.getNumber());
+                    return phone;
+                })
+                .toList();
 
-        companyRepository.save(savedCompany);
+        company.setAddresses(addresses);
+        company.setPhones(phones);
+
+        companyRepository.save(company);
 
         return CreateCompanyResponse.builder()
-                .id(savedCompany.getId())
-                .name(savedCompany.getName())
-                .countryCode(savedCompany.getCountryCode())
+                .id(company.getId())
+                .name(company.getName())
+                .countryCode(company.getCountryCode())
                 .addresses(addresses.stream()
                         .map(address -> AddressDto.builder()
-                                .id(address.getId())
                                 .country(address.getCountry())
                                 .city(address.getCity())
                                 .state(address.getState())
@@ -65,17 +77,16 @@ public class CompanyManagementService {
                         .toList())
                 .phones(phones.stream()
                         .map(phone -> PhoneDto.builder()
-                                .id(phone.getId())
                                 .code(phone.getCode())
                                 .number(phone.getNumber())
                                 .build())
                         .toList())
-                .email(savedCompany.getEmail())
-                .website(savedCompany.getWebsite())
-                .companyStatus(savedCompany.getStatus())
-                .createdBy(savedCompany.getCreatedBy())
-                .createdAt(savedCompany.getCreatedAt())
-                .updatedAt(savedCompany.getUpdatedAt())
+                .email(company.getEmail())
+                .website(company.getWebsite())
+                .companyStatus(company.getStatus())
+                .createdBy(company.getCreatedBy())
+                .createdAt(company.getCreatedAt())
+                .updatedAt(company.getUpdatedAt())
                 .build();
     }
 
@@ -88,7 +99,6 @@ public class CompanyManagementService {
                 .addresses(
                         company.getAddresses().stream()
                                 .map(address -> AddressDto.builder()
-                                        .id(address.getId())
                                         .country(address.getCountry())
                                         .city(address.getCity())
                                         .state(address.getState())
@@ -102,12 +112,12 @@ public class CompanyManagementService {
                 .phones(
                         company.getPhones().stream()
                                 .map(phone -> PhoneDto.builder()
-                                        .id(phone.getId())
                                         .code(phone.getCode())
                                         .number(phone.getNumber())
                                         .build()
                                 )
                                 .collect(Collectors.toList())
+
                 )
                 .email(company.getEmail())
                 .website(company.getWebsite())
