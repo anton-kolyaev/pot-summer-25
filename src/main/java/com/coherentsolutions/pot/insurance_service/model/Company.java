@@ -5,9 +5,16 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import com.coherentsolutions.pot.insurance_service.converter.AddressListConverter;
-import com.coherentsolutions.pot.insurance_service.converter.PhoneListConverter;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GenerationType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedBy;

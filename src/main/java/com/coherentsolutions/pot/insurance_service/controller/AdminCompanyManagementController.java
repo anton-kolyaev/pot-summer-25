@@ -38,16 +38,4 @@ public class AdminCompanyManagementController {
         return companyManagementService.getCompanyDetails(UUID.fromString(id));
     }
 
-
-//    @GetMapping("/companies/{id}/packages")
-//    public Optional<CompanyPackageResponse> viewPackages(@PathVariable UUID id) {
-//
-//    }
-
-//    @GetMapping("/companies/{id}/enrollments")
-//    public Optional<CompanyEnrollmentsResponse> viewEnrollments(@PathVariable UUID id) {
-//
-//    }
-
-
 }
