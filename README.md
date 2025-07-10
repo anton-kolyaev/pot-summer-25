@@ -14,4 +14,5 @@
 - JUnit 5
 - GitHub Actions
 - Swagger UI
+- MapStruct 1.6.3
 
