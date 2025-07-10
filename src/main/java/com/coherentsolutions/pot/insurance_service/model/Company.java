@@ -52,12 +52,12 @@ public class Company {
     private String countryCode;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
-    private List<Address> addresses;
+    @Column(columnDefinition = "jsonb")
+    private List<Address> address_data;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "json")
-    private List<Phone> phones;
+    @Column(columnDefinition = "jsonb")
+    private List<Phone> phone_data;
 
     @Email
     private String email;

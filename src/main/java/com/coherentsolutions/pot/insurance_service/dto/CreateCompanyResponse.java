@@ -14,8 +14,8 @@ public class CreateCompanyResponse {
     private UUID id;
     private String name;
     private String countryCode;
-    private List<AddressDto> addresses;
-    private List<PhoneDto> phones;
+    private List<AddressDto> address_data;
+    private List<PhoneDto> phone_data;
     private String email;
     private String website;
     private CompanyStatus companyStatus;
