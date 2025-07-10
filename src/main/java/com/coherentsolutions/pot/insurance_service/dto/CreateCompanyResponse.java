@@ -14,8 +14,8 @@ public class CreateCompanyResponse {
     private UUID id;
     private String name;
     private String countryCode;
-    private List<AddressDto> address_data;
-    private List<PhoneDto> phone_data;
+    private List<AddressDto> addressData;
+    private List<PhoneDto> phoneData;
     private String email;
     private String website;
     private CompanyStatus companyStatus;
@@ -23,4 +23,3 @@ public class CreateCompanyResponse {
     private Instant createdAt;
     private Instant updatedAt;
 }
-

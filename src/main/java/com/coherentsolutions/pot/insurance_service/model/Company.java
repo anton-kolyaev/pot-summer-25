@@ -51,12 +51,12 @@ public class Company {
     private String countryCode;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> address_data;
+    @Column(name = "address_data", columnDefinition = "jsonb")
+    private Map<String, Object> addressData;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private Map<String, Object> phone_data;
+    @Column(name ="phone_data", columnDefinition = "jsonb")
+    private Map<String, Object> phoneData;
 
     @Email
     private String email;

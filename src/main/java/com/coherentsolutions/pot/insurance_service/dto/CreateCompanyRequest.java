@@ -11,8 +11,8 @@ import java.util.UUID;
 public class CreateCompanyRequest {
     private String name;
     private String countryCode;
-    private List<AddressDto> addresses;
-    private List<PhoneDto> phones;
+    private List<AddressDto> addressData;
+    private List<PhoneDto> phoneData;
     private String email;
     private String website;
     private UUID createdBy;

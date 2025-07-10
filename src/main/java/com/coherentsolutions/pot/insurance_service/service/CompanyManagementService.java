@@ -26,8 +26,8 @@ public class CompanyManagementService {
 
     public CreateCompanyResponse createCompany(CreateCompanyRequest companyDto) {
         Company company = companyMapper.toEntity(companyDto);
-        company.setAddress_data(companyMapper.convertAddressListToMap(companyDto.getAddresses()));
-        company.setPhone_data(companyMapper.convertPhoneListToMap(companyDto.getPhones()));
+        company.setAddressData(companyMapper.convertAddressListToMap(companyDto.getAddressData()));
+        company.setPhoneData(companyMapper.convertPhoneListToMap(companyDto.getPhoneData()));
         company.setCreatedBy(companyDto.getCreatedBy());
 
         companyRepository.save(company);

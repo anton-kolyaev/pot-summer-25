@@ -12,8 +12,8 @@ import java.util.UUID;
 public class CompanyDetailsResponse {
     private UUID id;
     private String name;
-    private List<AddressDto> address_data;
-    private List<PhoneDto> phone_data;
+    private List<AddressDto> addressData;
+    private List<PhoneDto> phoneData;
     private String email;
     private String website;
     private CompanyStatus status;
