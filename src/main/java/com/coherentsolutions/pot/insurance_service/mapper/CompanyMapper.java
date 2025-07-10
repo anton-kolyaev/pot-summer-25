@@ -4,6 +4,8 @@ import com.coherentsolutions.pot.insurance_service.dto.AddressDto;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
 import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
+import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
+import com.coherentsolutions.pot.insurance_service.dto.UpdateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
 import org.mapstruct.Mapper;
@@ -13,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {
@@ -20,15 +23,27 @@ public interface CompanyMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
     @Mapping(target = "status", constant = "ACTIVE")
+    @Mapping(target = "addressData", expression = "java(convertAddressListToMap(dto.getAddressData()))")
+    @Mapping(target = "phoneData", expression = "java(convertPhoneListToMap(dto.getPhoneData()))")
     Company toEntity(CreateCompanyRequest dto);
 
     @Mapping(target = "companyStatus", source = "status")
+    @Mapping(target = "addressData", expression = "java(convertAddressMapToList(company.getAddressData()))")
+    @Mapping(target = "phoneData", expression = "java(convertPhoneMapToList(company.getPhoneData()))")
     CreateCompanyResponse toCreateCompanyResponse(Company company);
 
+    @Mapping(target = "addressData", expression = "java(convertAddressMapToList(company.getAddressData()))")
+    @Mapping(target = "phoneData", expression = "java(convertPhoneMapToList(company.getPhoneData()))")
     CompanyDetailsResponse toCompanyDetailsResponse(Company company);
 
+    @Mapping(target = "status", expression = "java(company.getStatus() != null ? company.getStatus().name() : null)")
+    @Mapping(target = "whoCreated", source = "createdBy")
+    CompanyResponseDto toCompanyResponseDto(Company company);
+
     default Map<String, Object> convertAddressListToMap(List<AddressDto> addresses) {
+        if (addresses == null) return null;
         Map<String, Object> map = new HashMap<>();
         map.put("items", addresses);
         return map;
@@ -45,6 +60,7 @@ public interface CompanyMapper {
     }
 
     default Map<String, Object> convertPhoneListToMap(List<PhoneDto> phones) {
+        if (phones == null) return null;
         Map<String, Object> map = new HashMap<>();
         map.put("items", phones);
         return map;
@@ -59,6 +75,5 @@ public interface CompanyMapper {
         }
         return Collections.emptyList();
     }
-
 }
 

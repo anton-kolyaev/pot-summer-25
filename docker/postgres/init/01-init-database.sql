@@ -6,6 +6,7 @@ CREATE USER insurance_app WITH PASSWORD 'insurance_app_password';
 
 -- Grant necessary privileges to the application user
 GRANT CONNECT ON DATABASE insurance_service TO insurance_app;
+GRANT CREATE ON DATABASE insurance_service TO insurance_app;
 
 -- Connect to the insurance_service database
 \c insurance_service;

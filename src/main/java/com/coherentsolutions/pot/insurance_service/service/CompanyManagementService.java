@@ -7,21 +7,18 @@ import com.coherentsolutions.pot.insurance_service.mapper.CompanyMapper;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
 import com.coherentsolutions.pot.insurance_service.dto.UpdateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
-import com.coherentsolutions.pot.insurance_service.model.Address;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.util.StringUtils;
 import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
-
 
 @Service
 public class CompanyManagementService {
@@ -77,7 +74,7 @@ public class CompanyManagementService {
                     }
                     return true;
                 })
-                .map(this::toCompanyResponseDto)
+                .map(companyMapper::toCompanyResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -85,74 +82,35 @@ public class CompanyManagementService {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
 
-        // Update company fields
-        company.setName(request.getName());
-        company.setCountryCode(request.getCountryCode());
-        company.setEmail(request.getEmail());
-        company.setWebsite(request.getWebsite());
+        // Update basic fields
+        if (request.getName() != null) {
+            company.setName(request.getName());
+        }
+        if (request.getCountryCode() != null) {
+            company.setCountryCode(request.getCountryCode());
+        }
+        if (request.getEmail() != null) {
+            company.setEmail(request.getEmail());
+        }
+        if (request.getWebsite() != null) {
+            company.setWebsite(request.getWebsite());
+        }
         if (request.getStatus() != null) {
             company.setStatus(CompanyStatus.valueOf(request.getStatus()));
         }
 
-        // Replace addresses
-        company.getAddresses().clear();
-        if (request.getAddresses() != null) {
-            List<Address> newAddresses = request.getAddresses().stream().map(dto -> {
-                Address address = new Address();
-                address.setCountry(dto.getCountry());
-                address.setCity(dto.getCity());
-                address.setState(dto.getState());
-                address.setStreet(dto.getStreet());
-                address.setBuilding(dto.getBuilding());
-                address.setRoom(dto.getRoom());
-                address.setCompany(company);
-                return address;
-            }).collect(Collectors.toList());
-            company.getAddresses().addAll(newAddresses);
+        // Update address data
+        if (request.getAddressData() != null) {
+            company.setAddressData(companyMapper.convertAddressListToMap(request.getAddressData()));
         }
 
-        // Replace phones
-        company.getPhones().clear();
-        if (request.getPhones() != null) {
-            List<Phone> newPhones = request.getPhones().stream().map(dto -> {
-                Phone phone = new Phone();
-                phone.setCode(dto.getCode());
-                phone.setNumber(dto.getNumber());
-                phone.setCompany(company);
-                return phone;
-            }).collect(Collectors.toList());
-            company.getPhones().addAll(newPhones);
+        // Update phone data
+        if (request.getPhoneData() != null) {
+            company.setPhoneData(companyMapper.convertPhoneListToMap(request.getPhoneData()));
         }
 
+        company.setUpdatedAt(Instant.now());
         Company updated = companyRepository.save(company);
-        return toCompanyResponseDto(updated);
-    }
-
-    private CompanyResponseDto toCompanyResponseDto(Company company) {
-        return CompanyResponseDto.builder()
-                .id(company.getId())
-                .name(company.getName())
-                .countryCode(company.getCountryCode())
-                .addresses(company.getAddresses() != null ? company.getAddresses().stream().map(address -> AddressDto.builder()
-                        .id(address.getId())
-                        .country(address.getCountry())
-                        .city(address.getCity())
-                        .state(address.getState())
-                        .street(address.getStreet())
-                        .building(address.getBuilding())
-                        .room(address.getRoom())
-                        .build()).collect(Collectors.toList()) : null)
-                .phones(company.getPhones() != null ? company.getPhones().stream().map(phone -> PhoneDto.builder()
-                        .id(phone.getId())
-                        .code(phone.getCode())
-                        .number(phone.getNumber())
-                        .build()).collect(Collectors.toList()) : null)
-                .email(company.getEmail())
-                .website(company.getWebsite())
-                .status(company.getStatus() != null ? company.getStatus().name() : null)
-                .whoCreated(company.getCreatedBy())
-                .createdAt(company.getCreatedAt())
-                .updatedAt(company.getUpdatedAt())
-                .build();
+        return companyMapper.toCompanyResponseDto(updated);
     }
 }
