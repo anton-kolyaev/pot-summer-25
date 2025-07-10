@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class UserService {
     private UserRepository userRepository;
 
-    private List<UserRequestDto> getAllUserRequestDtos() {
+    public List<UserRequestDto> getAllUserRequestDtos() {
         return userRepository.findAll()
                 .stream()
                 .map(this::convertEntityToRequestDto)
@@ -40,7 +40,7 @@ public class UserService {
         return userRequestDto;
     }
 
-    public List<UserResponseDto> getAllResponseDtos() {
+    public List<UserResponseDto> getAllUserResponseDtos() {
         return userRepository.findAll()
                 .stream()
                 .map(this::convertEntityToResponseDto)
