@@ -1,5 +1,7 @@
 package com.coherentsolutions.pot.insurance_service.model;
 
+import java.util.UUID;
+
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
 
 import jakarta.persistence.Column;
@@ -26,7 +28,7 @@ public class UserFunctionAssignment {
     
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private Integer id;  
+    private UUID id;  
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
