@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insurance_service.dto.user;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
@@ -25,7 +26,7 @@ public class UserDto {
     private String ssn;
     private List<AddressDto> addressData;
     private List<PhoneDto> phoneData;
-    private List<UserFunction> functions;
+    private Set<UserFunction> functions;
     private UserStatus status;
     private UUID companyId; 
 }
