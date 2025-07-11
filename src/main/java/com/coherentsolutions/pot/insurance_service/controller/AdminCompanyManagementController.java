@@ -46,7 +46,7 @@ public class AdminCompanyManagementController {
         return companyManagementService.getCompanyDetails(id);
     }
   
-  @PutMapping("/companies/{id}")
+  @PutMapping("/{id}")
     public CompanyResponseDto updateCompany(@PathVariable UUID id, @RequestBody UpdateCompanyRequest request) {
         return companyManagementService.updateCompany(id, request);
     }

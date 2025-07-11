@@ -30,10 +30,6 @@ public class CompanyManagementService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
 
-    public CompanyManagementService(CompanyRepository companyRepository, CompanyMapper companyMapper) {
-        this.companyRepository = companyRepository;
-        this.companyMapper = companyMapper;
-    }
 
     public CompanyResponseDto updateCompany(UUID id, UpdateCompanyRequest request) {
         Company company = companyRepository.findById(id)
