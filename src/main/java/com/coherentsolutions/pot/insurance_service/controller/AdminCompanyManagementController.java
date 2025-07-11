@@ -16,23 +16,39 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
+import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
+import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
+import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
 
-
 @RestController
+@RequiredArgsConstructor
+@RequestMapping("/v1/companies")
 public class AdminCompanyManagementController {
     private final CompanyManagementService companyManagementService;
 
-    public AdminCompanyManagementController(CompanyManagementService companyManagementService) {
-        this.companyManagementService = companyManagementService;
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreateCompanyResponse addCompany(@RequestBody CreateCompanyRequest companyDto) {
+        return companyManagementService.createCompany(companyDto);
     }
 
-    @PutMapping("/companies/{id}")
+    @GetMapping("/{id}")
+    public CompanyDetailsResponse viewCompanyDetails(@PathVariable UUID id) {
+        return companyManagementService.getCompanyDetails(id);
+    }
+  
+  @PutMapping("/companies/{id}")
     public CompanyResponseDto updateCompany(@PathVariable UUID id, @RequestBody UpdateCompanyRequest request) {
         return companyManagementService.updateCompany(id, request);
     }
+
 }
