@@ -1,5 +1,10 @@
 package com.coherentsolutions.pot.insurance_service.mapper;
 
+import com.coherentsolutions.pot.insurance_service.dto.AddressDto;
+import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
+import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
+import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
+import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
 import com.coherentsolutions.pot.insurance_service.dto.*;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import org.mapstruct.Mapper;

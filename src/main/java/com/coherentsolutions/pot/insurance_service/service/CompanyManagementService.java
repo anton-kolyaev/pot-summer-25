@@ -9,20 +9,17 @@ import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
-import com.coherentsolutions.pot.insurance_service.mapper.CompanyMapper;
-import com.coherentsolutions.pot.insurance_service.model.Company;
-import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
-import org.springframework.http.HttpStatus;
+import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
+import com.coherentsolutions.pot.insurance_service.repository.CompanySpecification;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import lombok.RequiredArgsConstructor;
+import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +27,13 @@ public class CompanyManagementService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
 
+    public List<CompanyResponseDto> getCompaniesWithFilters(CompanyFilter filter) {
+        // Use JPA Specification to filter at database level
+        List<Company> companies = companyRepository.findAll(CompanySpecification.withFilters(filter));
+        return companies.stream()
+                .map(companyMapper::toCompanyResponseDto)
+                .collect(Collectors.toList());
+    }
 
     public CompanyResponseDto updateCompany(UUID id, UpdateCompanyRequest request) {
         Company company = companyRepository.findById(id)
