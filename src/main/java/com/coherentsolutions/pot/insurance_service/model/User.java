@@ -3,7 +3,6 @@ package com.coherentsolutions.pot.insurance_service.model;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -59,11 +58,11 @@ public class User {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "address_data", columnDefinition = "jsonb")
-    private Map<String, Object> addressData;
+    private List<String> addressData;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name ="phone_data", columnDefinition = "jsonb")
-    private Map<String, Object> phoneData;
+    @Column(name = "phone_data", columnDefinition = "jsonb")
+    private List<String> phoneData;
 
     @NotNull
     @Column(name = "date_of_birth", nullable = false)
