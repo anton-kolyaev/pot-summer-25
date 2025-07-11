@@ -9,24 +9,15 @@ import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
-import com.coherentsolutions.pot.insurance_service.mapper.CompanyMapper;
-import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
-import com.coherentsolutions.pot.insurance_service.model.Company;
-import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
 import com.coherentsolutions.pot.insurance_service.repository.CompanySpecification;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
