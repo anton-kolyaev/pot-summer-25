@@ -1,10 +1,10 @@
 package com.coherentsolutions.pot.insurance_service.dto.user;
 
-import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
-
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+
+import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
+import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 
 public class UserFilter {
     private String name;
