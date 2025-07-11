@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
-import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.dto.AddressDto;
 import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
-
+import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
+import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +19,7 @@ public class UserDto {
     private UUID id;
     private String firstName;
     private String lastName;
-    private String userName;
+    private String username;
     private String email;
     private LocalDate dateOfBirth;
     private String ssn;
