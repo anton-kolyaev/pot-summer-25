@@ -10,6 +10,7 @@ import com.coherentsolutions.pot.insurance_service.repository.CompanySpecificati
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 
@@ -26,5 +27,21 @@ public class CompanyManagementService {
         return companies.stream()
                 .map(companyMapper::toCompanyResponseDto)
                 .collect(Collectors.toList());
+    }
+    public CreateCompanyResponse createCompany(CreateCompanyRequest companyDto) {
+        Company company = companyMapper.toEntity(companyDto);
+        company.setAddressData(companyMapper.convertAddressListToMap(companyDto.getAddressData()));
+        company.setPhoneData(companyMapper.convertPhoneListToMap(companyDto.getPhoneData()));
+
+        companyRepository.save(company);
+
+        return companyMapper.toCreateCompanyResponse(company);
+    }
+
+    public CompanyDetailsResponse getCompanyDetails(UUID id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
+        return companyMapper.toCompanyDetailsResponse(company);
+
     }
 }

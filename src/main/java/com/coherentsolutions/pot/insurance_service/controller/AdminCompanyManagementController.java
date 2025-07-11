@@ -28,4 +28,15 @@ public class AdminCompanyManagementController {
     public List<CompanyResponseDto> getCompanies(CompanyFilter filter) {
         return companyManagementService.getCompaniesWithFilters(filter);
     }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreateCompanyResponse addCompany(@RequestBody CreateCompanyRequest companyDto) {
+        return companyManagementService.createCompany(companyDto);
+    }
+
+    @GetMapping("/{id}")
+    public CompanyDetailsResponse viewCompanyDetails(@PathVariable UUID id) {
+        return companyManagementService.getCompanyDetails(id);
+    }
 }
