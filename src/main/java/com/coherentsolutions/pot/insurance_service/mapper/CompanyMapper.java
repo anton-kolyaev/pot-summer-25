@@ -5,8 +5,8 @@ import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
 import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
+import com.coherentsolutions.pot.insurance_service.dto.*;
 import com.coherentsolutions.pot.insurance_service.model.Company;
-import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -22,9 +22,13 @@ public interface CompanyMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "status", constant = "ACTIVE")
+    @Mapping(target = "addressData", expression = "java(convertAddressListToMap(dto.getAddressData()))")
+    @Mapping(target = "phoneData", expression = "java(convertPhoneListToMap(dto.getPhoneData()))")
     Company toEntity(CreateCompanyRequest dto);
 
     @Mapping(target = "companyStatus", source = "status")
+    @Mapping(target = "addressData", expression = "java(convertAddressMapToList(company.getAddressData()))")
+    @Mapping(target = "phoneData", expression = "java(convertPhoneMapToList(company.getPhoneData()))")
     CreateCompanyResponse toCreateCompanyResponse(Company company);
 
     CompanyDetailsResponse toCompanyDetailsResponse(Company company);
