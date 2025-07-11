@@ -26,6 +26,7 @@ public class AdminCompanyManagementController {
 
 
     @PostMapping("/companies")
+    @ResponseStatus(HttpStatus.CREATED)
     public CreateCompanyResponse addCompany(@RequestBody CreateCompanyRequest companyDto) {
         return companyManagementService.createCompany(companyDto);
     }
