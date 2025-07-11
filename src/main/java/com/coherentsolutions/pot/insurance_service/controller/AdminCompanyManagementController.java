@@ -19,10 +19,8 @@ public class AdminCompanyManagementController {
     private final CompanyManagementService companyManagementService;
 
     @GetMapping("/companies/{id}")
-    public Optional<CompanyDetailsResponse> viewCompanyDetails(@PathVariable String id)
-    {
+    public CompanyDetailsResponse viewCompanyDetails(@PathVariable String id) {
         return companyManagementService.getCompanyDetails(UUID.fromString(id));
     }
-
 
 }

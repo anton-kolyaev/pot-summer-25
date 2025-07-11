@@ -19,10 +19,10 @@ public class CompanyManagementService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
 
-    public Optional<CompanyDetailsResponse> getCompanyDetails(UUID id) {
+    public CompanyDetailsResponse getCompanyDetails(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
-        return Optional.of(companyMapper.toCompanyDetailsResponse(company));
+        return companyMapper.toCompanyDetailsResponse(company);
     }
 
 
