@@ -23,8 +23,8 @@ public class UserDto {
     private String email;
     private LocalDate dateOfBirth;
     private String ssn;
-    private List<AddressDto> address_data;
-    private List<PhoneDto> phone_data;
+    private List<AddressDto> addressData;
+    private List<PhoneDto> phoneData;
     private List<UserFunction> functions;
     private UserStatus status;
     private UUID companyId; 
