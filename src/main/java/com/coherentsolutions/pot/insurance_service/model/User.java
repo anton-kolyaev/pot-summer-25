@@ -58,11 +58,11 @@ public class User {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "address_data", columnDefinition = "jsonb")
-    private List<String> addressData;
+    private List<Address> addressData;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "phone_data", columnDefinition = "jsonb")
-    private List<String> phoneData;
+    private List<Phone> phoneData;
 
     @NotNull
     @Column(name = "date_of_birth", nullable = false)
