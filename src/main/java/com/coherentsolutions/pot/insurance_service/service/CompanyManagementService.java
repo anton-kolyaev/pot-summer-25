@@ -35,6 +35,7 @@ public class CompanyManagementService {
         companyRepository.save(company);
 
         return companyMapper.toCreateCompanyResponse(company);
+    }
 
     public CompanyDetailsResponse getCompanyDetails(UUID id) {
         Company company = companyRepository.findById(id)

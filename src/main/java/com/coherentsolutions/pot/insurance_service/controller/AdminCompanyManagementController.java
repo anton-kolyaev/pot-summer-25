@@ -28,6 +28,7 @@ public class AdminCompanyManagementController {
     @PostMapping("/companies")
     public CreateCompanyResponse addCompany(@RequestBody CreateCompanyRequest companyDto) {
         return companyManagementService.createCompany(companyDto);
+    }
 
     @GetMapping("/companies/{id}")
     public CompanyDetailsResponse viewCompanyDetails(@PathVariable UUID id) {
