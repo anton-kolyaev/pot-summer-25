@@ -16,12 +16,25 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import static java.util.Map.entry;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    @SafeVarargs
+    private static Map<String, Object> buildDetails(HttpServletRequest req, Map.Entry<String, Object>... extras){
+        Map<String, Object> details = new HashMap<>();
+        details.put("timestamp", Instant.now().toString());
+        details.put("endpoint",  req.getMethod() + " " + req.getRequestURI());
+        for (Map.Entry<String, Object> e : extras) {
+            details.put(e.getKey(), e.getValue());
+        }
+        return details;
+    }
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
             Exception ex,
@@ -30,10 +43,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpStatusCode statusCode,
             @NonNull WebRequest request){
         HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
-        Map<String,Object> details = Map.of(
-                "timestamp", Instant.now().toString(),
-                "endpoint",  servletRequest.getMethod() + " " + servletRequest.getRequestURI()
-        );
+        Map<String,Object> details = buildDetails(servletRequest);
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
                 ex.getMessage(),
@@ -56,11 +66,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
                 ));
         String summary = "Validation failed for fields: " + String.join(", ", errorFields.keySet());
-        Map<String, Object> details = Map.of(
-                "timestamp", Instant.now().toString(),
-                "endpoint", servletRequest.getMethod() + " " + servletRequest.getRequestURI(),
-                "validationErrors", errorFields
-        );
+        Map<String, Object> details = buildDetails(servletRequest, entry("validationErrors", errorFields));
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
                 summary,
@@ -69,11 +75,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(error, headers, statusCode);
     }
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex, HttpServletRequest request){
-        Map<String,Object> details = Map.of(
-                "timestamp", Instant.now().toString(),
-                "endpoint",  request.getMethod() + " " + request.getRequestURI()
-        );
+    public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex, HttpServletRequest servletRequest){
+        Map<String,Object> details = buildDetails(servletRequest);
         ErrorResponseDto error = new ErrorResponseDto(
                 HttpStatus.INTERNAL_SERVER_ERROR.name(),
                 ex.getMessage(),
