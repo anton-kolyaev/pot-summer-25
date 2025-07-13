@@ -18,3 +18,15 @@ CREATE TABLE companies (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ensure phone_data is an array
+ALTER TABLE companies
+ADD CONSTRAINT phone_data_is_array CHECK (
+    phone_data IS NULL OR jsonb_typeof(phone_data) = 'array'
+);
+
+-- ensure address_data is an array
+ALTER TABLE companies
+ADD CONSTRAINT address_data_is_array CHECK (
+    address_data IS NULL OR jsonb_typeof(address_data) = 'array'
+);
