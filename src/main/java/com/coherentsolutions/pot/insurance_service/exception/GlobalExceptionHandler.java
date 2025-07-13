@@ -11,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -128,6 +129,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 servletRequest,
                 entry("value", ex.getValue()),
                 entry("requiredType", ex.getRequiredType().getSimpleName())
+        );
+        ErrorResponseDto error = new ErrorResponseDto(
+                ((HttpStatus) statusCode).name(),
+                summary,
+                details
+        );
+        return new ResponseEntity<>(error, headers, statusCode);
+    }
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
+            HttpMediaTypeNotSupportedException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode statusCode,
+            @NonNull WebRequest request) {
+        HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
+        String summary = "Unsupported media type '" + ex.getContentType() + "'";
+        assert ex.getContentType() != null;
+        Map<String, Object> details = buildDetails(
+                servletRequest,
+                entry("unsupported", ex.getContentType()),
+                entry("supported", ex.getSupportedMediaTypes())
         );
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
