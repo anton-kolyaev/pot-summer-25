@@ -3,7 +3,7 @@
 --changeset Edgar:create-companies-table
 
 --preconditions onFail:MARK_RAN
---  not tableExists tableName=companies
+--precondition-not tableExists tableName=companies
 CREATE TABLE companies (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
@@ -19,13 +19,11 @@ CREATE TABLE companies (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ensure phone_data is an array
 ALTER TABLE companies
 ADD CONSTRAINT phone_data_is_array CHECK (
     phone_data IS NULL OR jsonb_typeof(phone_data) = 'array'
 );
 
--- ensure address_data is an array
 ALTER TABLE companies
 ADD CONSTRAINT address_data_is_array CHECK (
     address_data IS NULL OR jsonb_typeof(address_data) = 'array'

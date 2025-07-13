@@ -1,5 +1,5 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changeset/001-enable-uuid.sql
+      file: db/changelog/changeset/001-create-table-company.sql
   - include:
-     file: db/changelog/changeset/002-create-table-company.sql
+      file: db/changelog/changeset/002-enable-uuid.sql
