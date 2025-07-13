@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insurance_service.exception;
 
 import com.coherentsolutions.pot.insurance_service.dto.error.ErrorResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -105,6 +106,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> details = buildDetails(
                 servletRequest,
                 entry("parameter", ex.getParameterName())
+        );
+        ErrorResponseDto error = new ErrorResponseDto(
+                ((HttpStatus) statusCode).name(),
+                summary,
+                details
+        );
+        return new ResponseEntity<>(error, headers, statusCode);
+    }
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(
+            TypeMismatchException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode statusCode,
+            @NonNull WebRequest request) {
+        HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
+        String summary = "Type mismatch for parameter '" + ex.getPropertyName() + "'";
+        assert ex.getValue() != null;
+        assert ex.getRequiredType() != null;
+        Map<String, Object> details = buildDetails(
+                servletRequest,
+                entry("value", ex.getValue()),
+                entry("requiredType", ex.getRequiredType().getSimpleName())
         );
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
