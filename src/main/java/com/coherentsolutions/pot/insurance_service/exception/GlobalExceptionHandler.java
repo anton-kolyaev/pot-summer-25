@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
@@ -66,6 +67,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ));
         String summary = "Validation failed for fields: " + String.join(", ", errorFields.keySet());
         Map<String, Object> details = buildDetails(servletRequest, entry("validationErrors", errorFields));
+        ErrorResponseDto error = new ErrorResponseDto(
+                ((HttpStatus) statusCode).name(),
+                summary,
+                details
+        );
+        return new ResponseEntity<>(error, headers, statusCode);
+    }
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode statusCode,
+            @NonNull WebRequest request) {
+        HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
+        String summary = "Malformed JSON request";
+        Map<String, Object> details = buildDetails(servletRequest, entry("cause", ex.getMostSpecificCause().getMessage()));
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
                 summary,
