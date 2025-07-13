@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insurance_service.controller;
 
-import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
@@ -29,7 +28,7 @@ public class AdminCompanyManagementController {
     private final CompanyManagementService companyManagementService;
 
     @GetMapping
-    public List<CompanyResponseDto> getCompanies(CompanyFilter filter) {
+    public List<CompanyDetailsResponse> getCompanies(CompanyFilter filter) {
         return companyManagementService.getCompaniesWithFilters(filter);
     }
 
@@ -45,7 +44,7 @@ public class AdminCompanyManagementController {
     }
   
   @PutMapping("/{id}")
-    public CompanyResponseDto updateCompany(@PathVariable UUID id, @RequestBody UpdateCompanyRequest request) {
+    public CompanyDetailsResponse updateCompany(@PathVariable UUID id, @RequestBody UpdateCompanyRequest request) {
         return companyManagementService.updateCompany(id, request);
     }
 }

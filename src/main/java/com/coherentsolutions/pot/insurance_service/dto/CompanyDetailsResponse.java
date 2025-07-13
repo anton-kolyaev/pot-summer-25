@@ -12,6 +12,7 @@ import java.util.UUID;
 public class CompanyDetailsResponse {
     private UUID id;
     private String name;
+    private String countryCode;
     private List<AddressDto> addressData;
     private List<PhoneDto> phoneData;
     private String email;

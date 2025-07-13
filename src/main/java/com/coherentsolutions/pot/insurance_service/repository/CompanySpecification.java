@@ -9,7 +9,6 @@ import org.springframework.util.StringUtils;
 import jakarta.persistence.criteria.Predicate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class CompanySpecification {

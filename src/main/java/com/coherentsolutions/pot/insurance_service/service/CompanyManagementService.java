@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
-import com.coherentsolutions.pot.insurance_service.dto.CompanyResponseDto;
 import com.coherentsolutions.pot.insurance_service.dto.UpdateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.mapper.CompanyMapper;
 import com.coherentsolutions.pot.insurance_service.model.Company;
@@ -27,15 +26,13 @@ public class CompanyManagementService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
 
-    public List<CompanyResponseDto> getCompaniesWithFilters(CompanyFilter filter) {
+    public List<CompanyDetailsResponse> getCompaniesWithFilters(CompanyFilter filter) {
         // Use JPA Specification to filter at database level
         List<Company> companies = companyRepository.findAll(CompanySpecification.withFilters(filter));
-        return companies.stream()
-                .map(companyMapper::toCompanyResponseDto)
-                .collect(Collectors.toList());
+        return companies.stream().map(companyMapper::toCompanyDetailsResponse).collect(Collectors.toList()).reversed();
     }
 
-    public CompanyResponseDto updateCompany(UUID id, UpdateCompanyRequest request) {
+    public CompanyDetailsResponse updateCompany(UUID id, UpdateCompanyRequest request) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
 
@@ -58,23 +55,23 @@ public class CompanyManagementService {
 
         // Update address data
         if (request.getAddressData() != null) {
-            company.setAddressData(companyMapper.convertAddressListToMap(request.getAddressData()));
+            company.setAddressData(companyMapper.toAddressList(request.getAddressData()));
         }
 
         // Update phone data
         if (request.getPhoneData() != null) {
-            company.setPhoneData(companyMapper.convertPhoneListToMap(request.getPhoneData()));
+            company.setPhoneData(companyMapper.toPhoneList(request.getPhoneData()));
         }
 
         company.setUpdatedAt(Instant.now());
         Company updated = companyRepository.save(company);
-        return companyMapper.toCompanyResponseDto(updated);
+        return companyMapper.toCompanyDetailsResponse(updated);
     }
 
     public CreateCompanyResponse createCompany(CreateCompanyRequest companyDto) {
         Company company = companyMapper.toEntity(companyDto);
-        company.setAddressData(companyMapper.convertAddressListToMap(companyDto.getAddressData()));
-        company.setPhoneData(companyMapper.convertPhoneListToMap(companyDto.getPhoneData()));
+        company.setAddressData(companyMapper.toAddressList(companyDto.getAddressData()));
+        company.setPhoneData(companyMapper.toPhoneList(companyDto.getPhoneData()));
 
         companyRepository.save(company);
 
