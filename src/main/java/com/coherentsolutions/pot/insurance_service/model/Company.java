@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insurance_service.model;
 
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -24,7 +25,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.util.Map;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
@@ -49,11 +49,11 @@ public class Company {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "address_data", columnDefinition = "jsonb")
-    private Map<String, Object> addressData;
+    private List<Address> addressData;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name ="phone_data", columnDefinition = "jsonb")
-    private Map<String, Object> phoneData;
+    private List<Phone> phoneData;
 
     @Email
     private String email;
