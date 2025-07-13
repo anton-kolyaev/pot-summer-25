@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import java.time.Instant;
 import java.util.HashMap;
@@ -173,6 +174,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 entry("methodUsed", ex.getMethod()),
                 entry("supportedMethods", ex.getSupportedMethods())
         );
+        ErrorResponseDto error = new ErrorResponseDto(
+                ((HttpStatus) statusCode).name(),
+                summary,
+                details
+        );
+        return new ResponseEntity<>(error, headers, statusCode);
+    }
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(
+            NoHandlerFoundException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode statusCode,
+            @NonNull WebRequest request) {
+
+        HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
+        String summary = "No handler found for " + ex.getHttpMethod() + " " + ex.getRequestURL();
+        Map<String, Object> details = buildDetails(servletRequest);
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
                 summary,
