@@ -23,6 +23,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -73,9 +75,9 @@ public class User {
     @Column(name = "ssn", length = 11, unique = true, nullable = false)
     private String ssn;
 
-//    @ManyToOne
-//    @JoinColumn(name = "company_id", nullable = false)
-//    private Company company;
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 
     @Enumerated(EnumType.STRING)
     private UserStatus status;
