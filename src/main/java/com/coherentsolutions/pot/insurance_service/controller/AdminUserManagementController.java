@@ -13,7 +13,7 @@ import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
 import com.coherentsolutions.pot.insurance_service.service.UserManagementService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/v1/users")
 public class AdminUserManagementController {
     private final UserManagementService userManagementService;
 
