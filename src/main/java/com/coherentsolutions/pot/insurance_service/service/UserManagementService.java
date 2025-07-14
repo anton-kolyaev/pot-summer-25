@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class UserManagementService {
-
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -29,17 +28,13 @@ public class UserManagementService {
         return users.stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
-        
-    public UserManagementService(UserRepository userRepository, UserMapper userMapper) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
     }
 
     public UserDto createUser(UserDto dto) {
         User user = userMapper.toEntity(dto);
 
         if (user.getFunctions() != null) {
-            for (UserFunctionAssignment ufa : user.getFunctions()){
+            for (UserFunctionAssignment ufa : user.getFunctions()) {
                 ufa.setUser(user);
             }
         }
