@@ -18,7 +18,10 @@ public class CompanyDto {
     private List<PhoneDto> phoneData;
     private String email;
     private String website;
-    private CompanyStatus companyStatus;
+    private CompanyStatus status;
     private UUID createdBy;
     private Instant createdAt;
+    private UUID updatedBy;
+    private Instant updatedAt;
+
 }
