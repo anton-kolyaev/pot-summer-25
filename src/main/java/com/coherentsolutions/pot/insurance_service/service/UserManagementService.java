@@ -31,13 +31,19 @@ public class UserManagementService {
     public UserDto createUser(UserDto dto) {
         User user = userMapper.toEntity(dto);
 
-        if (user.getFunctions() != null) {
-            for (UserFunctionAssignment ufa : user.getFunctions()) {
-                ufa.setUser(user);
-            }
-        }
+        var functions = user.getFunctions();
+        user.setFunctions(null);
 
         user = userRepository.save(user);
+
+        if (functions != null) {
+            for (UserFunctionAssignment ufa : functions) {
+                ufa.setUser(user);
+            }
+            user.setFunctions(functions);
+            user = userRepository.save(user);
+        }
+
         return userMapper.toDto(user);
     }
 }
