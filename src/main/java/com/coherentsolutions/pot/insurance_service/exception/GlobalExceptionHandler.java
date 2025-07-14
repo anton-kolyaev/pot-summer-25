@@ -35,8 +35,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, Object> details = new HashMap<>();
         details.put("timestamp", Instant.now().toString());
         details.put("endpoint",  req.getMethod() + " " + req.getRequestURI());
-        for (Map.Entry<String, Object> e : extras) {
-            details.put(e.getKey(), e.getValue());
+        if(extras!=null){
+            for (Map.Entry<String, Object> e : extras) {
+                if(e!=null){
+                    details.put(e.getKey(), e.getValue());
+                }
+            }
         }
         return details;
     }
@@ -187,7 +191,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull HttpHeaders headers,
             @NonNull HttpStatusCode statusCode,
             @NonNull WebRequest request) {
-
         HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
         String summary = "No handler found for " + ex.getHttpMethod() + " " + ex.getRequestURL();
         Map<String, Object> details = buildDetails(servletRequest);
