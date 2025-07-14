@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insurance_service.dto;
 
+import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,7 @@ import java.time.Instant;
 public class CompanyFilter {
     private String name;
     private String countryCode;
-    private String status;
+    private CompanyStatus status;
     private Instant createdFrom;
     private Instant createdTo;
     private Instant updatedFrom;

@@ -4,7 +4,7 @@ import com.coherentsolutions.pot.insurance_service.dto.UpdateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.mapper.CompanyMapper;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
-import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
+import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
@@ -50,7 +50,7 @@ public class CompanyManagementService {
             company.setWebsite(request.getWebsite());
         }
         if (request.getStatus() != null) {
-            company.setStatus(CompanyStatus.valueOf(request.getStatus()));
+            company.setStatus(CompanyStatus.valueOf(String.valueOf(request.getStatus())));
         }
 
         // Update address data

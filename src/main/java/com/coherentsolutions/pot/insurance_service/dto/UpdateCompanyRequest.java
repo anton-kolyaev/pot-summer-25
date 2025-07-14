@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insurance_service.dto;
 
+import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import lombok.Data;
 import java.util.List;
 
@@ -11,5 +12,5 @@ public class UpdateCompanyRequest {
     private List<PhoneDto> phoneData;
     private String email;
     private String website;
-    private String status; // ACTIVE or INACTIVE
+    private CompanyStatus status; // ACTIVE or DEACTIVATED
 } 

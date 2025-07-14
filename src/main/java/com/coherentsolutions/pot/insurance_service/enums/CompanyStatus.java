@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.model.enums;
+package com.coherentsolutions.pot.insurance_service.enums;
 
 public enum CompanyStatus {
     ACTIVE,

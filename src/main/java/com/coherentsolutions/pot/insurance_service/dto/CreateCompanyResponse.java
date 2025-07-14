@@ -1,6 +1,6 @@
 package com.coherentsolutions.pot.insurance_service.dto;
 
-import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
+import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import lombok.Builder;
 import lombok.Data;
 
