@@ -1,11 +1,12 @@
 package com.coherentsolutions.pot.insurance_service.mapper;
-
+  
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import com.coherentsolutions.pot.insurance_service.dto.AddressDto;
 import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
@@ -17,7 +18,7 @@ import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
     //@Mapping(source = "company.id", target = "companyId")
