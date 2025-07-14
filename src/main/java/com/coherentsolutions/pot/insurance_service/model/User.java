@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insurance_service.model;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -80,7 +81,7 @@ public class User {
     private UserStatus status;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserFunctionAssignment> functions;
+    private Set<UserFunctionAssignment> functions;
 
     @CreatedBy
     @Column(name = "created_by")
