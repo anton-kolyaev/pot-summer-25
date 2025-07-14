@@ -60,10 +60,6 @@ public class Company {
 
     private String website;
 
-//    @OneToMany
-//    @JoinColumn(name = "company_id")
-//    private List<InsurancePackage> insurancePackages;
-
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private CompanyStatus status;

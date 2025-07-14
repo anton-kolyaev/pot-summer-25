@@ -1,6 +1,6 @@
 package com.coherentsolutions.pot.insurance_service.enums;
 
-public enum CompanyStatus {
+public enum UserStatus {
     ACTIVE,
-    DEACTIVATED
+    INACTIVE
 }
