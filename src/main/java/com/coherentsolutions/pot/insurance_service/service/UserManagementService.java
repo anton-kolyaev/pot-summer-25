@@ -13,8 +13,6 @@ import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
 import com.coherentsolutions.pot.insurance_service.repository.UserSpecification;
 
-import org.springframework.stereotype.Service;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
