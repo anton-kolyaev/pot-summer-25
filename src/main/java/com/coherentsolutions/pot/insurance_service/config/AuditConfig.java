@@ -26,13 +26,9 @@ public class AuditConfig {
                 return Optional.of(UUID.fromString("00000000-0000-0000-0000-000000000000"));
             }
             
-            // Try to parse the principal as UUID, if it fails, generate a hash-based UUID
-            try {
-                return Optional.of(UUID.fromString(authentication.getName()));
-            } catch (IllegalArgumentException e) {
-                // If the principal is not a valid UUID, generate a hash-based UUID
-                return Optional.of(UUID.nameUUIDFromBytes(authentication.getName().getBytes()));
-            }
+            // TODO: Refactor this when proper authentication is implemented to use actual user UUID
+            // For now, generate a hash-based UUID from the authentication name
+            return Optional.of(UUID.nameUUIDFromBytes(authentication.getName().getBytes()));
         };
     }
 } 
