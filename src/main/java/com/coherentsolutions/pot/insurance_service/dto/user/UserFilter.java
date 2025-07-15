@@ -8,10 +8,12 @@ import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
+@NoArgsConstructor
 @AllArgsConstructor
 public class UserFilter {
     private String name;
@@ -20,8 +22,4 @@ public class UserFilter {
     private UserStatus status;
     private String ssn;
     private Set<UserFunction> functions;
-
-    // Default constructor
-    public UserFilter() {
-    }
 }
