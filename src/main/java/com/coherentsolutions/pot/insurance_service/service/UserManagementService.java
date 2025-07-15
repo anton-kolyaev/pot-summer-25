@@ -1,5 +1,7 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +14,7 @@ import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
 import com.coherentsolutions.pot.insurance_service.repository.UserSpecification;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,6 +38,12 @@ public class UserManagementService {
         }
 
         user = userRepository.save(user);
+        return userMapper.toDto(user);
+    }
+
+    public UserDto getUsersDetails(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
         return userMapper.toDto(user);
     }
 }

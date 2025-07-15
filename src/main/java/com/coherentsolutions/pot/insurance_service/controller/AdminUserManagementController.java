@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insurance_service.controller;
 
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,6 +40,11 @@ public class AdminUserManagementController {
     @GetMapping
     public Page<UserDto> getUsersWithFilters (UserFilter filter, Pageable pageable) {
         return userManagementService.getUsersWithFilters(filter, pageable);
+    }
+
+    @GetMapping("/{id}")
+    public UserDto viewUsersDetails(@PathVariable UUID id) {
+        return userManagementService.getUsersDetails(id);
     }
 
 }
