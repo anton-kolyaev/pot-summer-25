@@ -18,15 +18,15 @@ public class CompanySpecification {
 
     public static Specification<Company> withFilters(CompanyFilter filter) {
         return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = Arrays.asList(
-                namePredicate(filter, root, criteriaBuilder),
-                countryCodePredicate(filter, root, criteriaBuilder),
-                statusPredicate(filter, root, criteriaBuilder),
-                createdDatePredicate(filter, root, criteriaBuilder),
-                updatedDatePredicate(filter, root, criteriaBuilder)
-            ).stream()
-                .filter(predicate -> predicate != null)
-                .collect(Collectors.toList());
+           List<Predicate> predicates = Stream.of(
+              namePredicate(filter, root, criteriaBuilder),
+              countryCodePredicate(filter, root, criteriaBuilder),
+              statusPredicate(filter, root, criteriaBuilder),
+              createdDatePredicate(filter, root, criteriaBuilder),
+              updatedDatePredicate(filter, root, criteriaBuilder)
+          )
+          .filter(Objects::nonNull)
+          .toList();
 
             return predicates.isEmpty() 
                 ? criteriaBuilder.conjunction() 
