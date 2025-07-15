@@ -22,6 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import java.time.Instant;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,12 +130,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull WebRequest request) {
         HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
         String summary = "Type mismatch for parameter '" + ex.getPropertyName() + "'";
-        assert ex.getValue() != null;
-        assert ex.getRequiredType() != null;
         Map<String, Object> details = buildDetails(
                 servletRequest,
-                entry("value", ex.getValue()),
-                entry("requiredType", ex.getRequiredType().getSimpleName())
+                new SimpleImmutableEntry<>("value", ex.getValue()),
+                new SimpleImmutableEntry<>(
+                        "requiredType",
+                        ex.getRequiredType() != null
+                                ? ex.getRequiredType().getSimpleName()
+                                : null)
         );
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
@@ -151,11 +154,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull WebRequest request) {
         HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
         String summary = "Unsupported media type '" + ex.getContentType() + "'";
-        assert ex.getContentType() != null;
         Map<String, Object> details = buildDetails(
                 servletRequest,
-                entry("unsupported", ex.getContentType()),
-                entry("supported", ex.getSupportedMediaTypes())
+                new SimpleImmutableEntry<>("unsupported", ex.getContentType()),
+                new SimpleImmutableEntry<>("supported", ex.getSupportedMediaTypes())
         );
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
@@ -172,11 +174,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             @NonNull WebRequest request) {
         HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
         String summary = "HTTP method '" + ex.getMethod() + "' is not supported for this endpoint";
-        assert ex.getSupportedMethods() != null;
         Map<String, Object> details = buildDetails(
                 servletRequest,
                 entry("methodUsed", ex.getMethod()),
-                entry("supportedMethods", ex.getSupportedMethods())
+                new SimpleImmutableEntry<>("supportedMethods", ex.getSupportedMethods())
         );
         ErrorResponseDto error = new ErrorResponseDto(
                 ((HttpStatus) statusCode).name(),
