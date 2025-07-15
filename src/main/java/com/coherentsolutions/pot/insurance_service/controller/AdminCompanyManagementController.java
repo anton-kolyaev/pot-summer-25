@@ -40,7 +40,7 @@ public class AdminCompanyManagementController {
     public CompanyDto viewCompanyDetails(@PathVariable UUID id) {
         return companyManagementService.getCompanyDetails(id);
     }
-  
+
     @PutMapping("/{id}")
     public CompanyDto updateCompany(@PathVariable UUID id, @RequestBody CompanyDto request) {
         return companyManagementService.updateCompany(id, request);
