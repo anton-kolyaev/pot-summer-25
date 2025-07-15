@@ -28,7 +28,9 @@ public class CompanyManagementService {
     public List<CompanyDto> getCompaniesWithFilters(CompanyFilter filter) {
         // Use JPA Specification to filter at database level
         List<Company> companies = companyRepository.findAll(CompanySpecification.withFilters(filter));
-        return companies.stream().map(companyMapper::toCompanyDto).collect(Collectors.toList()).reversed();
+        return companies.stream()
+                .map(companyMapper::toCompanyDto)
+                .collect(Collectors.toList());
     }
 
     public CompanyDto updateCompany(UUID id, CompanyDto request) {
