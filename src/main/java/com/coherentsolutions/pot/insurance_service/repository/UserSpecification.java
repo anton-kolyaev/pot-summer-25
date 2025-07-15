@@ -1,8 +1,8 @@
 package com.coherentsolutions.pot.insurance_service.repository;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.springframework.data.jpa.domain.Specification;
 import static org.springframework.util.StringUtils.hasText;
