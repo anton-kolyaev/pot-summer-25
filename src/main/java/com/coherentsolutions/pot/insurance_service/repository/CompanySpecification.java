@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insurance_service.repository;
 
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
 import com.coherentsolutions.pot.insurance_service.model.Company;
-import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Predicate;
@@ -10,7 +9,6 @@ import jakarta.persistence.criteria.Path;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -86,12 +84,12 @@ public class CompanySpecification {
             Path<java.time.Instant> datePath,
             CriteriaBuilder criteriaBuilder) {
         
-        List<Predicate> datePredicates = Arrays.asList(
+        List<Predicate> datePredicates = Stream.of(
             from != null ? criteriaBuilder.greaterThanOrEqualTo(datePath, from) : null,
             to != null ? criteriaBuilder.lessThanOrEqualTo(datePath, to) : null
-        ).stream()
-            .filter(predicate -> predicate != null)
-            .collect(Collectors.toList());
+        )
+        .filter(Objects::nonNull)
+        .toList();
 
         return datePredicates.isEmpty() 
             ? null 
