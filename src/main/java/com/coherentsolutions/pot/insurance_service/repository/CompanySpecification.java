@@ -5,10 +5,11 @@ import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Path;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-import jakarta.persistence.criteria.Predicate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ public class CompanySpecification {
         };
     }
 
-    private static Predicate namePredicate(CompanyFilter filter, jakarta.persistence.criteria.Root<Company> root, jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
+    private static Predicate namePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
         return StringUtils.hasText(filter.getName()) 
             ? criteriaBuilder.like(
                 criteriaBuilder.lower(root.get("name")),
@@ -42,7 +43,7 @@ public class CompanySpecification {
             : null;
     }
 
-    private static Predicate countryCodePredicate(CompanyFilter filter, jakarta.persistence.criteria.Root<Company> root, jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
+    private static Predicate countryCodePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
         return StringUtils.hasText(filter.getCountryCode())
             ? criteriaBuilder.equal(
                 root.get("countryCode"),
@@ -51,24 +52,15 @@ public class CompanySpecification {
             : null;
     }
 
-    private static Predicate statusPredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder cb) {
+    private static Predicate statusPredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
         if (filter.getStatus() == null) {
             return null;
         }
 
-        return cb.equal(root.get("status"), filter.getStatus());
+        return criteriaBuilder.equal(root.get("status"), filter.getStatus());
     }
 
-    private static Predicate createStatusPredicate(String status, jakarta.persistence.criteria.Root<Company> root, jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
-        try {
-            CompanyStatus companyStatus = CompanyStatus.valueOf(status.toUpperCase());
-            return criteriaBuilder.equal(root.get("status"), companyStatus);
-        } catch (IllegalArgumentException e) {
-            return criteriaBuilder.disjunction(); // Return no results for invalid status
-        }
-    }
-
-    private static Predicate createdDatePredicate(CompanyFilter filter, jakarta.persistence.criteria.Root<Company> root, jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
+    private static Predicate createdDatePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
         return createDateRangePredicate(
             filter.getCreatedFrom(),
             filter.getCreatedTo(),
@@ -77,7 +69,7 @@ public class CompanySpecification {
         );
     }
 
-    private static Predicate updatedDatePredicate(CompanyFilter filter, jakarta.persistence.criteria.Root<Company> root, jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
+    private static Predicate updatedDatePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
         return createDateRangePredicate(
             filter.getUpdatedFrom(),
             filter.getUpdatedTo(),
@@ -89,8 +81,8 @@ public class CompanySpecification {
     private static Predicate createDateRangePredicate(
             java.time.Instant from,
             java.time.Instant to,
-            jakarta.persistence.criteria.Path<java.time.Instant> datePath,
-            jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
+            Path<java.time.Instant> datePath,
+            CriteriaBuilder criteriaBuilder) {
         
         List<Predicate> datePredicates = Arrays.asList(
             from != null ? criteriaBuilder.greaterThanOrEqualTo(datePath, from) : null,
