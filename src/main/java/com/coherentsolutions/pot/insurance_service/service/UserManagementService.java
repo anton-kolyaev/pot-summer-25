@@ -1,9 +1,8 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
@@ -21,11 +20,9 @@ public class UserManagementService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public List<UserDto> getUsersWithFilters(UserFilter filter) {
-        List<User> users = userRepository.findAll(UserSpecification.withFilters(filter));
-        return users.stream()
-                .map(userMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<UserDto> getUsersWithFilters(UserFilter filter, Pageable pageable) {
+        Page<User> users = userRepository.findAll(UserSpecification.withFilters(filter), pageable);
+        return users.map(userMapper::toDto);
     }
 
     public UserDto createUser(UserDto dto) {
