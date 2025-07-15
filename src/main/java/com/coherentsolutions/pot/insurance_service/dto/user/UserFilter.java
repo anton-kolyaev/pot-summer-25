@@ -6,6 +6,7 @@ import java.util.Set;
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
 import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 
+import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
