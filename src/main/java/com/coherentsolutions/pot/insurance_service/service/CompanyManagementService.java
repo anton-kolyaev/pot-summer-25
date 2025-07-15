@@ -1,23 +1,22 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
 import com.coherentsolutions.pot.insurance_service.dto.CompanyDto;
-
 import com.coherentsolutions.pot.insurance_service.mapper.CompanyMapper;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
 import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
-
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
 import com.coherentsolutions.pot.insurance_service.repository.CompanySpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -25,31 +24,22 @@ public class CompanyManagementService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
 
-    public List<CompanyDto> getCompaniesWithFilters(CompanyFilter filter) {
-        // Use JPA Specification to filter at database level
-        List<Company> companies = companyRepository.findAll(CompanySpecification.withFilters(filter));
-        return companies.stream()
-                .map(companyMapper::toCompanyDto)
-                .collect(Collectors.toList());
+    public Page<CompanyDto> getCompaniesWithFilters(CompanyFilter filter, Pageable pageable) {
+        // Use JPA Specification to filter at database level with pagination
+        Page<Company> companies = companyRepository.findAll(CompanySpecification.withFilters(filter), pageable);
+        return companies.map(companyMapper::toCompanyDto);
     }
 
     public CompanyDto updateCompany(UUID id, CompanyDto request) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
 
-        // Update basic fields
-        if (request.getName() != null) {
-            company.setName(request.getName());
-        }
-        if (request.getCountryCode() != null) {
-            company.setCountryCode(request.getCountryCode());
-        }
-        if (request.getEmail() != null) {
-            company.setEmail(request.getEmail());
-        }
-        if (request.getWebsite() != null) {
-            company.setWebsite(request.getWebsite());
-        }
+        // Update basic fields using higher-order function
+        setIfNotNull(request.getName(), company::setName);
+        setIfNotNull(request.getCountryCode(), company::setCountryCode);
+        setIfNotNull(request.getEmail(), company::setEmail);
+        setIfNotNull(request.getWebsite(), company::setWebsite);
+        
         if (request.getStatus() != null) {
             company.setStatus(CompanyStatus.valueOf(String.valueOf(request.getStatus())));
         }
@@ -83,6 +73,11 @@ public class CompanyManagementService {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
         return companyMapper.toCompanyDto(company);
+    }
 
+    private <T> void setIfNotNull(T value, Consumer<T> setFunction) {
+        if (value != null) {
+            setFunction.accept(value);
+        }
     }
 }
