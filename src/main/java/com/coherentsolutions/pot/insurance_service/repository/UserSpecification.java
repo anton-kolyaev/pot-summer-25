@@ -19,6 +19,7 @@ public class UserSpecification {
     public static Specification<User> withFilters(UserFilter filter) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = Stream.of(
+              companyIdPredicate(filter, root, criteriaBuilder),
               namePredicate(filter, root, criteriaBuilder),
               emailPredicate(filter, root, criteriaBuilder),
               dateOfBirthPredicate(filter, root, criteriaBuilder),
@@ -32,6 +33,10 @@ public class UserSpecification {
                     ? criteriaBuilder.conjunction()
                     : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    private static Predicate companyIdPredicate(UserFilter filter, Root<User> root, CriteriaBuilder criteriaBuilder) {
+        return criteriaBuilder.equal(root.get("company").get("id"), filter.getCompanyId());
     }
 
     private static Predicate namePredicate(UserFilter filter, Root<User> root, CriteriaBuilder criteriaBuilder) {
