@@ -1,10 +1,7 @@
 package com.coherentsolutions.pot.insurance_service.controller;
 
+import com.coherentsolutions.pot.insurance_service.dto.CompanyDto;
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
-import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
-import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
-import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
-import com.coherentsolutions.pot.insurance_service.dto.UpdateCompanyRequest;
 import com.coherentsolutions.pot.insurance_service.service.CompanyManagementService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,23 +25,23 @@ public class AdminCompanyManagementController {
     private final CompanyManagementService companyManagementService;
 
     @GetMapping
-    public List<CompanyDetailsResponse> getCompanies(CompanyFilter filter) {
+    public List<CompanyDto> getCompanies(CompanyFilter filter) {
         return companyManagementService.getCompaniesWithFilters(filter);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CreateCompanyResponse addCompany(@RequestBody CreateCompanyRequest companyDto) {
+    public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
         return companyManagementService.createCompany(companyDto);
     }
 
     @GetMapping("/{id}")
-    public CompanyDetailsResponse viewCompanyDetails(@PathVariable UUID id) {
+    public CompanyDto viewCompanyDetails(@PathVariable UUID id) {
         return companyManagementService.getCompanyDetails(id);
     }
   
   @PutMapping("/{id}")
-    public CompanyDetailsResponse updateCompany(@PathVariable UUID id, @RequestBody UpdateCompanyRequest request) {
+    public CompanyDto updateCompany(@PathVariable UUID id, @RequestBody CompanyDto request) {
         return companyManagementService.updateCompany(id, request);
     }
 }

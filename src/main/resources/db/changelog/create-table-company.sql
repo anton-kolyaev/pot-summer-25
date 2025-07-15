@@ -1,10 +1,4 @@
---liquibase formatted sql
-
---changeset Edgar:create-companies-table
-
---preconditions onFail:MARK_RAN
---precondition-not tableExists tableName=companies
-CREATE TABLE companies (
+CREATE TABLE IF NOT EXISTS companies (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     country_code VARCHAR(3) NOT NULL,

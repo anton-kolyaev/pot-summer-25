@@ -19,7 +19,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
+import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -59,10 +59,6 @@ public class Company {
     private String email;
 
     private String website;
-
-//    @OneToMany
-//    @JoinColumn(name = "company_id")
-//    private List<InsurancePackage> insurancePackages;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)

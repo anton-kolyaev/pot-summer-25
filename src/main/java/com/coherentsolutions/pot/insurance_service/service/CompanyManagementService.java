@@ -1,13 +1,12 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
-import com.coherentsolutions.pot.insurance_service.dto.UpdateCompanyRequest;
+import com.coherentsolutions.pot.insurance_service.dto.CompanyDto;
+
 import com.coherentsolutions.pot.insurance_service.mapper.CompanyMapper;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
-import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
-import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyRequest;
-import com.coherentsolutions.pot.insurance_service.dto.CreateCompanyResponse;
-import com.coherentsolutions.pot.insurance_service.dto.CompanyDetailsResponse;
+import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
+
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
 import com.coherentsolutions.pot.insurance_service.repository.CompanySpecification;
 import org.springframework.stereotype.Service;
@@ -26,13 +25,13 @@ public class CompanyManagementService {
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
 
-    public List<CompanyDetailsResponse> getCompaniesWithFilters(CompanyFilter filter) {
+    public List<CompanyDto> getCompaniesWithFilters(CompanyFilter filter) {
         // Use JPA Specification to filter at database level
         List<Company> companies = companyRepository.findAll(CompanySpecification.withFilters(filter));
-        return companies.stream().map(companyMapper::toCompanyDetailsResponse).collect(Collectors.toList()).reversed();
+        return companies.stream().map(companyMapper::toCompanyDto).collect(Collectors.toList()).reversed();
     }
 
-    public CompanyDetailsResponse updateCompany(UUID id, UpdateCompanyRequest request) {
+    public CompanyDto updateCompany(UUID id, CompanyDto request) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
 
@@ -50,7 +49,7 @@ public class CompanyManagementService {
             company.setWebsite(request.getWebsite());
         }
         if (request.getStatus() != null) {
-            company.setStatus(CompanyStatus.valueOf(request.getStatus()));
+            company.setStatus(CompanyStatus.valueOf(String.valueOf(request.getStatus())));
         }
 
         // Update address data
@@ -65,23 +64,23 @@ public class CompanyManagementService {
 
         company.setUpdatedAt(Instant.now());
         Company updated = companyRepository.save(company);
-        return companyMapper.toCompanyDetailsResponse(updated);
+        return companyMapper.toCompanyDto(updated);
     }
 
-    public CreateCompanyResponse createCompany(CreateCompanyRequest companyDto) {
+    public CompanyDto createCompany(CompanyDto companyDto) {
         Company company = companyMapper.toEntity(companyDto);
         company.setAddressData(companyMapper.toAddressList(companyDto.getAddressData()));
         company.setPhoneData(companyMapper.toPhoneList(companyDto.getPhoneData()));
-
+        company.setStatus(CompanyStatus.ACTIVE);
         companyRepository.save(company);
 
-        return companyMapper.toCreateCompanyResponse(company);
+        return companyMapper.toCompanyDto(company);
     }
 
-    public CompanyDetailsResponse getCompanyDetails(UUID id) {
+    public CompanyDto getCompanyDetails(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
-        return companyMapper.toCompanyDetailsResponse(company);
+        return companyMapper.toCompanyDto(company);
 
     }
 }

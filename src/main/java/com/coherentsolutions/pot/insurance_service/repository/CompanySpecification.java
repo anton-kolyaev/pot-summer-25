@@ -2,7 +2,9 @@ package com.coherentsolutions.pot.insurance_service.repository;
 
 import com.coherentsolutions.pot.insurance_service.dto.CompanyFilter;
 import com.coherentsolutions.pot.insurance_service.model.Company;
-import com.coherentsolutions.pot.insurance_service.model.enums.CompanyStatus;
+import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -49,10 +51,12 @@ public class CompanySpecification {
             : null;
     }
 
-    private static Predicate statusPredicate(CompanyFilter filter, jakarta.persistence.criteria.Root<Company> root, jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
-        return StringUtils.hasText(filter.getStatus())
-            ? createStatusPredicate(filter.getStatus(), root, criteriaBuilder)
-            : null;
+    private static Predicate statusPredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder cb) {
+        if (filter.getStatus() == null) {
+            return null;
+        }
+
+        return cb.equal(root.get("status"), filter.getStatus());
     }
 
     private static Predicate createStatusPredicate(String status, jakarta.persistence.criteria.Root<Company> root, jakarta.persistence.criteria.CriteriaBuilder criteriaBuilder) {
