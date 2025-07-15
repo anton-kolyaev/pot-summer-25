@@ -18,15 +18,15 @@ public class UserSpecification {
 
     public static Specification<User> withFilters(UserFilter filter) {
         return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = Arrays.asList(
-                    namePredicate(filter, root, criteriaBuilder),
-                    emailPredicate(filter, root, criteriaBuilder),
-                    dateOfBirthPredicate(filter, root, criteriaBuilder),
-                    statusPredicate(filter, root, criteriaBuilder),
-                    ssnPredicate(filter, root, criteriaBuilder),
-                    functionPredicate(filter, root, criteriaBuilder)).stream()
-                    .filter(predicate -> predicate != null)
-                    .collect(Collectors.toList());
+            List<Predicate> predicates = Stream.of(
+              namePredicate(filter, root, criteriaBuilder),
+              emailPredicate(filter, root, criteriaBuilder),
+              dateOfBirthPredicate(filter, root, criteriaBuilder),
+              statusPredicate(filter, root, criteriaBuilder),
+              ssnPredicate(filter, root, criteriaBuilder),
+              functionPredicate(filter, root, criteriaBuilder))
+          .filter(Objects::nonNull)
+          .toList();
 
             return predicates.isEmpty()
                     ? criteriaBuilder.conjunction()
