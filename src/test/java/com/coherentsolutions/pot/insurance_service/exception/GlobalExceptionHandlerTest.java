@@ -331,6 +331,7 @@ class GlobalExceptionHandlerTest {
             HttpStatusCode status = HttpStatus.NOT_FOUND;
             ResponseEntity<Object> response = handler.handleNoHandlerFoundException(
                     ex, headers, status, webRequest);
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
             assertThat(response.getHeaders()).isEqualTo(headers);
             ErrorResponseDto dto = dtoFrom(response);
