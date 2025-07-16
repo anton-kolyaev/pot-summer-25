@@ -11,8 +11,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,6 +49,7 @@ class GlobalExceptionHandlerTest {
         when(servletRequest.getRequestURI()).thenReturn("/test-endpoint");
         webRequest = new ServletWebRequest(servletRequest);
     }
+    
     @Nested
     @DisplayName("buildDetails tests")
     class BuildDetailsTests {
@@ -57,7 +63,7 @@ class GlobalExceptionHandlerTest {
             buildDetailsMethod.setAccessible(true);
         }
         @Test
-        @DisplayName("Should include timestamp, endpoint, and extras when provided")
+        @DisplayName("should include timestamp, endpoint, and extras when provided")
         void includesTimestampEndpointAndExtras() throws Exception {
             AbstractMap.SimpleImmutableEntry<String, Object> extra =
                     new AbstractMap.SimpleImmutableEntry<>("key", "value");
@@ -72,7 +78,7 @@ class GlobalExceptionHandlerTest {
             assertThat(details.get("endpoint")).isEqualTo("GET /test-endpoint");
         }
         @Test
-        @DisplayName("Should include only timestamp and endpoint when extras is null")
+        @DisplayName("should include only timestamp and endpoint when extras is null")
         void onlyTimestampAndEndpoint() throws Exception {
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
@@ -85,7 +91,7 @@ class GlobalExceptionHandlerTest {
             assertThat(details.get("endpoint")).isEqualTo("GET /test-endpoint");
         }
         @Test
-        @DisplayName("Should skip null extras entries")
+        @DisplayName("should skip null extras entries")
         void includesTimestampEndpointAndNullExtraEntry() throws Exception {
             AbstractMap.SimpleImmutableEntry<String, Object> extra =
                     new AbstractMap.SimpleImmutableEntry<>("key", "value");
@@ -101,7 +107,7 @@ class GlobalExceptionHandlerTest {
             assertThat(details.get("endpoint")).isEqualTo("GET /test-endpoint");
         }
         @Test
-        @DisplayName("Should include multiple extras entries correctly")
+        @DisplayName("should include multiple extras entries correctly")
         void includesTimestampEndpointAndMultipleExtras() throws Exception {
             AbstractMap.SimpleImmutableEntry<String, Object> extra1 =
                     new AbstractMap.SimpleImmutableEntry<>("firstInput", 123);
@@ -123,28 +129,24 @@ class GlobalExceptionHandlerTest {
     @DisplayName("handleExceptionInternal tests")
     class HandleExceptionInternalTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto for handleExceptionInternal")
-        void buildsErrorResponseDto() {
+        @DisplayName("should build ErrorResponseDto and propagate headers")
+        void buildsErrorResponseDto_withHeadersPropagated() {
             IllegalArgumentException ex = new IllegalArgumentException("Ups");
             HttpHeaders headers = new HttpHeaders();
+            headers.add("testHeader", "testValue");
             HttpStatusCode status = HttpStatus.BAD_REQUEST;
             ResponseEntity<Object> response = handler.handleExceptionInternal(
                     ex,
                     null,
                     headers,
                     status,
-                    webRequest
-            );
+                    webRequest);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            Object body = response.getBody();
-            assertThat(body).isInstanceOf(ErrorResponseDto.class);
-            ErrorResponseDto dto = (ErrorResponseDto) body;
+            assertThat(response.getHeaders()).isEqualTo(headers);
+            ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
             assertThat(dto.getMessage()).isEqualTo("Ups");
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> details = (Map<String, Object>) dto.getDetails();
-            
+            Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
             assertThat(details).containsKey("timestamp");
         }
@@ -153,7 +155,7 @@ class GlobalExceptionHandlerTest {
     @DisplayName("handleMethodArgumentNotValid tests")
     class HandleMethodArgumentNotValidTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto with validation errors and details")
+        @DisplayName("should build ErrorResponseDto with validation errors and details")
         void buildsValidationErrorResponse() throws Exception {
             org.springframework.validation.BeanPropertyBindingResult bindingResult =
                     new org.springframework.validation.BeanPropertyBindingResult(new Object(), "target");
@@ -168,41 +170,51 @@ class GlobalExceptionHandlerTest {
             HttpHeaders headers = new HttpHeaders();
             HttpStatusCode status = HttpStatus.BAD_REQUEST;
             ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(
-                    ex, headers, status, webRequest);
+                    ex, headers, status, webRequest
+            );
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            @SuppressWarnings("unchecked")
-            Map<String, List<String>> errors = (Map<String,List<String>>) ((Map<String,Object>) ((ErrorResponseDto)response.getBody()).getDetails())
-                    .get("validationErrors");
-            
-            assertThat(errors).containsKeys("name","age");
+            ErrorResponseDto dto = dtoFrom(response);
+            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getMessage()).startsWith("Validation failed for fields:");
+            Map<String, List<String>> errors = validationErrorsFrom(response);
+            assertThat(errors).containsKeys("name", "age");
         }
+        @SuppressWarnings("unused")
         void forTest(String param) {}
     }
     @Nested
     @DisplayName("handleHttpMessageNotReadable tests")
     class HandleHttpMessageNotReadableTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto with cause and details")
+        @DisplayName("should build ErrorResponseDto with cause and details")
         void buildsMalformedRequestResponse() {
             Throwable cause = new java.io.IOException("Bad JSON");
-            HttpMessageNotReadableException ex = new HttpMessageNotReadableException("malformed", cause);
+            MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
+            HttpMessageNotReadableException ex =
+                    new HttpMessageNotReadableException("malformed", cause, inputMessage);
             HttpHeaders headers = new HttpHeaders();
             HttpStatusCode status = HttpStatus.BAD_REQUEST;
             ResponseEntity<Object> response = handler.handleHttpMessageNotReadable(
-                    ex, headers, status, webRequest
+                    ex,
+                    headers,
+                    status,
+                    webRequest
             );
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            @SuppressWarnings("unchecked")
-            Map<String,Object> details = (Map<String,Object>) ((ErrorResponseDto)response.getBody()).getDetails();
-            
+            ErrorResponseDto dto = dtoFrom(response);
+            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
+            Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("cause", "Bad JSON");
+            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
         }
+
     }
     @Nested
     @DisplayName("handleMissingServletRequestParameter tests")
     class HandleMissingServletRequestParameterTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto when a required param is missing")
+        @DisplayName("should build ErrorResponseDto when a required param is missing")
         void buildsMissingParamErrorResponse() {
             org.springframework.web.bind.MissingServletRequestParameterException ex =
                     new org.springframework.web.bind.MissingServletRequestParameterException("id", "String");
@@ -212,13 +224,10 @@ class GlobalExceptionHandlerTest {
                     ex, headers, status, webRequest);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getHeaders()).isEqualTo(headers);
-            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
             assertThat(dto.getMessage()).isEqualTo("Required request parameter 'id' is missing");
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> details = (Map<String, Object>) dto.getDetails();
-            
+            Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("parameter", "id");
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
         }
@@ -227,7 +236,7 @@ class GlobalExceptionHandlerTest {
     @DisplayName("handleTypeMismatch tests")
     class HandleTypeMismatchTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto when parameter type mismatches")
+        @DisplayName("should build ErrorResponseDto when parameter type mismatches")
         void buildsTypeMismatchErrorResponse() {
             java.beans.PropertyChangeEvent pce =
                     new java.beans.PropertyChangeEvent(servletRequest, "age", null, "abc");
@@ -239,13 +248,10 @@ class GlobalExceptionHandlerTest {
                     ex, headers, status, webRequest);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getHeaders()).isEqualTo(headers);
-            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
             assertThat(dto.getMessage()).isEqualTo("Type mismatch for parameter 'age'");
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> details = (Map<String, Object>) dto.getDetails();
-
+            Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("value", "abc");
             assertThat(details).containsEntry("requiredType", "Integer");
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
@@ -255,39 +261,37 @@ class GlobalExceptionHandlerTest {
     @DisplayName("handleHttpMediaTypeNotSupported tests")
     class HandleHttpMediaTypeNotSupportedTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto when media type is unsupported")
+        @DisplayName("should build ErrorResponseDto when media type is unsupported")
         void buildsUnsupportedMediaTypeErrorResponse() {
             HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(
-                    MediaType.TEXT_PLAIN, java.util.List.of(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML));
+                    MediaType.TEXT_PLAIN, List.of(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML));
             HttpHeaders headers = new HttpHeaders();
             HttpStatusCode status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
             ResponseEntity<Object> response = handler.handleHttpMediaTypeNotSupported(
                     ex, headers, status, webRequest);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             assertThat(response.getHeaders()).isEqualTo(headers);
-            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("UNSUPPORTED_MEDIA_TYPE");
-            assertThat(dto.getMessage()).isEqualTo("Unsupported media type 'text/plain'" );
-
-            @SuppressWarnings("unchecked")
-            Map<String,Object> details = (Map<String,Object>) dto.getDetails();
-            
+            assertThat(dto.getMessage()).isEqualTo("Unsupported media type 'text/plain'");
+            Map<String,Object> details = detailsFrom(response);
             assertThat(details).containsEntry("unsupported", MediaType.TEXT_PLAIN);
             Object supportedObj = details.get("supported");
-            assertThat(supportedObj).isInstanceOf(java.util.List.class);
+            assertThat(supportedObj).isInstanceOf(List.class);
             
             @SuppressWarnings("unchecked")
-            java.util.List<MediaType> supported = (java.util.List<MediaType>) supportedObj;
+            List<MediaType> supported = (List<MediaType>) supportedObj;
             
             assertThat(supported).contains(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
         }
+
     }
     @Nested
     @DisplayName("handleHttpRequestMethodNotSupported tests")
     class HandleHttpRequestMethodNotSupportedTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto when HTTP method is not supported")
+        @DisplayName("should build ErrorResponseDto when HTTP method is not supported")
         void buildsMethodNotSupportedErrorResponse() {
             HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException(
                     "DELETE", java.util.List.of("GET","POST"));
@@ -297,7 +301,7 @@ class GlobalExceptionHandlerTest {
                     ex, headers, status, webRequest);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
             assertThat(response.getHeaders()).isEqualTo(headers);
-            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("METHOD_NOT_ALLOWED");
             assertThat(dto.getMessage()).isEqualTo("HTTP method 'DELETE' is not supported for this endpoint");
 
@@ -316,7 +320,7 @@ class GlobalExceptionHandlerTest {
     @DisplayName("handleNoHandlerFoundException tests")
     class HandleNoHandlerFoundExceptionTests {
         @Test
-        @DisplayName("Should build ErrorResponseDto when no handler is found")
+        @DisplayName("should build ErrorResponseDto when no handler is found")
         void buildsNoHandlerFoundErrorResponse() {
             NoHandlerFoundException ex = new NoHandlerFoundException("PATCH", "/missing", new HttpHeaders());
             HttpHeaders headers = new HttpHeaders();
@@ -325,7 +329,7 @@ class GlobalExceptionHandlerTest {
                     ex, headers, status, webRequest);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
             assertThat(response.getHeaders()).isEqualTo(headers);
-            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("NOT_FOUND");
             assertThat(dto.getMessage()).isEqualTo("No handler found for PATCH /missing");
 
@@ -340,22 +344,35 @@ class GlobalExceptionHandlerTest {
     @DisplayName("handleGenericException tests")
     class HandleGenericExceptionTests {
         @Test
-        @DisplayName("Should build INTERNAL_SERVER_ERROR ErrorResponseDto for generic exception")
+        @DisplayName("should build INTERNAL_SERVER_ERROR ErrorResponseDto for generic exception")
         void buildsGenericErrorResponse() {
-            RuntimeException ex = new RuntimeException("Something exploded");
+            RuntimeException ex = new RuntimeException("Something went wrong");
             ResponseEntity<ErrorResponseDto> response = handler.handleGenericException(ex, servletRequest);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
             ErrorResponseDto dto = response.getBody();
             assertThat(dto).isNotNull();
             assertThat(dto.getCode()).isEqualTo("INTERNAL_SERVER_ERROR");
-            assertThat(dto.getMessage()).isEqualTo("Something exploded");
-
-            @SuppressWarnings("unchecked")
-            Map<String,Object> details = (Map<String,Object>) dto.getDetails();
-            
+            assertThat(dto.getMessage()).isEqualTo("Something went wrong");
+            Map<String,Object> details = detailsFrom(response);
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
             assertThat(details).containsKey("timestamp");
         }
+    }
+    private static ErrorResponseDto dtoFrom(ResponseEntity<?> response) {
+        Object body = response.getBody();
+        assertThat(body)
+                .as("Response body should be an ErrorResponseDto")
+                .isInstanceOf(ErrorResponseDto.class);
+        return (ErrorResponseDto) body;
+    }
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> detailsFrom(ResponseEntity<?> response) {
+        return (Map<String, Object>) dtoFrom(response).getDetails();
+    }
+    @SuppressWarnings("unchecked")
+    private static Map<String, List<String>> validationErrorsFrom(ResponseEntity<?> response) {
+        Object errors = detailsFrom(response).get("validationErrors");
+        return (Map<String, List<String>>) errors;
     }
     
 }
