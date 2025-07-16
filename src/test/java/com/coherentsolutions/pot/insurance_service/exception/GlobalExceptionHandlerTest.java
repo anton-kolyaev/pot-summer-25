@@ -336,5 +336,26 @@ class GlobalExceptionHandlerTest {
             assertThat(details).containsKey("timestamp");
         }
     }
+    @Nested
+    @DisplayName("handleGenericException tests")
+    class HandleGenericExceptionTests {
+        @Test
+        @DisplayName("Should build INTERNAL_SERVER_ERROR ErrorResponseDto for generic exception")
+        void buildsGenericErrorResponse() {
+            RuntimeException ex = new RuntimeException("Something exploded");
+            ResponseEntity<ErrorResponseDto> response = handler.handleGenericException(ex, servletRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            ErrorResponseDto dto = response.getBody();
+            assertThat(dto).isNotNull();
+            assertThat(dto.getCode()).isEqualTo("INTERNAL_SERVER_ERROR");
+            assertThat(dto.getMessage()).isEqualTo("Something exploded");
+
+            @SuppressWarnings("unchecked")
+            Map<String,Object> details = (Map<String,Object>) dto.getDetails();
+            
+            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+            assertThat(details).containsKey("timestamp");
+        }
+    }
     
 }
