@@ -222,5 +222,33 @@ class GlobalExceptionHandlerTest {
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
         }
     }
+    @Nested
+    @DisplayName("handleTypeMismatch tests")
+    class HandleTypeMismatchTests {
+        @Test
+        @DisplayName("Should build ErrorResponseDto when parameter type mismatches")
+        void buildsTypeMismatchErrorResponse() {
+            java.beans.PropertyChangeEvent pce =
+                    new java.beans.PropertyChangeEvent(servletRequest, "age", null, "abc");
+            org.springframework.beans.TypeMismatchException ex =
+                    new org.springframework.beans.TypeMismatchException(pce, Integer.class);
+            HttpHeaders headers = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+            ResponseEntity<Object> response = handler.handleTypeMismatch(
+                    ex, headers, status, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getHeaders()).isEqualTo(headers);
+            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getMessage()).isEqualTo("Type mismatch for parameter 'age'");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> details = (Map<String, Object>) dto.getDetails();
+
+            assertThat(details).containsEntry("value", "abc");
+            assertThat(details).containsEntry("requiredType", "Integer");
+            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+        }
+    }
     
 }
