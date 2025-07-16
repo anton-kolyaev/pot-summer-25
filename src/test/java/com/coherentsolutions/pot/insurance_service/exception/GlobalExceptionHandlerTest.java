@@ -11,11 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -247,6 +245,38 @@ class GlobalExceptionHandlerTest {
 
             assertThat(details).containsEntry("value", "abc");
             assertThat(details).containsEntry("requiredType", "Integer");
+            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+        }
+    }
+    @Nested
+    @DisplayName("handleHttpMediaTypeNotSupported tests")
+    class HandleHttpMediaTypeNotSupportedTests {
+        @Test
+        @DisplayName("Should build ErrorResponseDto when media type is unsupported")
+        void buildsUnsupportedMediaTypeErrorResponse() {
+            HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(
+                    MediaType.TEXT_PLAIN, java.util.List.of(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML));
+            HttpHeaders headers = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
+            ResponseEntity<Object> response = handler.handleHttpMediaTypeNotSupported(
+                    ex, headers, status, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+            assertThat(response.getHeaders()).isEqualTo(headers);
+            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            assertThat(dto.getCode()).isEqualTo("UNSUPPORTED_MEDIA_TYPE");
+            assertThat(dto.getMessage()).isEqualTo("Unsupported media type 'text/plain'" );
+
+            @SuppressWarnings("unchecked")
+            Map<String,Object> details = (Map<String,Object>) dto.getDetails();
+            
+            assertThat(details).containsEntry("unsupported", MediaType.TEXT_PLAIN);
+            Object supportedObj = details.get("supported");
+            assertThat(supportedObj).isInstanceOf(java.util.List.class);
+            
+            @SuppressWarnings("unchecked")
+            java.util.List<MediaType> supported = (java.util.List<MediaType>) supportedObj;
+            
+            assertThat(supported).contains(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
         }
     }
