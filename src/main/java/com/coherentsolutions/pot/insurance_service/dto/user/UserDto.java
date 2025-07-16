@@ -10,11 +10,15 @@ import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.dto.AddressDto;
 import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDto {
     private UUID id;
     private String firstName;
