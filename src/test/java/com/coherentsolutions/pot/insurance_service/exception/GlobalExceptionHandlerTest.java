@@ -18,6 +18,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.List;
@@ -308,6 +310,30 @@ class GlobalExceptionHandlerTest {
             String[] supportedMethods = (String[]) supportedObj;
             assertThat(supportedMethods).contains("GET","POST");
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+        }
+    }
+    @Nested
+    @DisplayName("handleNoHandlerFoundException tests")
+    class HandleNoHandlerFoundExceptionTests {
+        @Test
+        @DisplayName("Should build ErrorResponseDto when no handler is found")
+        void buildsNoHandlerFoundErrorResponse() {
+            NoHandlerFoundException ex = new NoHandlerFoundException("PATCH", "/missing", new HttpHeaders());
+            HttpHeaders headers = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.NOT_FOUND;
+            ResponseEntity<Object> response = handler.handleNoHandlerFoundException(
+                    ex, headers, status, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(response.getHeaders()).isEqualTo(headers);
+            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            assertThat(dto.getCode()).isEqualTo("NOT_FOUND");
+            assertThat(dto.getMessage()).isEqualTo("No handler found for PATCH /missing");
+
+            @SuppressWarnings("unchecked")
+            Map<String,Object> details = (Map<String,Object>) dto.getDetails();
+            
+            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+            assertThat(details).containsKey("timestamp");
         }
     }
     
