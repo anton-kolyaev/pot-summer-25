@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/001-create-table-user.sql
   - include:
       file: db/changelog/create-table-company.sql
+  - include:
+      file: db/changelog/create-table-user-functions.sql
