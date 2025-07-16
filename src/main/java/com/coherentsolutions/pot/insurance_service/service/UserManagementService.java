@@ -1,8 +1,14 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
-import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.UUID;
+import java.util.function.Consumer;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
@@ -36,5 +42,34 @@ public class UserManagementService {
 
         user = userRepository.save(user);
         return userMapper.toDto(user);
+    }
+
+    public UserDto updateUser(UUID id, UserDto request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        setIfNotNull(request.getFirstName(), user::setFirstName);
+        setIfNotNull(request.getLastName(), user::setLastName);
+        setIfNotNull(request.getUsername(), user::setUsername);
+        setIfNotNull(request.getEmail(), user::setEmail);
+
+        if (request.getPhoneData() != null) {
+            user.setPhoneData(userMapper.toPhoneList(request.getPhoneData()));
+        }
+
+        if (request.getAddressData() != null) {
+            user.setAddressData(userMapper.toAddressList(request.getAddressData()));
+        }
+
+        user.setUpdatedAt(Instant.now());
+
+        User updated = userRepository.save(user);
+        return userMapper.toDto(updated);
+    }
+
+    private <T> void setIfNotNull(T value, Consumer<T> setter) {
+        if (value != null) {
+            setter.accept(value);
+        }
     }
 }
