@@ -10,15 +10,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -51,10 +55,9 @@ class GlobalExceptionHandlerTest {
                     .getDeclaredMethod("buildDetails", HttpServletRequest.class, Map.Entry[].class);
             buildDetailsMethod.setAccessible(true);
         }
-
         @Test
         @DisplayName("Should include timestamp, endpoint, and extras when provided")
-        void withExtras_includesTimestampEndpointAndExtras() throws Exception {
+        void includesTimestampEndpointAndExtras() throws Exception {
             AbstractMap.SimpleImmutableEntry<String, Object> extra =
                     new AbstractMap.SimpleImmutableEntry<>("key", "value");
             @SuppressWarnings("unchecked")
@@ -69,12 +72,12 @@ class GlobalExceptionHandlerTest {
         }
         @Test
         @DisplayName("Should include only timestamp and endpoint when extras is null")
-        void withNullExtras_onlyTimestampAndEndpoint() throws Exception {
+        void onlyTimestampAndEndpoint() throws Exception {
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
                     null,
                     servletRequest,
-                    null
+                    (Object) null
             );
             assertThat(details).containsKeys("timestamp", "endpoint");
             assertThat(details).hasSize(2);
@@ -82,7 +85,7 @@ class GlobalExceptionHandlerTest {
         }
         @Test
         @DisplayName("Should skip null extras entries")
-        void withNullEntryInExtras_skipsNullExtra() throws Exception {
+        void includesTimestampEndpointAndNullExtraEntry() throws Exception {
             AbstractMap.SimpleImmutableEntry<String, Object> extra =
                     new AbstractMap.SimpleImmutableEntry<>("key", "value");
             @SuppressWarnings("unchecked")
@@ -98,7 +101,7 @@ class GlobalExceptionHandlerTest {
         }
         @Test
         @DisplayName("Should include multiple extras entries correctly")
-        void withMultipleExtras_includesAllEntries() throws Exception {
+        void includesTimestampEndpointAndMultipleExtras() throws Exception {
             AbstractMap.SimpleImmutableEntry<String, Object> extra1 =
                     new AbstractMap.SimpleImmutableEntry<>("firstInput", 123);
             AbstractMap.SimpleImmutableEntry<String, Object> extra2 =
@@ -142,6 +145,53 @@ class GlobalExceptionHandlerTest {
             Map<String, Object> details = (Map<String, Object>) dto.getDetails();
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
             assertThat(details).containsKey("timestamp");
+        }
+    }
+    @Nested
+    @DisplayName("handleMethodArgumentNotValid tests")
+    class HandleMethodArgumentNotValidTests {
+        @Test
+        @DisplayName("Should build ErrorResponseDto with validation errors and details")
+        void buildsValidationErrorResponse() throws Exception {
+            org.springframework.validation.BeanPropertyBindingResult bindingResult =
+                    new org.springframework.validation.BeanPropertyBindingResult(new Object(), "target");
+            bindingResult.addError(new org.springframework.validation.FieldError(
+                    "target", "name", "must not be null"));
+            bindingResult.addError(new org.springframework.validation.FieldError(
+                    "target", "age", "must be greater than 0"));
+            MethodParameter param = new MethodParameter(
+                    getClass().getDeclaredMethod("forTest", String.class), 0
+            );
+            MethodArgumentNotValidException ex = new MethodArgumentNotValidException(param, bindingResult);
+            HttpHeaders headers = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+            ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(
+                    ex, headers, status, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            @SuppressWarnings("unchecked")
+            Map<String, List<String>> errors = (Map<String,List<String>>) ((Map<String,Object>) ((ErrorResponseDto)response.getBody()).getDetails())
+                    .get("validationErrors");
+            assertThat(errors).containsKeys("name","age");
+        }
+        void forTest(String param) {}
+    }
+    @Nested
+    @DisplayName("handleHttpMessageNotReadable tests")
+    class HandleHttpMessageNotReadableTests {
+        @Test
+        @DisplayName("Should build ErrorResponseDto with cause and details")
+        void buildsMalformedRequestResponse() {
+            Throwable cause = new java.io.IOException("Bad JSON");
+            HttpMessageNotReadableException ex = new HttpMessageNotReadableException("malformed", cause);
+            HttpHeaders headers = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+            ResponseEntity<Object> response = handler.handleHttpMessageNotReadable(
+                    ex, headers, status, webRequest
+            );
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            @SuppressWarnings("unchecked")
+            Map<String,Object> details = (Map<String,Object>) ((ErrorResponseDto)response.getBody()).getDetails();
+            assertThat(details).containsEntry("cause", "Bad JSON");
         }
     }
 }
