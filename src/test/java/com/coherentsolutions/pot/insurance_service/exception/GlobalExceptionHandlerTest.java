@@ -2,10 +2,7 @@ package com.coherentsolutions.pot.insurance_service.exception;
 
 import com.coherentsolutions.pot.insurance_service.dto.error.ErrorResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -141,6 +138,7 @@ class GlobalExceptionHandlerTest {
                     headers,
                     status,
                     webRequest);
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getHeaders()).isEqualTo(headers);
             ErrorResponseDto dto = dtoFrom(response);
@@ -172,6 +170,7 @@ class GlobalExceptionHandlerTest {
             ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(
                     ex, headers, status, webRequest
             );
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
@@ -200,6 +199,7 @@ class GlobalExceptionHandlerTest {
                     status,
                     webRequest
             );
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
@@ -222,6 +222,7 @@ class GlobalExceptionHandlerTest {
             HttpStatusCode status = HttpStatus.BAD_REQUEST;
             ResponseEntity<Object> response = handler.handleMissingServletRequestParameter(
                     ex, headers, status, webRequest);
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getHeaders()).isEqualTo(headers);
             ErrorResponseDto dto = dtoFrom(response);
@@ -246,6 +247,7 @@ class GlobalExceptionHandlerTest {
             HttpStatusCode status = HttpStatus.BAD_REQUEST;
             ResponseEntity<Object> response = handler.handleTypeMismatch(
                     ex, headers, status, webRequest);
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getHeaders()).isEqualTo(headers);
             ErrorResponseDto dto = dtoFrom(response);
@@ -269,6 +271,7 @@ class GlobalExceptionHandlerTest {
             HttpStatusCode status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
             ResponseEntity<Object> response = handler.handleHttpMediaTypeNotSupported(
                     ex, headers, status, webRequest);
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
             assertThat(response.getHeaders()).isEqualTo(headers);
             ErrorResponseDto dto = dtoFrom(response);
@@ -299,6 +302,7 @@ class GlobalExceptionHandlerTest {
             HttpStatusCode status = HttpStatus.METHOD_NOT_ALLOWED;
             ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(
                     ex, headers, status, webRequest);
+            Assertions.assertNotNull(response);
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
             assertThat(response.getHeaders()).isEqualTo(headers);
             ErrorResponseDto dto = dtoFrom(response);
