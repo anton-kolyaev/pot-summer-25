@@ -14,6 +14,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
@@ -277,6 +278,35 @@ class GlobalExceptionHandlerTest {
             java.util.List<MediaType> supported = (java.util.List<MediaType>) supportedObj;
             
             assertThat(supported).contains(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
+            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+        }
+    }
+    @Nested
+    @DisplayName("handleHttpRequestMethodNotSupported tests")
+    class HandleHttpRequestMethodNotSupportedTests {
+        @Test
+        @DisplayName("Should build ErrorResponseDto when HTTP method is not supported")
+        void buildsMethodNotSupportedErrorResponse() {
+            HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException(
+                    "DELETE", java.util.List.of("GET","POST"));
+            HttpHeaders headers = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.METHOD_NOT_ALLOWED;
+            ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(
+                    ex, headers, status, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
+            assertThat(response.getHeaders()).isEqualTo(headers);
+            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            assertThat(dto.getCode()).isEqualTo("METHOD_NOT_ALLOWED");
+            assertThat(dto.getMessage()).isEqualTo("HTTP method 'DELETE' is not supported for this endpoint");
+
+            @SuppressWarnings("unchecked")
+            Map<String,Object> details = (Map<String,Object>) dto.getDetails();
+            
+            assertThat(details).containsEntry("methodUsed", "DELETE");
+            Object supportedObj = details.get("supportedMethods");
+            assertThat(supportedObj).isInstanceOf(String[].class);
+            String[] supportedMethods = (String[]) supportedObj;
+            assertThat(supportedMethods).contains("GET","POST");
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
         }
     }
