@@ -77,7 +77,7 @@ class GlobalExceptionHandlerTest {
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
                     null,
                     servletRequest,
-                    (Object) null
+                    null
             );
             assertThat(details).containsKeys("timestamp", "endpoint");
             assertThat(details).hasSize(2);
@@ -143,6 +143,7 @@ class GlobalExceptionHandlerTest {
 
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) dto.getDetails();
+            
             assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
             assertThat(details).containsKey("timestamp");
         }
@@ -171,6 +172,7 @@ class GlobalExceptionHandlerTest {
             @SuppressWarnings("unchecked")
             Map<String, List<String>> errors = (Map<String,List<String>>) ((Map<String,Object>) ((ErrorResponseDto)response.getBody()).getDetails())
                     .get("validationErrors");
+            
             assertThat(errors).containsKeys("name","age");
         }
         void forTest(String param) {}
@@ -191,7 +193,34 @@ class GlobalExceptionHandlerTest {
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             @SuppressWarnings("unchecked")
             Map<String,Object> details = (Map<String,Object>) ((ErrorResponseDto)response.getBody()).getDetails();
+            
             assertThat(details).containsEntry("cause", "Bad JSON");
         }
     }
+    @Nested
+    @DisplayName("handleMissingServletRequestParameter tests")
+    class HandleMissingServletRequestParameterTests {
+        @Test
+        @DisplayName("Should build ErrorResponseDto when a required param is missing")
+        void buildsMissingParamErrorResponse() {
+            org.springframework.web.bind.MissingServletRequestParameterException ex =
+                    new org.springframework.web.bind.MissingServletRequestParameterException("id", "String");
+            HttpHeaders headers = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+            ResponseEntity<Object> response = handler.handleMissingServletRequestParameter(
+                    ex, headers, status, webRequest);
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(response.getHeaders()).isEqualTo(headers);
+            ErrorResponseDto dto = (ErrorResponseDto) response.getBody();
+            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getMessage()).isEqualTo("Required request parameter 'id' is missing");
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> details = (Map<String, Object>) dto.getDetails();
+            
+            assertThat(details).containsEntry("parameter", "id");
+            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+        }
+    }
+    
 }
