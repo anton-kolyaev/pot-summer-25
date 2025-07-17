@@ -479,12 +479,15 @@ class GlobalExceptionHandlerTests {
                     "Unsupported media type '" + UNSUPPORTED_TYPE.toString() + "'",
                     dto.getMessage()
             );
+            
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) dto.getDetails();
             assertEquals(UNSUPPORTED_TYPE, details.get("unsupported"));
+            
             @SuppressWarnings("unchecked")
             List<MediaType> supportedFromDetails =
                     (List<MediaType>) details.get("supported");
+            
             assertEquals(SUPPORTED_TYPES, supportedFromDetails);
             assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
             assertNotNull(details.get("timestamp"));
@@ -510,42 +513,81 @@ class GlobalExceptionHandlerTests {
             assertEquals(DEFAULT_STATUS, response.getStatusCode());
             @SuppressWarnings("unchecked")
             Map<String,Object> details = (Map<String,Object>) dtoFrom(response).getDetails();
+            
             assertTrue(((List<?>) details.get("supported")).isEmpty());
             assertEquals(UNSUPPORTED_TYPE, details.get("unsupported"));
             assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
 
     }
-
     @Nested
     @DisplayName("handleHttpRequestMethodNotSupported tests")
     class HandleHttpRequestMethodNotSupportedTests {
-        @Test
-        @DisplayName("should build ErrorResponseDto when HTTP method is not supported")
-        void buildsMethodNotSupportedErrorResponse() {
-            HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException(
-                    "DELETE", java.util.List.of("GET","POST"));
-            HttpHeaders headers = new HttpHeaders();
-            HttpStatusCode status = HttpStatus.METHOD_NOT_ALLOWED;
-            ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(
-                    ex, headers, status, webRequest);
-            assertNotNull(response);
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
-            assertThat(response.getHeaders()).isEqualTo(headers);
-            ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("METHOD_NOT_ALLOWED");
-            assertThat(dto.getMessage()).isEqualTo("HTTP method 'DELETE' is not supported for this endpoint");
+        private static final String UNSUPPORTED_METHOD = "DELETE";
+        private static final List<String> ALLOWED_METHODS = List.of("GET", "POST");
+        private static final HttpStatus STATUS = HttpStatus.METHOD_NOT_ALLOWED;
 
+        @Test
+        @DisplayName("should return METHOD_NOT_ALLOWED and include supportedMethods array")
+        void shouldReturnMethodNotAllowedWithSupportedMethodsDetail() {
+            // Given
+            HttpRequestMethodNotSupportedException ex =
+                    new HttpRequestMethodNotSupportedException(UNSUPPORTED_METHOD, ALLOWED_METHODS);
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
+            ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(
+                    ex,
+                    requestHeaders,
+                    STATUS,
+                    webRequest
+            );
+
+            // Then
+            assertNotNull(response);
+            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(requestHeaders, response.getHeaders());
+
+            ErrorResponseDto dto = dtoFrom(response);
+            assertEquals(STATUS.name(), dto.getCode());
+            String expectedMessage =
+                    "HTTP method '" + UNSUPPORTED_METHOD + "' is not supported for this endpoint";
+            assertEquals(expectedMessage, dto.getMessage());
+            
             @SuppressWarnings("unchecked")
             Map<String,Object> details = (Map<String,Object>) dto.getDetails();
+            assertEquals(UNSUPPORTED_METHOD, details.get("methodUsed"));
             
-            assertThat(details).containsEntry("methodUsed", "DELETE");
-            Object supportedObj = details.get("supportedMethods");
-            assertThat(supportedObj).isInstanceOf(String[].class);
-            String[] supportedMethods = (String[]) supportedObj;
-            assertThat(supportedMethods).contains("GET","POST");
-            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+            Object rawSupported = details.get("supportedMethods");
+            assertInstanceOf(String[].class, rawSupported);
+            String[] supportedArray = (String[]) rawSupported;
+            assertArrayEquals(
+                    ALLOWED_METHODS.toArray(new String[0]),
+                    supportedArray
+            );
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertNotNull(details.get("timestamp"));
         }
+        @Test
+        @DisplayName("when no allowed methods provided, supportedMethods is null")
+        void handlesNullSupportedMethods() {
+            // Given
+            HttpRequestMethodNotSupportedException ex =
+                    new HttpRequestMethodNotSupportedException(UNSUPPORTED_METHOD);
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
+            ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(
+                    ex, requestHeaders, STATUS, webRequest);
+
+            // Then
+            @SuppressWarnings("unchecked")
+            Map<String,Object> details =
+                    (Map<String,Object>) dtoFrom(response).getDetails();
+            assertTrue(details.containsKey("supportedMethods"));
+            assertNull(details.get("supportedMethods"));
+        }
+
     }
     @Nested
     @DisplayName("handleNoHandlerFoundException tests")
