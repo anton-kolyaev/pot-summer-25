@@ -40,8 +40,8 @@ public class UserManagementServiceTest {
 
 
     @Test
-    @DisplayName("Should get Users by companyId")
-    void shouldReturnUsersOfCompany() {
+    @DisplayName("Should return all users of a company by companyId")
+    void shouldReturnAllUsersOfExistingCompany() {
         UUID companyId = UUID.randomUUID();
         Company mockCompany = new Company();
         mockCompany.setId(companyId);
