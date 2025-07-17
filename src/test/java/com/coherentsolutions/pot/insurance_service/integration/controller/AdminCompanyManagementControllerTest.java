@@ -7,7 +7,6 @@ import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.repository.CompanyRepository;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,13 +39,10 @@ public class AdminCompanyManagementControllerTest extends PostgresTestContainer 
     @Autowired
     private UserRepository userRepository;
 
-    private UUID companyId;
 
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll();
-        companyRepository.deleteAll();
-
+    @Test
+    @DisplayName("Should return all users of a company by companyId")
+    void shouldReturnAllUsersOfExistingCompany() throws Exception {
         Company company = new Company();
         company.setName("Test Company");
         company.setCountryCode("USA");
@@ -54,7 +50,7 @@ public class AdminCompanyManagementControllerTest extends PostgresTestContainer 
         company.setWebsite("https://example.com");
         company.setStatus(CompanyStatus.ACTIVE);
         company = companyRepository.save(company);
-        companyId = company.getId();
+        UUID companyId = company.getId();
 
         User user1 = new User();
         user1.setFirstName("Alice");
@@ -78,23 +74,26 @@ public class AdminCompanyManagementControllerTest extends PostgresTestContainer 
 
         userRepository.save(user1);
         userRepository.save(user2);
-    }
 
-    @Test
-    @DisplayName("Should return all users of a company by companyId")
-    void shouldReturnAllUsersOfExistingCompany() throws Exception {
-        mockMvc.perform(get("/v1/companies/{id}/users", companyId)
-                        .param("page", "0")
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.content[0].username").value("alice.johnson"))
-                .andExpect(jsonPath("$.content[1].username").value("bob.smith"))
-                .andExpect(jsonPath("$.content[0].companyId").value(companyId.toString()))
-                .andExpect(jsonPath("$.content[1].companyId").value(companyId.toString()));
+        try{
+            mockMvc.perform(get("/v1/companies/{id}/users", companyId)
+                            .param("page", "0")
+                            .param("size", "10")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content.length()").value(2))
+                    .andExpect(jsonPath("$.content[0].username").value("alice.johnson"))
+                    .andExpect(jsonPath("$.content[1].username").value("bob.smith"))
+                    .andExpect(jsonPath("$.content[0].companyId").value(companyId.toString()))
+                    .andExpect(jsonPath("$.content[1].companyId").value(companyId.toString()));
+        } finally {
+            userRepository.deleteById(user1.getId());
+            userRepository.deleteById(user2.getId());
+            companyRepository.deleteById(companyId);
+        }
+
     }
 
     @Test
@@ -107,14 +106,19 @@ public class AdminCompanyManagementControllerTest extends PostgresTestContainer 
         emptyCompany.setStatus(CompanyStatus.ACTIVE);
         emptyCompany = companyRepository.save(emptyCompany);
 
-        mockMvc.perform(get("/v1/companies/{id}/users", emptyCompany.getId())
-                        .param("page", "0")
-                        .param("size", "10")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(0))
-                .andExpect(jsonPath("$.totalElements").value(0));
+        try{
+            mockMvc.perform(get("/v1/companies/{id}/users", emptyCompany.getId())
+                            .param("page", "0")
+                            .param("size", "10")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.content").isArray())
+                    .andExpect(jsonPath("$.content.length()").value(0))
+                    .andExpect(jsonPath("$.totalElements").value(0));
+        }   finally {
+            companyRepository.deleteById(emptyCompany.getId());
+        }
+
     }
 }
