@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insurance_service.integration.controller;
 
+import com.coherentsolutions.pot.insurance_service.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.model.Company;
@@ -13,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -22,11 +23,11 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Testcontainers
+@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Integration test for AdminCompanyManagementController")
-public class AdminCompanyManagementControllerTest {
+public class AdminCompanyManagementControllerTest extends PostgresTestContainer {
 
     @Autowired
     private MockMvc mockMvc;
