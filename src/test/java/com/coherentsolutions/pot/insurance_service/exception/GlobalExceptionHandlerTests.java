@@ -27,11 +27,16 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTests {
-
+    private static final String DEFAULT_URI = "/test-endpoint";
+    private static final String DEFAULT_METHOD = "GET";
+    private static final String DEFAULT_ENDPOINT = DEFAULT_METHOD + " " + DEFAULT_URI;
+    
     @InjectMocks
     private GlobalExceptionHandler handler;
 
@@ -42,17 +47,15 @@ class GlobalExceptionHandlerTests {
 
     @BeforeEach
     void setUp() {
-        when(servletRequest.getMethod()).thenReturn("GET");
-        when(servletRequest.getRequestURI()).thenReturn("/test-endpoint");
+        when(servletRequest.getMethod()).thenReturn(DEFAULT_METHOD);
+        when(servletRequest.getRequestURI()).thenReturn(DEFAULT_URI);
         webRequest = new ServletWebRequest(servletRequest);
     }
-    
+
     @Nested
     @DisplayName("buildDetails tests")
     class BuildDetailsTests {
-
         private Method buildDetailsMethod;
-
         @BeforeEach
         void initialBuildDetailsMethod() throws NoSuchMethodException {
             buildDetailsMethod = GlobalExceptionHandler.class
@@ -60,68 +63,102 @@ class GlobalExceptionHandlerTests {
             buildDetailsMethod.setAccessible(true);
         }
         @Test
-        @DisplayName("should include timestamp, endpoint, and extras when provided")
+        @DisplayName("should include timestamp, endpoint, and one extra")
         void includesTimestampEndpointAndExtras() throws Exception {
-            AbstractMap.SimpleImmutableEntry<String, Object> extra =
-                    new AbstractMap.SimpleImmutableEntry<>("key", "value");
+            // Given
+            Map.Entry<String, Object> extra = new AbstractMap.SimpleImmutableEntry<>("key", "value");
+            // When
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
                     null,
                     servletRequest,
                     new Map.Entry[]{extra}
             );
-            assertThat(details).containsKeys("timestamp", "endpoint", "key");
-            assertThat(details.get("key")).isEqualTo("value");
-            assertThat(details.get("endpoint")).isEqualTo("GET /test-endpoint");
+            // Then
+            assertEquals(3, details.size());
+            assertTrue(details.containsKey("timestamp"));
+            assertTrue(details.containsKey("endpoint"));
+            assertTrue(details.containsKey("key"));
+            assertEquals("value", details.get("key"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
         @Test
         @DisplayName("should include only timestamp and endpoint when extras is null")
         void onlyTimestampAndEndpoint() throws Exception {
+            // Given / When
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
                     null,
                     servletRequest,
                     null
             );
-            assertThat(details).containsKeys("timestamp", "endpoint");
-            assertThat(details).hasSize(2);
-            assertThat(details.get("endpoint")).isEqualTo("GET /test-endpoint");
+            // Then
+            assertEquals(2, details.size());
+            assertTrue(details.containsKey("timestamp"));
+            assertTrue(details.containsKey("endpoint"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
         @Test
-        @DisplayName("should skip null extras entries")
-        void includesTimestampEndpointAndNullExtraEntry() throws Exception {
-            AbstractMap.SimpleImmutableEntry<String, Object> extra =
-                    new AbstractMap.SimpleImmutableEntry<>("key", "value");
+        @DisplayName("should include timestamp, endpoint, one extra, and skip null extra")
+        void skipsNullExtrasEntries() throws Exception {
+            // Given
+            Map.Entry<String, Object> extra = new AbstractMap.SimpleImmutableEntry<>("key", "value");
+            // When
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
                     null,
                     servletRequest,
                     new Map.Entry[]{extra, null}
             );
-            assertThat(details).containsKeys("timestamp", "endpoint", "key");
-            assertThat(details).hasSize(3);
-            assertThat(details.get("key")).isEqualTo("value");
-            assertThat(details.get("endpoint")).isEqualTo("GET /test-endpoint");
+            // Then
+            assertEquals(3, details.size());
+            assertTrue(details.containsKey("timestamp"));
+            assertTrue(details.containsKey("endpoint"));
+            assertTrue(details.containsKey("key"));
+            assertEquals("value", details.get("key"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
         @Test
-        @DisplayName("should include multiple extras entries correctly")
-        void includesTimestampEndpointAndMultipleExtras() throws Exception {
-            AbstractMap.SimpleImmutableEntry<String, Object> extra1 =
-                    new AbstractMap.SimpleImmutableEntry<>("firstInput", 123);
-            AbstractMap.SimpleImmutableEntry<String, Object> extra2 =
-                    new AbstractMap.SimpleImmutableEntry<>("secondInput", false);
+        @DisplayName("should include timestamp, endpoint, and multiple extras entries")
+        void includesMultipleExtras() throws Exception {
+            // Given
+            Map.Entry<String, Object> extra1 = new AbstractMap.SimpleImmutableEntry<>("firstInput", 123);
+            Map.Entry<String, Object> extra2 = new AbstractMap.SimpleImmutableEntry<>("secondInput", false);
+            // When
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
                     null,
                     servletRequest,
                     new Map.Entry[]{extra1, extra2}
             );
-            assertThat(details).containsKeys("timestamp", "endpoint", "firstInput", "secondInput");
-            assertThat(details.get("firstInput")).isEqualTo(123);
-            assertThat(details.get("secondInput")).isEqualTo(false);
-            assertThat(details.get("endpoint")).isEqualTo("GET /test-endpoint");
+            // Then
+            assertEquals(4, details.size());
+            assertTrue(details.containsKey("timestamp"));
+            assertTrue(details.containsKey("endpoint"));
+            assertTrue(details.containsKey("firstInput"));
+            assertTrue(details.containsKey("secondInput"));
+            assertEquals(123, details.get("firstInput"));
+            assertEquals(false, details.get("secondInput"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+        }
+        @Test
+        @DisplayName("should include timestamp, endpoint, and handle an empty extras array")
+        void handlesEmptyExtrasArray() throws Exception {
+            // Given / When
+            @SuppressWarnings("unchecked")
+            Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
+                    null,
+                    servletRequest,
+                    new Map.Entry[0]
+            );
+            // Then
+            assertEquals(2, details.size());
+            assertTrue(details.containsKey("timestamp"));
+            assertTrue(details.containsKey("endpoint"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
     }
+
     @Nested
     @DisplayName("handleExceptionInternal tests")
     class HandleExceptionInternalTests {
