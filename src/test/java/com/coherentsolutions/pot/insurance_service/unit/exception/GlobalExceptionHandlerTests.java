@@ -47,7 +47,6 @@ class GlobalExceptionHandlerTests {
     private static final String DEFAULT_URI = "/test-endpoint";
     private static final String DEFAULT_METHOD = "GET";
     private static final String DEFAULT_ENDPOINT = DEFAULT_METHOD + " " + DEFAULT_URI;
-    private static final HttpStatus DEFAULT_STATUS = HttpStatus.BAD_REQUEST;
 
     private final TestableGlobalExceptionHandler handler = new TestableGlobalExceptionHandler();
 
@@ -187,7 +186,7 @@ class GlobalExceptionHandlerTests {
                     exception,
                     null,
                     requestHeaders,
-                    DEFAULT_STATUS,
+                    HttpStatus.BAD_REQUEST,
                     webRequest
             );
             // Then
@@ -196,7 +195,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(requestHeaders, response.getHeaders());
             
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.BAD_REQUEST.name(), dto.getCode());
             assertEquals("Test-Exception", dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
@@ -209,13 +208,12 @@ class GlobalExceptionHandlerTests {
             // Given
             RuntimeException exception = new RuntimeException((String) null);
             HttpHeaders emptyHeaders = new HttpHeaders();
-            HttpStatusCode responseStatus = HttpStatus.INTERNAL_SERVER_ERROR;
             // When
             ResponseEntity<Object> response = handler.handleExceptionInternal(
                     exception,
                     null,
                     emptyHeaders,
-                    responseStatus,
+                    HttpStatus.INTERNAL_SERVER_ERROR,
                     webRequest);
             // Then
             assertNotNull(response);
@@ -237,14 +235,13 @@ class GlobalExceptionHandlerTests {
             HttpHeaders incomingHeaders = new HttpHeaders();
             incomingHeaders.add("Test-Header-First", "abc123");
             incomingHeaders.add("Test-Header-Second", "___456");
-            HttpStatusCode responseStatus = HttpStatus.CONFLICT;
             
             // When
             ResponseEntity<Object> response = handler.handleExceptionInternal(
                     exception,
                     null,
                     incomingHeaders,
-                    responseStatus,
+                    HttpStatus.CONFLICT,
                     webRequest);
             
             // Then
@@ -282,16 +279,16 @@ class GlobalExceptionHandlerTests {
             ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(
                     ex,
                     requestHeaders,
-                    DEFAULT_STATUS,
+                    HttpStatus.BAD_REQUEST,
                     webRequest
             );
             
             // Then
             assertNotNull(response, "response should not be null");
-            assertEquals(DEFAULT_STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.BAD_REQUEST.name(), dto.getCode());
             assertEquals(
                     "Validation failed for fields: name, age",
                     dto.getMessage()
@@ -325,15 +322,15 @@ class GlobalExceptionHandlerTests {
                     handler.handleHttpMessageNotReadable(
                             ex,
                             requestHeaders,
-                            DEFAULT_STATUS,
+                            HttpStatus.BAD_REQUEST,
                             webRequest
                     );
             
             // Then
             assertNotNull(response);
-            assertEquals(DEFAULT_STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.BAD_REQUEST.name(), dto.getCode());
             assertEquals("Malformed JSON request", dto.getMessage());
             Map<String, Object> details = detailsFrom(response);
             assertEquals(CAUSE, details.get("cause"));
@@ -353,15 +350,15 @@ class GlobalExceptionHandlerTests {
                     handler.handleHttpMessageNotReadable(
                             ex,
                             requestHeaders,
-                            DEFAULT_STATUS,
+                            HttpStatus.BAD_REQUEST,
                             webRequest
                     );
             
             // Then
             assertNotNull(response);
-            assertEquals(DEFAULT_STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.BAD_REQUEST.name(), dto.getCode());
             assertEquals("Malformed JSON request", dto.getMessage());
             Map<String, Object> details = detailsFrom(response);
             assertEquals("parse failed", details.get("cause"));
@@ -373,7 +370,6 @@ class GlobalExceptionHandlerTests {
     class HandleMissingServletRequestParameterTests {
         private static final String PARAM_NAME = "id";
         private static final String PARAM_TYPE = "String";
-        private static final HttpStatus STATUS = HttpStatus.BAD_REQUEST;
 
         @Test
         @DisplayName("should return 400 and include missing-parameter details")
@@ -387,17 +383,17 @@ class GlobalExceptionHandlerTests {
             ResponseEntity<Object> response = handler.handleMissingServletRequestParameter(
                     ex,
                     requestHeaders,
-                    STATUS,
+                    HttpStatus.BAD_REQUEST,
                     webRequest
             );
 
             // Then
             assertNotNull(response);
-            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertEquals(requestHeaders, response.getHeaders(), "incoming headers must be propagated");
             
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(STATUS.name(),  dto.getCode());
+            assertEquals(HttpStatus.BAD_REQUEST.name(),  dto.getCode());
             assertEquals(
                     "Required request parameter '" + PARAM_NAME + "' is missing",
                     dto.getMessage()
@@ -423,17 +419,19 @@ class GlobalExceptionHandlerTests {
             ResponseEntity<Object> response = handler.handleTypeMismatch(
                     ex,
                     requestHeaders,
-                    DEFAULT_STATUS,
+                    HttpStatus.BAD_REQUEST,
                     webRequest
             );
 
             // Then
             assertNotNull(response, "response must not be null");
-            assertEquals(DEFAULT_STATUS, response.getStatusCode(), "status should be" + " " + DEFAULT_STATUS);
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(),
+                    "status should be" + " " + HttpStatus.BAD_REQUEST);
             assertEquals(requestHeaders, response.getHeaders(), "incoming headers should be propagated");
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(DEFAULT_STATUS.name(), dto.getCode(), "code must match" + " " + DEFAULT_STATUS.value());
+            assertEquals(HttpStatus.BAD_REQUEST.name(), dto.getCode(),
+                    "code must match" + " " + HttpStatus.BAD_REQUEST.value());
             assertEquals("Type mismatch for parameter 'age'", dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
@@ -453,7 +451,6 @@ class GlobalExceptionHandlerTests {
                 List.of(MediaType.APPLICATION_JSON,
                         MediaType.APPLICATION_XML
                 );
-        private static final HttpStatus DEFAULT_STATUS = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
 
         @Test
         @DisplayName("should build ErrorResponseDto when media type is unsupported")
@@ -467,18 +464,18 @@ class GlobalExceptionHandlerTests {
             ResponseEntity<Object> response = handler.handleHttpMediaTypeNotSupported(
                     ex,
                     requestHeaders,
-                    DEFAULT_STATUS,
+                    HttpStatus.UNSUPPORTED_MEDIA_TYPE,
                     webRequest
             );
 
             // Then
             assertNotNull(response,"response must not be null");
-            assertEquals(DEFAULT_STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
             assertEquals(requestHeaders, response.getHeaders(),
                     "incoming headers should be propagated");
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE.name(), dto.getCode());
             assertEquals(
                     "Unsupported media type '" + UNSUPPORTED_TYPE + "'",
                     dto.getMessage()
@@ -507,13 +504,13 @@ class GlobalExceptionHandlerTests {
             ResponseEntity<Object> response = handler.handleHttpMediaTypeNotSupported(
                     ex,
                     requestHeaders,
-                    DEFAULT_STATUS,
+                    HttpStatus.UNSUPPORTED_MEDIA_TYPE,
                     webRequest
             );
 
             // Then
             assertNotNull(response);
-            assertEquals(DEFAULT_STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, response.getStatusCode());
             @SuppressWarnings("unchecked")
             Map<String,Object> details = (Map<String,Object>) dtoFrom(response).getDetails();
             
@@ -528,7 +525,6 @@ class GlobalExceptionHandlerTests {
     class HandleHttpRequestMethodNotSupportedTests {
         private static final String UNSUPPORTED_METHOD = "DELETE";
         private static final List<String> ALLOWED_METHODS = List.of("GET", "POST");
-        private static final HttpStatus STATUS = HttpStatus.METHOD_NOT_ALLOWED;
 
         @Test
         @DisplayName("should return METHOD_NOT_ALLOWED and include supportedMethods array")
@@ -542,17 +538,17 @@ class GlobalExceptionHandlerTests {
             ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(
                     ex,
                     requestHeaders,
-                    STATUS,
+                    HttpStatus.METHOD_NOT_ALLOWED,
                     webRequest
             );
 
             // Then
             assertNotNull(response);
-            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatusCode());
             assertEquals(requestHeaders, response.getHeaders());
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.METHOD_NOT_ALLOWED.name(), dto.getCode());
             String expectedMessage =
                     "HTTP method '" + UNSUPPORTED_METHOD + "' is not supported for this endpoint";
             assertEquals(expectedMessage, dto.getMessage());
@@ -580,7 +576,11 @@ class GlobalExceptionHandlerTests {
 
             // When
             ResponseEntity<Object> response = handler.handleHttpRequestMethodNotSupported(
-                    ex, requestHeaders, STATUS, webRequest);
+                    ex,
+                    requestHeaders,
+                    HttpStatus.METHOD_NOT_ALLOWED,
+                    webRequest
+            );
 
             // Then
             assertNotNull(response);
@@ -595,36 +595,32 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleNoHandlerFoundException tests")
     class HandleNoHandlerFoundExceptionTests {
-        private static final String HTTP_METHOD = "PATCH";
-        private static final String REQUEST_URL = "/missing";
-        private static final String EXPECTED_SUMMARY =
-                "No handler found for " + HTTP_METHOD + " " + REQUEST_URL;
-        private static final HttpStatus STATUS = HttpStatus.NOT_FOUND;
-
         @Test
         @DisplayName("should return NOT_FOUND with correct error details")
         void shouldReturnNotFoundWithCorrectErrorDetails() {
             // Given
             NoHandlerFoundException ex =
-                    new NoHandlerFoundException(HTTP_METHOD, REQUEST_URL, new HttpHeaders());
+                    new NoHandlerFoundException("PATCH", "/missing", new HttpHeaders());
             HttpHeaders requestHeaders = new HttpHeaders();
 
             // When
             ResponseEntity<Object> response = handler.handleNoHandlerFoundException(
                     ex,
                     requestHeaders,
-                    STATUS,
+                    HttpStatus.NOT_FOUND,
                     webRequest
             );
 
             // Then
             assertNotNull(response);
-            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
             assertEquals(requestHeaders, response.getHeaders());
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(STATUS.name(), dto.getCode());
-            assertEquals(EXPECTED_SUMMARY, dto.getMessage());
+            assertEquals(HttpStatus.NOT_FOUND.name(), dto.getCode());
+            assertEquals("No handler found for " + "PATCH" + " " + "/missing",
+                    dto.getMessage()
+            );
 
             Map<String, Object> details = detailsFrom(response);
             assertEndpointAndTimestamp(details);
@@ -642,7 +638,7 @@ class GlobalExceptionHandlerTests {
 
             // When
             ResponseEntity<Object> response = handler.handleNoHandlerFoundException(
-                    ex, requestHeaders, STATUS, webRequest);
+                    ex, requestHeaders, HttpStatus.NOT_FOUND, webRequest);
 
             // Then
             assertNotNull(response);
@@ -656,7 +652,6 @@ class GlobalExceptionHandlerTests {
     @DisplayName("handleGenericException tests")
     class HandleGenericExceptionTests {
         private static final String EXCEPTION_MESSAGE = "Something went wrong";
-        private static final HttpStatus STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
 
         @Test
         @DisplayName("should return 500 and include exception message and endpoint")
@@ -669,9 +664,9 @@ class GlobalExceptionHandlerTests {
                     handler.handleGenericException(exception, servletRequest);
 
             // Then
-            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.name(), dto.getCode());
             assertEquals(EXCEPTION_MESSAGE, dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
@@ -689,9 +684,9 @@ class GlobalExceptionHandlerTests {
                     handler.handleGenericException(exception, servletRequest);
 
             // Then
-            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals(STATUS.name(), dto.getCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.name(), dto.getCode());
             assertNull(dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
