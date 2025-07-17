@@ -592,28 +592,63 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleNoHandlerFoundException tests")
     class HandleNoHandlerFoundExceptionTests {
-        @Test
-        @DisplayName("should build ErrorResponseDto when no handler is found")
-        void buildsNoHandlerFoundErrorResponse() {
-            NoHandlerFoundException ex = new NoHandlerFoundException("PATCH", "/missing", new HttpHeaders());
-            HttpHeaders headers = new HttpHeaders();
-            HttpStatusCode status = HttpStatus.NOT_FOUND;
-            ResponseEntity<Object> response = handler.handleNoHandlerFoundException(
-                    ex, headers, status, webRequest);
-            assertNotNull(response);
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-            assertThat(response.getHeaders()).isEqualTo(headers);
-            ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("NOT_FOUND");
-            assertThat(dto.getMessage()).isEqualTo("No handler found for PATCH /missing");
+        private static final String HTTP_METHOD = "PATCH";
+        private static final String REQUEST_URL = "/missing";
+        private static final String EXPECTED_SUMMARY =
+                "No handler found for " + HTTP_METHOD + " " + REQUEST_URL;
+        private static final HttpStatus STATUS = HttpStatus.NOT_FOUND;
 
-            @SuppressWarnings("unchecked")
-            Map<String,Object> details = (Map<String,Object>) dto.getDetails();
-            
-            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
-            assertThat(details).containsKey("timestamp");
+        @Test
+        @DisplayName("should return NOT_FOUND with correct error details")
+        void shouldReturnNotFoundWithCorrectErrorDetails() {
+            // Given
+            NoHandlerFoundException ex =
+                    new NoHandlerFoundException(HTTP_METHOD, REQUEST_URL, new HttpHeaders());
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
+            ResponseEntity<Object> response = handler.handleNoHandlerFoundException(
+                    ex,
+                    requestHeaders,
+                    STATUS,
+                    webRequest
+            );
+
+            // Then
+            assertNotNull(response);
+            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(requestHeaders, response.getHeaders());
+
+            ErrorResponseDto dto = dtoFrom(response);
+            assertEquals(STATUS.name(), dto.getCode());
+            assertEquals(EXPECTED_SUMMARY, dto.getMessage());
+
+            Map<String, Object> details = detailsFrom(response);
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertNotNull(details.get("timestamp"));
+        }
+
+        @Test
+        @DisplayName("should handle unexpected method or URL values")
+        void shouldIncludeWhateverSpringProvides() {
+            // Given
+            String altMethod = "OPTIONS";
+            String altUrl    = "/something-else";
+            NoHandlerFoundException ex =
+                    new NoHandlerFoundException(altMethod, altUrl, new HttpHeaders());
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
+            ResponseEntity<Object> response = handler.handleNoHandlerFoundException(
+                    ex, requestHeaders, STATUS, webRequest);
+
+            // Then
+            ErrorResponseDto dto = dtoFrom(response);
+            String expected = "No handler found for " + altMethod + " " + altUrl;
+            assertEquals(expected, dto.getMessage());
         }
     }
+
     @Nested
     @DisplayName("handleGenericException tests")
     class HandleGenericExceptionTests {
