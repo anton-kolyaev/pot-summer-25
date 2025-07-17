@@ -300,30 +300,50 @@ class GlobalExceptionHandlerTests {
     @DisplayName("handleHttpMessageNotReadable tests")
     class HandleHttpMessageNotReadableTests {
         @Test
-        @DisplayName("should build ErrorResponseDto with cause and details")
-        void buildsMalformedRequestResponse() {
-            Throwable cause = new java.io.IOException("Bad JSON");
+        @DisplayName("should build ErrorResponseDto with the root cause message")
+        void buildsMalformedRequestResponse_withRootCause() {
+            // Given
+            Throwable rootCause = new java.io.IOException("Bad JSON");
             MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
             HttpMessageNotReadableException ex =
-                    new HttpMessageNotReadableException("malformed", cause, inputMessage);
-            HttpHeaders headers = new HttpHeaders();
+                    new HttpMessageNotReadableException("unused‑wrapper", rootCause, inputMessage);
+            HttpHeaders requestHeaders = new HttpHeaders();
             HttpStatusCode status = HttpStatus.BAD_REQUEST;
-            ResponseEntity<Object> response = handler.handleHttpMessageNotReadable(
-                    ex,
-                    headers,
-                    status,
-                    webRequest
-            );
-            assertNotNull(response);
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            // When
+            ResponseEntity<Object> response =
+                    handler.handleHttpMessageNotReadable(ex, requestHeaders, status, webRequest);
+            // Then
+            assertThat(response).isNotNull();
+            assertThat(response.getStatusCode()).isEqualTo(status);
             ErrorResponseDto dto = dtoFrom(response);
             assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
             assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
             Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("cause", "Bad JSON");
-            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+            assertThat(details).containsEntry("endpoint", DEFAULT_ENDPOINT);
         }
-
+        @Test
+        @DisplayName("should fall back to exception message when no cause is set")
+        void buildsMalformedRequestResponse_whenNoUnderlyingCause() {
+            // Given
+            MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
+            HttpMessageNotReadableException ex =
+                    new HttpMessageNotReadableException("parse failed", inputMessage);
+            HttpHeaders requestHeaders = new HttpHeaders();
+            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+            // When
+            ResponseEntity<Object> response =
+                    handler.handleHttpMessageNotReadable(ex, requestHeaders, status, webRequest);
+            // Then
+            assertThat(response).isNotNull();
+            assertThat(response.getStatusCode()).isEqualTo(status);
+            ErrorResponseDto dto = dtoFrom(response);
+            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
+            Map<String, Object> details = detailsFrom(response);
+            assertThat(details).containsEntry("cause", "parse failed");
+            assertThat(details).containsEntry("endpoint", DEFAULT_ENDPOINT);
+        }
     }
     @Nested
     @DisplayName("handleMissingServletRequestParameter tests")
