@@ -50,8 +50,10 @@ class UserMapperTest {
         user.setEmail("jdoe@example.com");
         user.setDateOfBirth(LocalDate.of(1990, 1, 1));
         user.setSsn("123-45-6789");
-        user.setCompany(new Company());
-        user.getCompany().setId(companyId);
+
+        Company company = new Company();
+        company.setId(companyId);
+        user.setCompany(company);
 
         UserDto dto = userMapper.toDto(user);
 
