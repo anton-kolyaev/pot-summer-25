@@ -53,13 +53,8 @@ public class UserManagementService {
         setIfNotNull(request.getUsername(), user::setUsername);
         setIfNotNull(request.getEmail(), user::setEmail);
 
-        if (request.getPhoneData() != null) {
-            user.setPhoneData(userMapper.toPhoneList(request.getPhoneData()));
-        }
-
-        if (request.getAddressData() != null) {
-            user.setAddressData(userMapper.toAddressList(request.getAddressData()));
-        }
+        user.setPhoneData(request.getPhoneData());
+        user.setAddressData(request.getAddressData());
 
         user.setUpdatedAt(Instant.now());
 

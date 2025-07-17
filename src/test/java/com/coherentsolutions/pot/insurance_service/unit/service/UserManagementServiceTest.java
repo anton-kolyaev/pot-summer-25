@@ -16,11 +16,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.coherentsolutions.pot.insurance_service.dto.AddressDto;
-import com.coherentsolutions.pot.insurance_service.dto.PhoneDto;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.mapper.UserMapper;
+import com.coherentsolutions.pot.insurance_service.model.Address;
+import com.coherentsolutions.pot.insurance_service.model.Phone;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
 import com.coherentsolutions.pot.insurance_service.service.UserManagementService;
@@ -79,8 +79,8 @@ class UserManagementServiceTest {
     @Test
     void shouldUpdatePhoneAndAddressData() {
 
-        List<PhoneDto> phoneDtos = List.of(new PhoneDto());
-        List<AddressDto> addressDtos = List.of(new AddressDto());
+        List<Phone> phoneDtos = List.of(new Phone());
+        List<Address> addressDtos = List.of(new Address());
 
         UserDto requestDto = new UserDto();
         requestDto.setPhoneData(phoneDtos);
@@ -88,8 +88,6 @@ class UserManagementServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userMapper.toPhoneList(phoneDtos)).thenReturn(List.of());
-        when(userMapper.toAddressList(addressDtos)).thenReturn(List.of());
         when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
 
         UserDto result = userManagementService.updateUser(userId, requestDto);
@@ -97,8 +95,6 @@ class UserManagementServiceTest {
         assertEquals(phoneDtos, result.getPhoneData());
         assertEquals(addressDtos, result.getAddressData());
 
-        verify(userMapper).toPhoneList(phoneDtos);
-        verify(userMapper).toAddressList(addressDtos);
         verify(userRepository).save(user);
     }
 
