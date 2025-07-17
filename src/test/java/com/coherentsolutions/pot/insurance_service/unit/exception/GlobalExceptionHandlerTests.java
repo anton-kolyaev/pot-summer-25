@@ -69,8 +69,11 @@ class GlobalExceptionHandlerTests {
         private Method buildDetailsMethod;
         @BeforeEach
         void initialBuildDetailsMethod() throws NoSuchMethodException {
-            buildDetailsMethod = GlobalExceptionHandler.class
-                    .getDeclaredMethod("buildDetails", HttpServletRequest.class, Map.Entry[].class);
+            buildDetailsMethod = GlobalExceptionHandler.class.getDeclaredMethod(
+                    "buildDetails",
+                    HttpServletRequest.class,
+                    Map.Entry[].class
+            );
             buildDetailsMethod.setAccessible(true);
         }
         @Test
@@ -272,8 +275,7 @@ class GlobalExceptionHandlerTests {
                     getClass().getDeclaredMethod("TestControllerMethod", String.class),
                     0
             );
-            MethodArgumentNotValidException ex =
-                    new MethodArgumentNotValidException(param, bindingResult);
+            MethodArgumentNotValidException ex = new MethodArgumentNotValidException(param, bindingResult);
             HttpHeaders requestHeaders = new HttpHeaders();
             
             // When
@@ -299,12 +301,9 @@ class GlobalExceptionHandlerTests {
             assertEndpointAndTimestamp(details);
             
             @SuppressWarnings("unchecked")
-            Map<String,List<String>> validationErrors =
-                    (Map<String,List<String>>) details.get("validationErrors");
-            assertEquals( List.of("must not be null"),
-                    validationErrors.get("name") );
-            assertEquals( List.of("must be greater than 0"),
-                    validationErrors.get("age")  );
+            Map<String,List<String>> validationErrors = (Map<String,List<String>>) details.get("validationErrors");
+            assertEquals( List.of("must not be null"), validationErrors.get("name") );
+            assertEquals( List.of("must be greater than 0"), validationErrors.get("age")  );
         }
     }
     @Nested
