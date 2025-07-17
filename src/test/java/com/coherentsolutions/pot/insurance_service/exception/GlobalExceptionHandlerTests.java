@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,6 +39,7 @@ class GlobalExceptionHandlerTests {
     private static final String DEFAULT_URI = "/test-endpoint";
     private static final String DEFAULT_METHOD = "GET";
     private static final String DEFAULT_ENDPOINT = DEFAULT_METHOD + " " + DEFAULT_URI;
+    private static final HttpStatus DEFAULT_STATUS = HttpStatus.BAD_REQUEST;
     
     @InjectMocks
     private GlobalExceptionHandler handler;
@@ -170,13 +172,12 @@ class GlobalExceptionHandlerTests {
             IllegalArgumentException exception = new IllegalArgumentException("Test-Exception");
             HttpHeaders requestHeaders = new HttpHeaders();
             requestHeaders.add("Test-Header", "testValue");
-            HttpStatusCode responseStatus = HttpStatus.BAD_REQUEST;
             // When
             ResponseEntity<Object> response = handler.handleExceptionInternal(
                     exception,
                     null,
                     requestHeaders,
-                    responseStatus,
+                    DEFAULT_STATUS,
                     webRequest
             );
             // Then
@@ -185,7 +186,7 @@ class GlobalExceptionHandlerTests {
             assertThat(response.getHeaders()).isEqualTo(requestHeaders);
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getCode()).isEqualTo(DEFAULT_STATUS.name());
             assertThat(dto.getMessage()).isEqualTo("Test-Exception");
 
             Map<String, Object> details = detailsFrom(response);
@@ -229,6 +230,7 @@ class GlobalExceptionHandlerTests {
             incomingHeaders.add("Test-Header-First", "abc123");
             incomingHeaders.add("Test-Header-Second", "___456");
             HttpStatusCode responseStatus = HttpStatus.CONFLICT;
+            
             // When
             ResponseEntity<Object> response = handler.handleExceptionInternal(
                     exception,
@@ -236,6 +238,7 @@ class GlobalExceptionHandlerTests {
                     incomingHeaders,
                     responseStatus,
                     webRequest);
+            
             // Then
             assertThat(response).isNotNull();
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
@@ -266,20 +269,21 @@ class GlobalExceptionHandlerTests {
             MethodArgumentNotValidException ex =
                     new MethodArgumentNotValidException(param, bindingResult);
             HttpHeaders requestHeaders = new HttpHeaders();
-            HttpStatusCode responseStatus = HttpStatus.BAD_REQUEST;
+            
             // When
             ResponseEntity<Object> response = handler.handleMethodArgumentNotValid(
                     ex,
                     requestHeaders,
-                    responseStatus,
+                    DEFAULT_STATUS,
                     webRequest
             );
+            
             // Then
             assertNotNull(response, "response should not be null");
-            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            assertEquals(DEFAULT_STATUS, response.getStatusCode());
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertEquals("BAD_REQUEST", dto.getCode());
+            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
             assertEquals(
                     "Validation failed for fields: name, age",
                     dto.getMessage()
@@ -300,7 +304,6 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleHttpMessageNotReadable tests")
     class HandleHttpMessageNotReadableTests {
-        private static final HttpStatusCode STATUS = HttpStatus.BAD_REQUEST;
         private static final String CAUSE = "Bad JSON";
         @Test
         @DisplayName("should build ErrorResponseDto with the root cause message")
@@ -311,19 +314,21 @@ class GlobalExceptionHandlerTests {
             HttpMessageNotReadableException ex =
                     new HttpMessageNotReadableException("unused‑wrapper", rootCause, inputMessage);
             HttpHeaders requestHeaders = new HttpHeaders();
+            
             // When
             ResponseEntity<Object> response =
                     handler.handleHttpMessageNotReadable(
                             ex,
                             requestHeaders,
-                            STATUS,
+                            DEFAULT_STATUS,
                             webRequest
                     );
+            
             // Then
             assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(STATUS);
+            assertThat(response.getStatusCode()).isEqualTo(DEFAULT_STATUS);
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo(STATUS.toString());
+            assertThat(dto.getCode()).isEqualTo(DEFAULT_STATUS.name());
             assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
             Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("cause", CAUSE);
@@ -337,15 +342,21 @@ class GlobalExceptionHandlerTests {
             HttpMessageNotReadableException ex =
                     new HttpMessageNotReadableException("parse failed", inputMessage);
             HttpHeaders requestHeaders = new HttpHeaders();
-            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+            
             // When
             ResponseEntity<Object> response =
-                    handler.handleHttpMessageNotReadable(ex, requestHeaders, status, webRequest);
+                    handler.handleHttpMessageNotReadable(
+                            ex,
+                            requestHeaders,
+                            DEFAULT_STATUS,
+                            webRequest
+                    );
+            
             // Then
             assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(status);
+            assertThat(response.getStatusCode()).isEqualTo(DEFAULT_STATUS);
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo(STATUS.toString());
+            assertThat(dto.getCode()).isEqualTo(DEFAULT_STATUS.name());
             assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
             Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("cause", "parse failed");
@@ -396,29 +407,41 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleTypeMismatch tests")
     class HandleTypeMismatchTests {
+
         @Test
         @DisplayName("should build ErrorResponseDto when parameter type mismatches")
         void buildsTypeMismatchErrorResponse() {
-            java.beans.PropertyChangeEvent pce =
-                    new java.beans.PropertyChangeEvent(servletRequest, "age", null, "abc");
-            org.springframework.beans.TypeMismatchException ex =
-                    new org.springframework.beans.TypeMismatchException(pce, Integer.class);
-            HttpHeaders headers = new HttpHeaders();
-            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+            // Given
+            TypeMismatchException ex = new TypeMismatchException("abc", Integer.class);
+            ex.initPropertyName("age");
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
             ResponseEntity<Object> response = handler.handleTypeMismatch(
-                    ex, headers, status, webRequest);
-            assertNotNull(response);
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(response.getHeaders()).isEqualTo(headers);
+                    ex,
+                    requestHeaders,
+                    DEFAULT_STATUS,
+                    webRequest
+            );
+
+            // Then
+            assertNotNull(response, "response must not be null");
+            assertEquals(DEFAULT_STATUS, response.getStatusCode(), "status should be" + " " + DEFAULT_STATUS);
+            assertEquals(requestHeaders, response.getHeaders(), "incoming headers should be propagated");
+
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
-            assertThat(dto.getMessage()).isEqualTo("Type mismatch for parameter 'age'");
+            assertEquals(DEFAULT_STATUS.name(), dto.getCode(), "code must match" + " " + DEFAULT_STATUS.value());
+            assertEquals("Type mismatch for parameter 'age'", dto.getMessage());
+
             Map<String, Object> details = detailsFrom(response);
-            assertThat(details).containsEntry("value", "abc");
-            assertThat(details).containsEntry("requiredType", "Integer");
-            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+            assertEquals("abc", details.get("value"), "should include the raw value");
+            assertEquals("Integer", details.get("requiredType"), "should include the required type");
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"), "should include the endpoint");
+
+            assertNotNull(details.get("timestamp"), "timestamp must be present");
         }
     }
+
     @Nested
     @DisplayName("handleHttpMediaTypeNotSupported tests")
     class HandleHttpMediaTypeNotSupportedTests {
