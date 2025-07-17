@@ -1,8 +1,6 @@
 spring:
   datasource:
     url: jdbc:tc:postgresql:16.9://localhost/test
-    username: test
-    password: test
   jpa:
     hibernate:
       ddl-auto: validate
@@ -12,7 +10,6 @@ spring:
         format_sql: true
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
-    enabled: true
 
 logging:
   level:
