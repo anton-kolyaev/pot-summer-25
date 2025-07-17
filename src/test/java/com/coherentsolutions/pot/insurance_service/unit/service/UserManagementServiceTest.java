@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.service;
+package com.coherentsolutions.pot.insurance_service.unit.service;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
@@ -7,6 +7,7 @@ import com.coherentsolutions.pot.insurance_service.mapper.UserMapper;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
+import com.coherentsolutions.pot.insurance_service.service.UserManagementService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("User Company Management Service Tests")
@@ -102,6 +103,11 @@ public class UserManagementServiceTest {
         Assertions.assertEquals(2, result.getTotalElements());
         Assertions.assertEquals("alice.johnson", result.getContent().get(0).getUsername());
         Assertions.assertEquals("bob.smith", result.getContent().get(1).getUsername());
+
+        verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
+        verify(userMapper).toDto(user);
+        verify(userMapper).toDto(user1);
+
     }
     @Test
     @DisplayName("Should return empty result when no users match the companyId")
@@ -120,9 +126,9 @@ public class UserManagementServiceTest {
 
         Assertions.assertNotNull(result, "Result should not be null");
         Assertions.assertTrue(result.isEmpty(), "");
+
+        verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
+        verify(userMapper, times(0)).toDto(Mockito.any());
     }
 
 }
-
-
-
