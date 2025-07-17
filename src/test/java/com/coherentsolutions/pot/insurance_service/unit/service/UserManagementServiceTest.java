@@ -24,7 +24,10 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("User Company Management Service Tests")
