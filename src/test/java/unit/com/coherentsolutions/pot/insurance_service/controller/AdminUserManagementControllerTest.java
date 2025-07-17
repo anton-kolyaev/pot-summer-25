@@ -1,5 +1,6 @@
-package com.coherentsolutions.pot.insurance_service.controller;
+package unit.com.coherentsolutions.pot.insurance_service.controller;
 
+import com.coherentsolutions.pot.insurance_service.controller.AdminUserManagementController;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
 import com.coherentsolutions.pot.insurance_service.enums.UserStatus;

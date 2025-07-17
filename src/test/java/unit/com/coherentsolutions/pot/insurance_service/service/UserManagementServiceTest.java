@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.service;
+package unit.com.coherentsolutions.pot.insurance_service.service;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
@@ -7,6 +7,7 @@ import com.coherentsolutions.pot.insurance_service.mapper.UserMapper;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
+import com.coherentsolutions.pot.insurance_service.service.UserManagementService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

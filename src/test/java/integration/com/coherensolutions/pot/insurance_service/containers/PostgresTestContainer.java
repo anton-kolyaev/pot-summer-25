@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.containers;
+package integration.com.coherensolutions.pot.insurance_service.containers;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
