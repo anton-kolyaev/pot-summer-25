@@ -7,6 +7,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,6 +54,7 @@ class UserManagementServiceTest {
     }
 
     @Test
+    @DisplayName("Should update core user fields when user exists")
     void shouldUpdateUserFieldsSuccessfully() {
         // Given
         UserDto requestDto = new UserDto();
@@ -77,6 +79,7 @@ class UserManagementServiceTest {
     }
 
     @Test
+    @DisplayName("Should update phone and address data when present in request")
     void shouldUpdatePhoneAndAddressData() {
         // Given
         List<Phone> phoneDtos = List.of(new Phone());
@@ -100,6 +103,7 @@ class UserManagementServiceTest {
     }
 
     @Test
+    @DisplayName("Should throw ResponseStatusException when attempting to update non-existent user")
     void shouldThrowExceptionWhenUserNotFound() {
         // Given
         when(userRepository.findById(userId)).thenReturn(Optional.empty());

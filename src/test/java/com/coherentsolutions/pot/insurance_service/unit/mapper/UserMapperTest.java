@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -21,6 +22,7 @@ class UserMapperTest {
     private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
     @Test
+    @DisplayName("Should map UserFunctionAssignment set to UserFunction set")
     void mapToFunctions_shouldMapAssignmentsToFunctions() {
         // Given
         UserFunctionAssignment assignment = new UserFunctionAssignment();
@@ -34,6 +36,7 @@ class UserMapperTest {
     }
 
     @Test
+    @DisplayName("Should map UserFunction set to UserFunctionAssignment set")
     void mapToAssignments_shouldMapFunctionsToAssignments() {
         // Given
         Set<UserFunction> functions = Set.of(UserFunction.CONSUMER);
@@ -47,6 +50,7 @@ class UserMapperTest {
     }
 
     @Test
+    @DisplayName("Should map User entity to UserDto correctly")
     void shouldMapUserToUserDtoCorrectly() {
         // Given
         UUID companyId = UUID.randomUUID();
@@ -77,6 +81,7 @@ class UserMapperTest {
     }
 
     @Test
+    @DisplayName("Should map UserDto to User entity correctly")
     void shouldMapUserDtoToUserCorrectly() {
         // Given
         UUID companyId = UUID.randomUUID();
