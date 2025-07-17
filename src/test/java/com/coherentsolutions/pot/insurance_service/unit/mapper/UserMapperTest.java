@@ -55,18 +55,18 @@ class UserMapperTest {
 
         UserDto dto = userMapper.toDto(user);
 
-        assertEquals("John", dto.getFirstName());
-        assertEquals("Doe", dto.getLastName());
-        assertEquals("jdoe", dto.getUsername());
-        assertEquals("jdoe@example.com", dto.getEmail());
-        assertEquals(LocalDate.of(1990, 1, 1), dto.getDateOfBirth());
-        assertEquals("123-45-6789", dto.getSsn());
-        assertEquals(companyId, dto.getCompanyId());
+        assertEquals(user.getFirstName(), dto.getFirstName());
+        assertEquals(user.getLastName(), dto.getLastName());
+        assertEquals(user.getUsername(), dto.getUsername());
+        assertEquals(user.getEmail(), dto.getEmail());
+        assertEquals(user.getDateOfBirth(), dto.getDateOfBirth());
+        assertEquals(user.getSsn(), dto.getSsn());
+        assertEquals(user.getCompany().getId(), dto.getCompanyId());
     }
 
     @Test
     void shouldMapUserDtoToUserCorrectly() {
-        
+
         UUID companyId = UUID.randomUUID();
         UserDto dto = UserDto.builder()
                 .firstName("Jane")
@@ -78,10 +78,8 @@ class UserMapperTest {
                 .companyId(companyId)
                 .build();
 
-        
         User user = userMapper.toEntity(dto);
 
-        
         assertEquals("Jane", user.getFirstName());
         assertEquals("Smith", user.getLastName());
         assertEquals("jsmith", user.getUsername());
