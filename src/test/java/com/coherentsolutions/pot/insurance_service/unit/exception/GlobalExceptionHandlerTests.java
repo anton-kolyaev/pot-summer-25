@@ -70,6 +70,7 @@ class GlobalExceptionHandlerTests {
             );
             buildDetailsMethod.setAccessible(true);
         }
+        
         @Test
         @DisplayName("should include timestamp, endpoint, and one extra")
         void includesTimestampEndpointAndExtras() throws Exception {
@@ -90,6 +91,7 @@ class GlobalExceptionHandlerTests {
             assertEquals("value", details.get("key"));
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("should include only timestamp and endpoint when extras is null")
         void onlyTimestampAndEndpoint() throws Exception {
@@ -106,6 +108,7 @@ class GlobalExceptionHandlerTests {
             assertTrue(details.containsKey("endpoint"));
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("should include timestamp, endpoint, one extra, and skip null extra")
         void skipsNullExtrasEntries() throws Exception {
@@ -126,6 +129,7 @@ class GlobalExceptionHandlerTests {
             assertEquals("value", details.get("key"));
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("should include timestamp, endpoint, and multiple extras entries")
         void includesMultipleExtras() throws Exception {
@@ -149,6 +153,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(false, details.get("secondInput"));
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("should include timestamp, endpoint, and handle an empty extras array")
         void handlesEmptyExtrasArray() throws Exception {
@@ -166,9 +171,11 @@ class GlobalExceptionHandlerTests {
             assertEndpointAndTimestamp(details);
         }
     }
+    
     @Nested
     @DisplayName("handleExceptionInternal tests")
     class HandleExceptionInternalTests {
+        
         @Test
         @DisplayName("should build ErrorResponseDto and propagate headers")
         void buildsErrorResponseDto_withHeader() {
@@ -197,6 +204,7 @@ class GlobalExceptionHandlerTests {
             assertEndpointAndTimestamp(details);
             assertTrue(details.containsKey("timestamp"));
         }
+        
         @Test
         @DisplayName("should handle exceptions with null message")
         void handlesNullExceptionMessage() {
@@ -222,6 +230,7 @@ class GlobalExceptionHandlerTests {
             assertTrue(details.containsKey("timestamp"));
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("should propagate all incoming headers unchanged")
         void propagatesAllIncomingHeaders() {
@@ -248,6 +257,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(List.of("___456"), headers.get("Test-Header-Second"));
         }
     }
+    
     @Nested
     @DisplayName("handleMethodArgumentNotValid tests")
     class HandleMethodArgumentNotValidTests {
@@ -298,10 +308,12 @@ class GlobalExceptionHandlerTests {
             assertEquals( List.of("must be greater than 0"), validationErrors.get("age")  );
         }
     }
+    
     @Nested
     @DisplayName("handleHttpMessageNotReadable tests")
     class HandleHttpMessageNotReadableTests {
         private static final String CAUSE = "Bad JSON";
+        
         @Test
         @DisplayName("should build ErrorResponseDto with the root cause message")
         void buildsMalformedRequestResponse_withRootCause() {
@@ -331,6 +343,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(CAUSE, details.get("cause"));
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("should fall back to exception message when no cause is set")
         void buildsMalformedRequestResponse_whenNoUnderlyingCause() {
@@ -360,6 +373,7 @@ class GlobalExceptionHandlerTests {
             assertEndpointAndTimestamp(details);
         }
     }
+    
     @Nested
     @DisplayName("handleMissingServletRequestParameter tests")
     class HandleMissingServletRequestParameterTests {
@@ -393,15 +407,16 @@ class GlobalExceptionHandlerTests {
                     "Required request parameter '" + PARAM_NAME + "' is missing",
                     dto.getMessage()
             );
-            
             Map<String, Object> details = detailsFrom(response);
             assertEquals(PARAM_NAME, details.get("parameter"));
             assertEndpointAndTimestamp(details);
         }
     }
+    
     @Nested
     @DisplayName("handleTypeMismatch tests")
     class HandleTypeMismatchTests {
+        
         @Test
         @DisplayName("should build ErrorResponseDto when parameter type mismatches")
         void buildsTypeMismatchErrorResponse() {
@@ -437,6 +452,7 @@ class GlobalExceptionHandlerTests {
             assertNotNull(details.get("timestamp"), "timestamp must be present");
         }
     }
+    
     @Nested
     @DisplayName("handleHttpMediaTypeNotSupported tests")
     class HandleHttpMediaTypeNotSupportedTests {
@@ -487,6 +503,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(SUPPORTED_TYPES, supportedFromDetails);
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("should handle empty supported‐media list without blowing up")
         void handlesEmptySupportedMediaList() {
@@ -513,8 +530,8 @@ class GlobalExceptionHandlerTests {
             assertEquals(UNSUPPORTED_TYPE, details.get("unsupported"));
             assertEndpointAndTimestamp(details);
         }
-
     }
+    
     @Nested
     @DisplayName("handleHttpRequestMethodNotSupported tests")
     class HandleHttpRequestMethodNotSupportedTests {
@@ -561,6 +578,7 @@ class GlobalExceptionHandlerTests {
             );
             assertEndpointAndTimestamp(details);
         }
+        
         @Test
         @DisplayName("when no allowed methods provided, supportedMethods is null")
         void handlesNullSupportedMethods() {
@@ -585,11 +603,12 @@ class GlobalExceptionHandlerTests {
             assertTrue(details.containsKey("supportedMethods"));
             assertNull(details.get("supportedMethods"));
         }
-
     }
+    
     @Nested
     @DisplayName("handleNoHandlerFoundException tests")
     class HandleNoHandlerFoundExceptionTests {
+        
         @Test
         @DisplayName("should return NOT_FOUND with correct error details")
         void shouldReturnNotFoundWithCorrectErrorDetails() {
