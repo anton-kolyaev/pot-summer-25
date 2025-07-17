@@ -14,7 +14,6 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -44,10 +43,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTests {
-    private static final String DEFAULT_URI = "/test-endpoint";
-    private static final String DEFAULT_METHOD = "GET";
-    private static final String DEFAULT_ENDPOINT = DEFAULT_METHOD + " " + DEFAULT_URI;
-
     private final TestableGlobalExceptionHandler handler = new TestableGlobalExceptionHandler();
 
     @Mock
@@ -57,8 +52,8 @@ class GlobalExceptionHandlerTests {
 
     @BeforeEach
     void setUp() {
-        when(servletRequest.getMethod()).thenReturn(DEFAULT_METHOD);
-        when(servletRequest.getRequestURI()).thenReturn(DEFAULT_URI);
+        when(servletRequest.getMethod()).thenReturn("GET");
+        when(servletRequest.getRequestURI()).thenReturn("/test-endpoint");
         webRequest = new ServletWebRequest(servletRequest);
     }
 
@@ -437,7 +432,7 @@ class GlobalExceptionHandlerTests {
             Map<String, Object> details = detailsFrom(response);
             assertEquals("abc", details.get("value"), "should include the raw value");
             assertEquals("Integer", details.get("requiredType"), "should include the required type");
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"), "should include the endpoint");
+            assertEquals("GET /test-endpoint", details.get("endpoint"), "should include the endpoint");
 
             assertNotNull(details.get("timestamp"), "timestamp must be present");
         }
@@ -618,7 +613,7 @@ class GlobalExceptionHandlerTests {
 
             ErrorResponseDto dto = dtoFrom(response);
             assertEquals(HttpStatus.NOT_FOUND.name(), dto.getCode());
-            assertEquals("No handler found for " + "PATCH" + " " + "/missing",
+            assertEquals("No handler found for PATCH /missing",
                     dto.getMessage()
             );
 
@@ -630,10 +625,8 @@ class GlobalExceptionHandlerTests {
         @DisplayName("should handle unexpected method or URL values")
         void shouldIncludeWhateverSpringProvides() {
             // Given
-            String altMethod = "OPTIONS";
-            String altUrl    = "/something-else";
             NoHandlerFoundException ex =
-                    new NoHandlerFoundException(altMethod, altUrl, new HttpHeaders());
+                    new NoHandlerFoundException("OPTIONS", "/something-else", new HttpHeaders());
             HttpHeaders requestHeaders = new HttpHeaders();
 
             // When
@@ -643,7 +636,7 @@ class GlobalExceptionHandlerTests {
             // Then
             assertNotNull(response);
             ErrorResponseDto dto = dtoFrom(response);
-            String expected = "No handler found for " + altMethod + " " + altUrl;
+            String expected = "No handler found for OPTIONS /something-else";
             assertEquals(expected, dto.getMessage());
         }
     }
@@ -699,7 +692,7 @@ class GlobalExceptionHandlerTests {
         return (ErrorResponseDto) body;
     }
     private void assertEndpointAndTimestamp(Map<String, Object> details) {
-        assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"), "should include the endpoint");
+        assertEquals("GET /test-endpoint", details.get("endpoint"), "should include the endpoint");
         assertNotNull(details.get("timestamp"), "should include a timestamp");
     }
     @SuppressWarnings("unchecked")
