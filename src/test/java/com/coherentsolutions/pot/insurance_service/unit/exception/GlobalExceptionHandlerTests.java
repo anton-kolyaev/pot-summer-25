@@ -76,6 +76,7 @@ class GlobalExceptionHandlerTests {
         void includesTimestampEndpointAndExtras() throws Exception {
             // Given
             Map.Entry<String, Object> extra = new AbstractMap.SimpleImmutableEntry<>("key", "value");
+            
             // When
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
@@ -83,6 +84,7 @@ class GlobalExceptionHandlerTests {
                     servletRequest,
                     new Map.Entry[]{extra}
             );
+            
             // Then
             assertEquals(3, details.size());
             assertTrue(details.containsKey("timestamp"));
@@ -102,6 +104,7 @@ class GlobalExceptionHandlerTests {
                     servletRequest,
                     null
             );
+            
             // Then
             assertEquals(2, details.size());
             assertTrue(details.containsKey("timestamp"));
@@ -114,6 +117,7 @@ class GlobalExceptionHandlerTests {
         void skipsNullExtrasEntries() throws Exception {
             // Given
             Map.Entry<String, Object> extra = new AbstractMap.SimpleImmutableEntry<>("key", "value");
+            
             // When
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
@@ -121,6 +125,7 @@ class GlobalExceptionHandlerTests {
                     servletRequest,
                     new Map.Entry[]{extra, null}
             );
+            
             // Then
             assertEquals(3, details.size());
             assertTrue(details.containsKey("timestamp"));
@@ -136,6 +141,7 @@ class GlobalExceptionHandlerTests {
             // Given
             Map.Entry<String, Object> extra1 = new AbstractMap.SimpleImmutableEntry<>("firstInput", 123);
             Map.Entry<String, Object> extra2 = new AbstractMap.SimpleImmutableEntry<>("secondInput", false);
+            
             // When
             @SuppressWarnings("unchecked")
             Map<String, Object> details = (Map<String, Object>) buildDetailsMethod.invoke(
@@ -143,6 +149,7 @@ class GlobalExceptionHandlerTests {
                     servletRequest,
                     new Map.Entry[]{extra1, extra2}
             );
+            
             // Then
             assertEquals(4, details.size());
             assertTrue(details.containsKey("timestamp"));
@@ -164,6 +171,7 @@ class GlobalExceptionHandlerTests {
                     servletRequest,
                     new Map.Entry[0]
             );
+            
             // Then
             assertEquals(2, details.size());
             assertTrue(details.containsKey("timestamp"));
@@ -183,6 +191,7 @@ class GlobalExceptionHandlerTests {
             IllegalArgumentException exception = new IllegalArgumentException("Test-Exception");
             HttpHeaders requestHeaders = new HttpHeaders();
             requestHeaders.add("Test-Header", "testValue");
+            
             // When
             ResponseEntity<Object> response = handler.handleExceptionInternal(
                     exception,
@@ -191,6 +200,7 @@ class GlobalExceptionHandlerTests {
                     HttpStatus.BAD_REQUEST,
                     webRequest
             );
+            
             // Then
             assertNotNull(response);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -211,6 +221,7 @@ class GlobalExceptionHandlerTests {
             // Given
             RuntimeException exception = new RuntimeException((String) null);
             HttpHeaders emptyHeaders = new HttpHeaders();
+            
             // When
             ResponseEntity<Object> response = handler.handleExceptionInternal(
                     exception,
@@ -218,6 +229,7 @@ class GlobalExceptionHandlerTests {
                     emptyHeaders,
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     webRequest);
+            
             // Then
             assertNotNull(response);
             assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
