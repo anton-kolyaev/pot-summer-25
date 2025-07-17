@@ -76,6 +76,8 @@ class UserManagementServiceTest {
         assertEquals("User", result.getLastName());
         assertEquals("new_username", result.getUsername());
         verify(userRepository).save(user);
+        verify(userRepository).findById(userId);
+        verify(userMapper).toDto(user);
     }
 
     @Test
@@ -100,6 +102,8 @@ class UserManagementServiceTest {
         assertEquals(phoneDtos, result.getPhoneData());
         assertEquals(addressDtos, result.getAddressData());
         verify(userRepository).save(user);
+        verify(userRepository).findById(userId);
+        verify(userMapper).toDto(user);
     }
 
     @Test
