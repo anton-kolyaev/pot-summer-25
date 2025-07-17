@@ -5,7 +5,6 @@ import com.coherentsolutions.pot.insurance_service.exception.GlobalExceptionHand
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.TypeMismatchException;
@@ -41,9 +40,8 @@ class GlobalExceptionHandlerTests {
     private static final String DEFAULT_METHOD = "GET";
     private static final String DEFAULT_ENDPOINT = DEFAULT_METHOD + " " + DEFAULT_URI;
     private static final HttpStatus DEFAULT_STATUS = HttpStatus.BAD_REQUEST;
-    
-    @InjectMocks
-    private GlobalExceptionHandler handler;
+
+    private final TestableGlobalExceptionHandler handler = new TestableGlobalExceptionHandler();
 
     @Mock
     private HttpServletRequest servletRequest;
@@ -183,7 +181,7 @@ class GlobalExceptionHandlerTests {
             );
             // Then
             assertNotNull(response);
-            assertEquals(HttpStatus.BAD_REQUEST, response.getBody());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertEquals(requestHeaders, response.getHeaders());
             
             ErrorResponseDto dto = dtoFrom(response);
