@@ -407,7 +407,6 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleTypeMismatch tests")
     class HandleTypeMismatchTests {
-
         @Test
         @DisplayName("should build ErrorResponseDto when parameter type mismatches")
         void buildsTypeMismatchErrorResponse() {
@@ -441,38 +440,83 @@ class GlobalExceptionHandlerTests {
             assertNotNull(details.get("timestamp"), "timestamp must be present");
         }
     }
-
     @Nested
     @DisplayName("handleHttpMediaTypeNotSupported tests")
     class HandleHttpMediaTypeNotSupportedTests {
+
+        private static final MediaType UNSUPPORTED_TYPE = MediaType.TEXT_PLAIN;
+        private static final List<MediaType> SUPPORTED_TYPES =
+                List.of(MediaType.APPLICATION_JSON,
+                        MediaType.APPLICATION_XML
+                );
+        private static final HttpStatus DEFAULT_STATUS = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
+
         @Test
         @DisplayName("should build ErrorResponseDto when media type is unsupported")
         void buildsUnsupportedMediaTypeErrorResponse() {
-            HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(
-                    MediaType.TEXT_PLAIN, List.of(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML));
-            HttpHeaders headers = new HttpHeaders();
-            HttpStatusCode status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
+            // Given
+            HttpMediaTypeNotSupportedException ex =
+                    new HttpMediaTypeNotSupportedException(UNSUPPORTED_TYPE, SUPPORTED_TYPES);
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
             ResponseEntity<Object> response = handler.handleHttpMediaTypeNotSupported(
-                    ex, headers, status, webRequest);
-            assertNotNull(response);
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
-            assertThat(response.getHeaders()).isEqualTo(headers);
+                    ex,
+                    requestHeaders,
+                    DEFAULT_STATUS,
+                    webRequest
+            );
+
+            // Then
+            assertNotNull(response,"response must not be null");
+            assertEquals(DEFAULT_STATUS, response.getStatusCode());
+            assertEquals(requestHeaders, response.getHeaders(),
+                    "incoming headers should be propagated");
+
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("UNSUPPORTED_MEDIA_TYPE");
-            assertThat(dto.getMessage()).isEqualTo("Unsupported media type 'text/plain'");
-            Map<String,Object> details = detailsFrom(response);
-            assertThat(details).containsEntry("unsupported", MediaType.TEXT_PLAIN);
-            Object supportedObj = details.get("supported");
-            assertThat(supportedObj).isInstanceOf(List.class);
-            
+            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals(
+                    "Unsupported media type '" + UNSUPPORTED_TYPE.toString() + "'",
+                    dto.getMessage()
+            );
             @SuppressWarnings("unchecked")
-            List<MediaType> supported = (List<MediaType>) supportedObj;
-            
-            assertThat(supported).contains(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML);
-            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+            Map<String, Object> details = (Map<String, Object>) dto.getDetails();
+            assertEquals(UNSUPPORTED_TYPE, details.get("unsupported"));
+            @SuppressWarnings("unchecked")
+            List<MediaType> supportedFromDetails =
+                    (List<MediaType>) details.get("supported");
+            assertEquals(SUPPORTED_TYPES, supportedFromDetails);
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertNotNull(details.get("timestamp"));
+        }
+        @Test
+        @DisplayName("should handle empty supported‐media list without blowing up")
+        void handlesEmptySupportedMediaList() {
+            // Given
+            HttpMediaTypeNotSupportedException ex =
+                    new HttpMediaTypeNotSupportedException(UNSUPPORTED_TYPE, List.of());
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
+            ResponseEntity<Object> response = handler.handleHttpMediaTypeNotSupported(
+                    ex,
+                    requestHeaders,
+                    DEFAULT_STATUS,
+                    webRequest
+            );
+
+            // Then
+            assertNotNull(response);
+            assertEquals(DEFAULT_STATUS, response.getStatusCode());
+            @SuppressWarnings("unchecked")
+            Map<String,Object> details = (Map<String,Object>) dtoFrom(response).getDetails();
+            assertTrue(((List<?>) details.get("supported")).isEmpty());
+            assertEquals(UNSUPPORTED_TYPE, details.get("unsupported"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
 
     }
+
     @Nested
     @DisplayName("handleHttpRequestMethodNotSupported tests")
     class HandleHttpRequestMethodNotSupportedTests {
