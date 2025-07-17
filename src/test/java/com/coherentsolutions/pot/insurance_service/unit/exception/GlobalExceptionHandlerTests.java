@@ -1,6 +1,7 @@
-package com.coherentsolutions.pot.insurance_service.exception;
+package com.coherentsolutions.pot.insurance_service.unit.exception;
 
 import com.coherentsolutions.pot.insurance_service.dto.error.ErrorResponseDto;
+import com.coherentsolutions.pot.insurance_service.exception.GlobalExceptionHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
