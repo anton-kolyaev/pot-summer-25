@@ -83,7 +83,7 @@ class GlobalExceptionHandlerTests {
             assertTrue(details.containsKey("endpoint"));
             assertTrue(details.containsKey("key"));
             assertEquals("value", details.get("key"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("should include only timestamp and endpoint when extras is null")
@@ -99,7 +99,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(2, details.size());
             assertTrue(details.containsKey("timestamp"));
             assertTrue(details.containsKey("endpoint"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("should include timestamp, endpoint, one extra, and skip null extra")
@@ -119,7 +119,7 @@ class GlobalExceptionHandlerTests {
             assertTrue(details.containsKey("endpoint"));
             assertTrue(details.containsKey("key"));
             assertEquals("value", details.get("key"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("should include timestamp, endpoint, and multiple extras entries")
@@ -142,7 +142,7 @@ class GlobalExceptionHandlerTests {
             assertTrue(details.containsKey("secondInput"));
             assertEquals(123, details.get("firstInput"));
             assertEquals(false, details.get("secondInput"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("should include timestamp, endpoint, and handle an empty extras array")
@@ -158,7 +158,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(2, details.size());
             assertTrue(details.containsKey("timestamp"));
             assertTrue(details.containsKey("endpoint"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
     }
     @Nested
@@ -189,7 +189,7 @@ class GlobalExceptionHandlerTests {
             assertEquals("Test-Exception", dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
             assertTrue(details.containsKey("timestamp"));
         }
         @Test
@@ -215,8 +215,8 @@ class GlobalExceptionHandlerTests {
             assertNull(dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
             assertTrue(details.containsKey("timestamp"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("should propagate all incoming headers unchanged")
@@ -287,9 +287,9 @@ class GlobalExceptionHandlerTests {
                     dto.getMessage()
             );
             Map<String,Object> details = detailsFrom(response);
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
             assertNotNull(details.get("timestamp"));
-
+            assertEndpointAndTimestamp(details);
+            
             @SuppressWarnings("unchecked")
             Map<String,List<String>> validationErrors =
                     (Map<String,List<String>>) details.get("validationErrors");
@@ -330,7 +330,7 @@ class GlobalExceptionHandlerTests {
             assertEquals("Malformed JSON request", dto.getMessage());
             Map<String, Object> details = detailsFrom(response);
             assertEquals(CAUSE, details.get("cause"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("should fall back to exception message when no cause is set")
@@ -358,7 +358,7 @@ class GlobalExceptionHandlerTests {
             assertEquals("Malformed JSON request", dto.getMessage());
             Map<String, Object> details = detailsFrom(response);
             assertEquals("parse failed", details.get("cause"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
     }
     @Nested
@@ -398,8 +398,7 @@ class GlobalExceptionHandlerTests {
             
             Map<String, Object> details = detailsFrom(response);
             assertEquals(PARAM_NAME, details.get("parameter"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
-            assertNotNull(details.get("timestamp"));
+            assertEndpointAndTimestamp(details);
         }
     }
     @Nested
@@ -474,7 +473,7 @@ class GlobalExceptionHandlerTests {
             ErrorResponseDto dto = dtoFrom(response);
             assertEquals(DEFAULT_STATUS.name(), dto.getCode());
             assertEquals(
-                    "Unsupported media type '" + UNSUPPORTED_TYPE.toString() + "'",
+                    "Unsupported media type '" + UNSUPPORTED_TYPE + "'",
                     dto.getMessage()
             );
             
@@ -487,8 +486,7 @@ class GlobalExceptionHandlerTests {
                     (List<MediaType>) details.get("supported");
             
             assertEquals(SUPPORTED_TYPES, supportedFromDetails);
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
-            assertNotNull(details.get("timestamp"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("should handle empty supported‐media list without blowing up")
@@ -514,7 +512,7 @@ class GlobalExceptionHandlerTests {
             
             assertTrue(((List<?>) details.get("supported")).isEmpty());
             assertEquals(UNSUPPORTED_TYPE, details.get("unsupported"));
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertEndpointAndTimestamp(details);
         }
 
     }
@@ -563,8 +561,7 @@ class GlobalExceptionHandlerTests {
                     ALLOWED_METHODS.toArray(new String[0]),
                     supportedArray
             );
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
-            assertNotNull(details.get("timestamp"));
+            assertEndpointAndTimestamp(details);
         }
         @Test
         @DisplayName("when no allowed methods provided, supportedMethods is null")
@@ -623,8 +620,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(EXPECTED_SUMMARY, dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
-            assertNotNull(details.get("timestamp"));
+            assertEndpointAndTimestamp(details);
         }
 
         @Test
@@ -672,8 +668,7 @@ class GlobalExceptionHandlerTests {
             assertEquals(EXCEPTION_MESSAGE, dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
-            assertTrue(details.containsKey("timestamp"));
+            assertEndpointAndTimestamp(details);
         }
 
         @Test
@@ -693,14 +688,17 @@ class GlobalExceptionHandlerTests {
             assertNull(dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
-            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
-            assertTrue(details.containsKey("timestamp"));
+            assertEndpointAndTimestamp(details);
         }
     }
     private static ErrorResponseDto dtoFrom(ResponseEntity<?> response) {
         Object body = response.getBody();
         assertInstanceOf(ErrorResponseDto.class, body);
         return (ErrorResponseDto) body;
+    }
+    private void assertEndpointAndTimestamp(Map<String, Object> details) {
+        assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"), "should include the endpoint");
+        assertNotNull(details.get("timestamp"), "should include a timestamp");
     }
     @SuppressWarnings("unchecked")
     private static Map<String, Object> detailsFrom(ResponseEntity<?> response) {
