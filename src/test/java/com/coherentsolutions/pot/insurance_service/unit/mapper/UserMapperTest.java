@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.mapper;
+package com.coherentsolutions.pot.insurance_service.unit.mapper;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -11,6 +11,7 @@ import org.mapstruct.factory.Mappers;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
+import com.coherentsolutions.pot.insurance_service.mapper.UserMapper;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;

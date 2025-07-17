@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insurance_service.service;
 
 import java.time.Instant;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +16,7 @@ import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
 import com.coherentsolutions.pot.insurance_service.repository.UserSpecification;
+import static com.coherentsolutions.pot.insurance_service.util.ObjectUtils.setIfNotNull;
 
 import lombok.RequiredArgsConstructor;
 
@@ -65,11 +65,5 @@ public class UserManagementService {
 
         User updated = userRepository.save(user);
         return userMapper.toDto(updated);
-    }
-
-    private <T> void setIfNotNull(T value, Consumer<T> setter) {
-        if (value != null) {
-            setter.accept(value);
-        }
     }
 }

@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insurance_service.service;
+package com.coherentsolutions.pot.insurance_service.unit.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +23,7 @@ import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.mapper.UserMapper;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
+import com.coherentsolutions.pot.insurance_service.service.UserManagementService;
 
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class UserManagementServiceTest {
