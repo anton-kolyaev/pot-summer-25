@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -55,8 +54,6 @@ public class UserManagementService {
 
         user.setPhoneData(request.getPhoneData());
         user.setAddressData(request.getAddressData());
-
-        user.setUpdatedAt(Instant.now());
 
         User updated = userRepository.save(user);
         return userMapper.toDto(updated);
