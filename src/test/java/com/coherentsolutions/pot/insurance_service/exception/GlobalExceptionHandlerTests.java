@@ -20,6 +20,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -299,27 +300,33 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleHttpMessageNotReadable tests")
     class HandleHttpMessageNotReadableTests {
+        private static final HttpStatusCode STATUS = HttpStatus.BAD_REQUEST;
+        private static final String CAUSE = "Bad JSON";
         @Test
         @DisplayName("should build ErrorResponseDto with the root cause message")
         void buildsMalformedRequestResponse_withRootCause() {
             // Given
-            Throwable rootCause = new java.io.IOException("Bad JSON");
+            Throwable rootCause = new java.io.IOException(CAUSE);
             MockHttpInputMessage inputMessage = new MockHttpInputMessage(new byte[0]);
             HttpMessageNotReadableException ex =
                     new HttpMessageNotReadableException("unused‑wrapper", rootCause, inputMessage);
             HttpHeaders requestHeaders = new HttpHeaders();
-            HttpStatusCode status = HttpStatus.BAD_REQUEST;
             // When
             ResponseEntity<Object> response =
-                    handler.handleHttpMessageNotReadable(ex, requestHeaders, status, webRequest);
+                    handler.handleHttpMessageNotReadable(
+                            ex,
+                            requestHeaders,
+                            STATUS,
+                            webRequest
+                    );
             // Then
             assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(status);
+            assertThat(response.getStatusCode()).isEqualTo(STATUS);
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getCode()).isEqualTo(STATUS.toString());
             assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
             Map<String, Object> details = detailsFrom(response);
-            assertThat(details).containsEntry("cause", "Bad JSON");
+            assertThat(details).containsEntry("cause", CAUSE);
             assertThat(details).containsEntry("endpoint", DEFAULT_ENDPOINT);
         }
         @Test
@@ -338,7 +345,7 @@ class GlobalExceptionHandlerTests {
             assertThat(response).isNotNull();
             assertThat(response.getStatusCode()).isEqualTo(status);
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
+            assertThat(dto.getCode()).isEqualTo(STATUS.toString());
             assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
             Map<String, Object> details = detailsFrom(response);
             assertThat(details).containsEntry("cause", "parse failed");
@@ -348,24 +355,42 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleMissingServletRequestParameter tests")
     class HandleMissingServletRequestParameterTests {
+        private static final String PARAM_NAME = "id";
+        private static final String PARAM_TYPE = "String";
+        private static final HttpStatus STATUS = HttpStatus.BAD_REQUEST;
+
         @Test
-        @DisplayName("should build ErrorResponseDto when a required param is missing")
-        void buildsMissingParamErrorResponse() {
-            org.springframework.web.bind.MissingServletRequestParameterException ex =
-                    new org.springframework.web.bind.MissingServletRequestParameterException("id", "String");
-            HttpHeaders headers = new HttpHeaders();
-            HttpStatusCode status = HttpStatus.BAD_REQUEST;
+        @DisplayName("should return 400 and include missing-parameter details")
+        void shouldReturnBadRequestWithMissingParameterDetails() {
+            // Given
+            MissingServletRequestParameterException ex =
+                    new MissingServletRequestParameterException(PARAM_NAME, PARAM_TYPE);
+            HttpHeaders requestHeaders = new HttpHeaders();
+
+            // When
             ResponseEntity<Object> response = handler.handleMissingServletRequestParameter(
-                    ex, headers, status, webRequest);
+                    ex,
+                    requestHeaders,
+                    STATUS,
+                    webRequest
+            );
+
+            // Then
             assertNotNull(response);
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(response.getHeaders()).isEqualTo(headers);
+            assertEquals(STATUS, response.getStatusCode());
+            assertEquals(requestHeaders, response.getHeaders(), "incoming headers must be propagated");
+            
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("BAD_REQUEST");
-            assertThat(dto.getMessage()).isEqualTo("Required request parameter 'id' is missing");
+            assertEquals(STATUS.name(),  dto.getCode());
+            assertEquals(
+                    "Required request parameter '" + PARAM_NAME + "' is missing",
+                    dto.getMessage()
+            );
+            
             Map<String, Object> details = detailsFrom(response);
-            assertThat(details).containsEntry("parameter", "id");
-            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
+            assertEquals(PARAM_NAME, details.get("parameter"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertNotNull(details.get("timestamp"));
         }
     }
     @Nested
