@@ -62,6 +62,7 @@ class AdminUserManagementControllerTest {
     @Test
     @DisplayName("Should update user by ID")
     void shouldUpdateUserById() throws Exception {
+        // Given
         UserDto updateRequest = UserDto.builder()
                 .firstName("Updated")
                 .lastName("User")
@@ -72,9 +73,11 @@ class AdminUserManagementControllerTest {
         when(userManagementService.updateUser(eq(testUserId), any(UserDto.class)))
                 .thenReturn(updatedUserDto);
 
+        // When
         mockMvc.perform(put("/v1/users/{id}", testUserId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
+                        
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(testUserId.toString()))
@@ -83,6 +86,7 @@ class AdminUserManagementControllerTest {
                 .andExpect(jsonPath("$.email").value("updated@example.com"))
                 .andExpect(jsonPath("$.username").value("updated_user"));
 
+        // Then 
         verify(userManagementService).updateUser(eq(testUserId), any(UserDto.class));
     }
 }

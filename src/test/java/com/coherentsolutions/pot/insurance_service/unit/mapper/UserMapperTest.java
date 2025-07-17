@@ -22,25 +22,33 @@ class UserMapperTest {
 
     @Test
     void mapToFunctions_shouldMapAssignmentsToFunctions() {
+        // Given
         UserFunctionAssignment assignment = new UserFunctionAssignment();
         assignment.setFunction(UserFunction.COMPANY_MANAGER);
 
+        // When
         Set<UserFunction> result = userMapper.mapToFunctions(Set.of(assignment));
 
+        // Then
         assertEquals(Set.of(UserFunction.COMPANY_MANAGER), result);
     }
 
     @Test
     void mapToAssignments_shouldMapFunctionsToAssignments() {
-        Set<UserFunctionAssignment> result = userMapper.mapToAssignments(Set.of(UserFunction.CONSUMER));
+        // Given
+        Set<UserFunction> functions = Set.of(UserFunction.CONSUMER);
 
+        // When
+        Set<UserFunctionAssignment> result = userMapper.mapToAssignments(functions);
+
+        // Then
         assertEquals(1, result.size());
         assertEquals(UserFunction.CONSUMER, result.iterator().next().getFunction());
     }
 
     @Test
     void shouldMapUserToUserDtoCorrectly() {
-
+        // Given
         UUID companyId = UUID.randomUUID();
         User user = new User();
         user.setId(UUID.randomUUID());
@@ -55,8 +63,10 @@ class UserMapperTest {
         company.setId(companyId);
         user.setCompany(company);
 
+        // When
         UserDto dto = userMapper.toDto(user);
 
+        // Then
         assertEquals(user.getFirstName(), dto.getFirstName());
         assertEquals(user.getLastName(), dto.getLastName());
         assertEquals(user.getUsername(), dto.getUsername());
@@ -68,7 +78,7 @@ class UserMapperTest {
 
     @Test
     void shouldMapUserDtoToUserCorrectly() {
-
+        // Given
         UUID companyId = UUID.randomUUID();
         UserDto dto = UserDto.builder()
                 .firstName("Jane")
@@ -80,8 +90,10 @@ class UserMapperTest {
                 .companyId(companyId)
                 .build();
 
+        // When
         User user = userMapper.toEntity(dto);
 
+        // Then
         assertEquals(dto.getFirstName(), user.getFirstName());
         assertEquals(dto.getLastName(), user.getLastName());
         assertEquals(dto.getUsername(), user.getUsername());

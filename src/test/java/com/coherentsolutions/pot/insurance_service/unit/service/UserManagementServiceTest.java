@@ -52,10 +52,9 @@ class UserManagementServiceTest {
         user.setStatus(UserStatus.ACTIVE);
     }
 
-    //UpdateUser (PUT /users/{id})
     @Test
     void shouldUpdateUserFieldsSuccessfully() {
-
+        // Given
         UserDto requestDto = new UserDto();
         requestDto.setFirstName("New");
         requestDto.setLastName("User");
@@ -66,8 +65,10 @@ class UserManagementServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
 
+        // When
         UserDto result = userManagementService.updateUser(userId, requestDto);
 
+        // Then
         assertEquals("new@email.com", result.getEmail());
         assertEquals("New", result.getFirstName());
         assertEquals("User", result.getLastName());
@@ -75,10 +76,9 @@ class UserManagementServiceTest {
         verify(userRepository).save(user);
     }
 
-    //UpdateUser (PUT /users/{id})
     @Test
     void shouldUpdatePhoneAndAddressData() {
-
+        // Given
         List<Phone> phoneDtos = List.of(new Phone());
         List<Address> addressDtos = List.of(new Address());
 
@@ -90,23 +90,23 @@ class UserManagementServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
 
+        // When
         UserDto result = userManagementService.updateUser(userId, requestDto);
 
+        // Then
         assertEquals(phoneDtos, result.getPhoneData());
         assertEquals(addressDtos, result.getAddressData());
-
         verify(userRepository).save(user);
     }
 
-    //UpdateUser (PUT /users/{id})
     @Test
     void shouldThrowExceptionWhenUserNotFound() {
-
+        // Given
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
+        // When // Then
         assertThrows(
                 ResponseStatusException.class,
                 () -> userManagementService.updateUser(userId, new UserDto()));
-
     }
 }
