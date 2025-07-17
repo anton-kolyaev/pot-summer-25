@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
-import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
@@ -181,18 +181,17 @@ class GlobalExceptionHandlerTests {
                     webRequest
             );
             // Then
-            assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-            assertThat(response.getHeaders()).isEqualTo(requestHeaders);
-
+            assertNotNull(response);
+            assertEquals(HttpStatus.BAD_REQUEST, response.getBody());
+            assertEquals(requestHeaders, response.getHeaders());
+            
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo(DEFAULT_STATUS.name());
-            assertThat(dto.getMessage()).isEqualTo("Test-Exception");
+            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals("Test-Exception", dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
-            assertThat(details)
-                    .containsEntry("endpoint", DEFAULT_ENDPOINT)
-                    .containsKey("timestamp");
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertTrue(details.containsKey("timestamp"));
         }
         @Test
         @DisplayName("should handle exceptions with null message")
@@ -209,17 +208,16 @@ class GlobalExceptionHandlerTests {
                     responseStatus,
                     webRequest);
             // Then
-            assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+            assertNotNull(response);
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo("INTERNAL_SERVER_ERROR");
-            assertThat(dto.getMessage()).isNull();
+            assertEquals("INTERNAL_SERVER_ERROR", dto.getCode());
+            assertNull(dto.getMessage());
 
             Map<String, Object> details = detailsFrom(response);
-            assertThat(details)
-                    .containsEntry("endpoint", DEFAULT_ENDPOINT)
-                    .containsKey("timestamp");
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertTrue(details.containsKey("timestamp"));
         }
         @Test
         @DisplayName("should propagate all incoming headers unchanged")
@@ -240,11 +238,12 @@ class GlobalExceptionHandlerTests {
                     webRequest);
             
             // Then
-            assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-            assertThat(response.getHeaders())
-                    .containsEntry("Test-Header-First", List.of("abc123"))
-                    .containsEntry("Test-Header-Second", List.of("___456"));
+            assertNotNull(response);
+            assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+
+            Map<String, List<String>> headers = response.getHeaders();
+            assertEquals(List.of("abc123"), headers.get("Test-Header-First"));
+            assertEquals(List.of("___456"), headers.get("Test-Header-Second"));
         }
     }
     @Nested
@@ -325,14 +324,14 @@ class GlobalExceptionHandlerTests {
                     );
             
             // Then
-            assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(DEFAULT_STATUS);
+            assertNotNull(response);
+            assertEquals(DEFAULT_STATUS, response.getStatusCode());
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo(DEFAULT_STATUS.name());
-            assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
+            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals("Malformed JSON request", dto.getMessage());
             Map<String, Object> details = detailsFrom(response);
-            assertThat(details).containsEntry("cause", CAUSE);
-            assertThat(details).containsEntry("endpoint", DEFAULT_ENDPOINT);
+            assertEquals(CAUSE, details.get("cause"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
         @Test
         @DisplayName("should fall back to exception message when no cause is set")
@@ -353,14 +352,14 @@ class GlobalExceptionHandlerTests {
                     );
             
             // Then
-            assertThat(response).isNotNull();
-            assertThat(response.getStatusCode()).isEqualTo(DEFAULT_STATUS);
+            assertNotNull(response);
+            assertEquals(DEFAULT_STATUS, response.getStatusCode());
             ErrorResponseDto dto = dtoFrom(response);
-            assertThat(dto.getCode()).isEqualTo(DEFAULT_STATUS.name());
-            assertThat(dto.getMessage()).isEqualTo("Malformed JSON request");
+            assertEquals(DEFAULT_STATUS.name(), dto.getCode());
+            assertEquals("Malformed JSON request", dto.getMessage());
             Map<String, Object> details = detailsFrom(response);
-            assertThat(details).containsEntry("cause", "parse failed");
-            assertThat(details).containsEntry("endpoint", DEFAULT_ENDPOINT);
+            assertEquals("parse failed", details.get("cause"));
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
         }
     }
     @Nested
@@ -581,6 +580,7 @@ class GlobalExceptionHandlerTests {
                     ex, requestHeaders, STATUS, webRequest);
 
             // Then
+            assertNotNull(response);
             @SuppressWarnings("unchecked")
             Map<String,Object> details =
                     (Map<String,Object>) dtoFrom(response).getDetails();
@@ -643,6 +643,7 @@ class GlobalExceptionHandlerTests {
                     ex, requestHeaders, STATUS, webRequest);
 
             // Then
+            assertNotNull(response);
             ErrorResponseDto dto = dtoFrom(response);
             String expected = "No handler found for " + altMethod + " " + altUrl;
             assertEquals(expected, dto.getMessage());
@@ -652,36 +653,58 @@ class GlobalExceptionHandlerTests {
     @Nested
     @DisplayName("handleGenericException tests")
     class HandleGenericExceptionTests {
+        private static final String EXCEPTION_MESSAGE = "Something went wrong";
+        private static final HttpStatus STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
+
         @Test
-        @DisplayName("should build INTERNAL_SERVER_ERROR ErrorResponseDto for generic exception")
-        void buildsGenericErrorResponse() {
-            RuntimeException ex = new RuntimeException("Something went wrong");
-            ResponseEntity<ErrorResponseDto> response = handler.handleGenericException(ex, servletRequest);
-            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-            ErrorResponseDto dto = response.getBody();
-            assertThat(dto).isNotNull();
-            assertThat(dto.getCode()).isEqualTo("INTERNAL_SERVER_ERROR");
-            assertThat(dto.getMessage()).isEqualTo("Something went wrong");
-            Map<String,Object> details = detailsFrom(response);
-            assertThat(details).containsEntry("endpoint", "GET /test-endpoint");
-            assertThat(details).containsKey("timestamp");
+        @DisplayName("should return 500 and include exception message and endpoint")
+        void shouldReturnInternalErrorWithMessage() {
+            // Given
+            RuntimeException exception = new RuntimeException(EXCEPTION_MESSAGE);
+
+            // When
+            ResponseEntity<ErrorResponseDto> response =
+                    handler.handleGenericException(exception, servletRequest);
+
+            // Then
+            assertEquals(STATUS, response.getStatusCode());
+            ErrorResponseDto dto = dtoFrom(response);
+            assertEquals(STATUS.name(), dto.getCode());
+            assertEquals(EXCEPTION_MESSAGE, dto.getMessage());
+
+            Map<String, Object> details = detailsFrom(response);
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertTrue(details.containsKey("timestamp"));
+        }
+
+        @Test
+        @DisplayName("should return 500 and handle null exception message")
+        void shouldHandleNullExceptionMessage() {
+            // Given
+            RuntimeException exception = new RuntimeException((String) null);
+
+            // When
+            ResponseEntity<ErrorResponseDto> response =
+                    handler.handleGenericException(exception, servletRequest);
+
+            // Then
+            assertEquals(STATUS, response.getStatusCode());
+            ErrorResponseDto dto = dtoFrom(response);
+            assertEquals(STATUS.name(), dto.getCode());
+            assertNull(dto.getMessage());
+
+            Map<String, Object> details = detailsFrom(response);
+            assertEquals(DEFAULT_ENDPOINT, details.get("endpoint"));
+            assertTrue(details.containsKey("timestamp"));
         }
     }
     private static ErrorResponseDto dtoFrom(ResponseEntity<?> response) {
         Object body = response.getBody();
-        assertThat(body)
-                .as("Response body should be an ErrorResponseDto")
-                .isInstanceOf(ErrorResponseDto.class);
+        assertInstanceOf(ErrorResponseDto.class, body);
         return (ErrorResponseDto) body;
     }
     @SuppressWarnings("unchecked")
     private static Map<String, Object> detailsFrom(ResponseEntity<?> response) {
         return (Map<String, Object>) dtoFrom(response).getDetails();
     }
-    @SuppressWarnings("unchecked")
-    private static Map<String, List<String>> validationErrorsFrom(ResponseEntity<?> response) {
-        Object errors = detailsFrom(response).get("validationErrors");
-        return (Map<String, List<String>>) errors;
-    }
-    
 }
