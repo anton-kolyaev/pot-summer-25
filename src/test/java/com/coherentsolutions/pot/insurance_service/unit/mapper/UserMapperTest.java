@@ -80,14 +80,14 @@ class UserMapperTest {
 
         User user = userMapper.toEntity(dto);
 
-        assertEquals("Jane", user.getFirstName());
-        assertEquals("Smith", user.getLastName());
-        assertEquals("jsmith", user.getUsername());
-        assertEquals("jane@example.com", user.getEmail());
-        assertEquals(LocalDate.of(1995, 5, 15), user.getDateOfBirth());
-        assertEquals("987-65-4321", user.getSsn());
+        assertEquals(dto.getFirstName(), user.getFirstName());
+        assertEquals(dto.getLastName(), user.getLastName());
+        assertEquals(dto.getUsername(), user.getUsername());
+        assertEquals(dto.getEmail(), user.getEmail());
+        assertEquals(dto.getDateOfBirth(), user.getDateOfBirth());
+        assertEquals(dto.getSsn(), user.getSsn());
         assertNotNull(user.getCompany());
-        assertEquals(companyId, user.getCompany().getId());
+        assertEquals(dto.getCompanyId(), user.getCompany().getId());
     }
 
 }
