@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Integration test for AdminCompanyManagementController")
-public class AdminCompanyManagementControllerTest extends PostgresTestContainer {
+public class AdminCompanyManagementControllerIT extends PostgresTestContainer {
 
     @Autowired
     private MockMvc mockMvc;
