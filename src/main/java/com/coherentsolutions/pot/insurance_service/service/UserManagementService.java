@@ -42,8 +42,7 @@ public class UserManagementService {
     }
 
     public UserDto getUsersDetails(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+        User user = userRepository.findByIdOrThrow(id);
         return userMapper.toDto(user);
     }
 }
