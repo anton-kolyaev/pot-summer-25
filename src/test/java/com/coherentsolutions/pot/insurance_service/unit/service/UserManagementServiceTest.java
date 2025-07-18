@@ -76,7 +76,7 @@ class UserManagementServiceTest {
     @DisplayName("Should get user details by ID")
     void shouldGetUserDetailsById() {
         // Given
-        when(userRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByIdOrThrow(testUserId)).thenReturn(testUser);
         when(userMapper.toDto(testUser)).thenReturn(testUserDto);
 
         // When
@@ -85,7 +85,7 @@ class UserManagementServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(testUserDto, result);
-        verify(userRepository).findById(testUserId);
+        verify(userRepository).findByIdOrThrow(testUserId);
         verify(userMapper).toDto(testUser);
     }
 }
