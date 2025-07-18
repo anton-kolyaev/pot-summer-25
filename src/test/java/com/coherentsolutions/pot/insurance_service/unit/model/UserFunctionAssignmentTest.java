@@ -1,6 +1,9 @@
-package com.coherentsolutions.pot.insurance_service.model;
+package com.coherentsolutions.pot.insurance_service.unit.model;
 
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
+import com.coherentsolutions.pot.insurance_service.model.User;
+import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

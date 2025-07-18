@@ -1,6 +1,11 @@
-package com.coherentsolutions.pot.insurance_service.model;
+package com.coherentsolutions.pot.insurance_service.unit.model;
 
 import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
+import com.coherentsolutions.pot.insurance_service.model.Address;
+import com.coherentsolutions.pot.insurance_service.model.Company;
+import com.coherentsolutions.pot.insurance_service.model.Phone;
+import com.coherentsolutions.pot.insurance_service.model.User;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
