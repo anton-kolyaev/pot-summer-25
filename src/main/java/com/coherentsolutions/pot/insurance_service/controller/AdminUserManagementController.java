@@ -1,14 +1,12 @@
 package com.coherentsolutions.pot.insurance_service.controller;
 
-import java.time.LocalDate;
-import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
@@ -17,8 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
-import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
-import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.service.UserManagementService;
 
 import jakarta.validation.Valid;
@@ -39,6 +35,11 @@ public class AdminUserManagementController {
     @GetMapping
     public Page<UserDto> getUsersWithFilters (UserFilter filter, Pageable pageable) {
         return userManagementService.getUsersWithFilters(filter, pageable);
+    }
+
+    @GetMapping("/{id}")
+    public UserDto viewUsersDetails(@PathVariable("id") UUID id) {
+        return userManagementService.getUsersDetails(id);
     }
 
 }
