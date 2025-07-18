@@ -31,56 +31,60 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Admin User Management Controller Tests")
 class AdminUserManagementControllerTest {
 
-    @Mock
-    private UserManagementService userManagementService;
+        @Mock
+        private UserManagementService userManagementService;
 
-    @InjectMocks
-    private AdminUserManagementController controller;
+        @InjectMocks
+        private AdminUserManagementController controller;
 
-    private MockMvc mockMvc;
-    private ObjectMapper objectMapper;
+        private MockMvc mockMvc;
+        private ObjectMapper objectMapper;
 
-    private UserDto testUserDto;
-    private UUID testUserId;
+        private UserDto testUserDto;
+        private UUID testUserId;
 
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .build();
-        objectMapper = new ObjectMapper();
-        
-        testUserId = UUID.randomUUID();
-        testUserDto = UserDto.builder()
-                .id(testUserId)
-                .firstName("John")
-                .lastName("Doe")
-                .email("john.doe@example.com")
-                .status(UserStatus.ACTIVE)
-                .functions(Set.of(UserFunction.COMPANY_CLAIM_MANAGER))
-                .dateOfBirth(LocalDate.of(1990, 1, 1))
-                .build();
-    }
+        @BeforeEach
+        void setUp() {
+                mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                                .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+                                .build();
+                objectMapper = new ObjectMapper();
 
-    @Test
-    @DisplayName("Should get user details by ID")
-    void shouldGetUserDetailsById() throws Exception {
-        // Given
-        when(userManagementService.getUsersDetails(testUserId))
-                .thenReturn(testUserDto);
+                testUserId = UUID.randomUUID();
+                testUserDto = UserDto.builder()
+                                .id(testUserId)
+                                .firstName("John")
+                                .lastName("Doe")
+                                .email("john.doe@example.com")
+                                .status(UserStatus.ACTIVE)
+                                .functions(Set.of(UserFunction.COMPANY_CLAIM_MANAGER))
+                                .dateOfBirth(LocalDate.of(1990, 1, 1))
+                                .build();
+        }
 
-        // When & Then
-        mockMvc.perform(get("/v1/users/{id}", testUserId)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(testUserId.toString()))
-                .andExpect(jsonPath("$.firstName").value("John"))
-                .andExpect(jsonPath("$.lastName").value("Doe"))
-                .andExpect(jsonPath("$.email").value("john.doe@example.com"))
-                .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.functions[0]").value("COMPANY_CLAIM_MANAGER"));
+        @Test
+        @DisplayName("Should get user details by ID")
+        void shouldGetUserDetailsById() throws Exception {
+                // Given
+                when(userManagementService.getUsersDetails(testUserId))
+                                .thenReturn(testUserDto);
 
-        verify(userManagementService).getUsersDetails(testUserId);
-    }
+                // When & Then
+                mockMvc.perform(get("/v1/users/{id}", testUserId)
+                                .contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.functions").isArray())
+                                .andExpect(jsonPath("$.functions.length()").value(1))
+                                .andExpect(jsonPath("$.functions[0]").value("COMPANY_CLAIM_MANAGER"))
+                                .andExpect(jsonPath("$.functions").isNotEmpty())
+                                .andExpect(status().isOk())
+                                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                                .andExpect(jsonPath("$.id").value(testUserId.toString()))
+                                .andExpect(jsonPath("$.firstName").value("John"))
+                                .andExpect(jsonPath("$.lastName").value("Doe"))
+                                .andExpect(jsonPath("$.email").value("john.doe@example.com"))
+                                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                                .andExpect(jsonPath("$.functions[0]").value("COMPANY_CLAIM_MANAGER"));
+
+                verify(userManagementService).getUsersDetails(testUserId);
+        }
 }
