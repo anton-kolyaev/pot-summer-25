@@ -8,11 +8,15 @@ import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import com.coherentsolutions.pot.insurance_service.model.Address;
 import com.coherentsolutions.pot.insurance_service.model.Phone;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CompanyDto {
     private UUID id;
     private String name;
