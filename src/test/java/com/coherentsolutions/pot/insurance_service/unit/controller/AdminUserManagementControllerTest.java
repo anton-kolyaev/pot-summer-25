@@ -1,4 +1,4 @@
-package unit.com.coherentsolutions.pot.insurance_service.controller;
+package com.coherentsolutions.pot.insurance_service.unit.controller;
 
 import com.coherentsolutions.pot.insurance_service.controller.AdminUserManagementController;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
