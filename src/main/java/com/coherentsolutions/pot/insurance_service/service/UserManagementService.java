@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
 import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
+import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.mapper.UserMapper;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment;
@@ -20,6 +22,7 @@ import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
 import com.coherentsolutions.pot.insurance_service.repository.UserSpecification;
 import static com.coherentsolutions.pot.insurance_service.util.ObjectUtils.setIfNotNull;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -47,8 +50,11 @@ public class UserManagementService {
     }
 
     public UserDto updateUser(UUID id, UserDto request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        User user = userRepository.getByIdOrThrow(id);
+
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot modify an inactive user");
+        }
 
         setIfNotNull(request.getFirstName(), user::setFirstName);
         setIfNotNull(request.getLastName(), user::setLastName);
@@ -83,5 +89,35 @@ public class UserManagementService {
         User updated = userRepository.save(user);
         return userMapper.toDto(updated);
 
+    }
+
+    @Transactional
+    public UserDto deactivateUser(UUID id) {
+        User user = userRepository.getByIdOrThrow(id);
+
+        if (user.getStatus() == UserStatus.INACTIVE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already inactive");
+        }
+
+        user.setStatus(UserStatus.INACTIVE);
+        user.setUpdatedAt(Instant.now());
+        userRepository.save(user);
+
+        return userMapper.toDto(user);
+    }
+
+    @Transactional
+    public UserDto reactivateUser(UUID id) {
+        User user = userRepository.getByIdOrThrow(id);
+
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already active");
+        }
+
+        user.setStatus(UserStatus.ACTIVE);
+        user.setUpdatedAt(Instant.now());
+        userRepository.save(user);
+
+        return userMapper.toDto(user);
     }
 }
