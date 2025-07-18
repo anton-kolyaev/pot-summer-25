@@ -1,6 +1,6 @@
 package com.coherentsolutions.pot.insurance_service.integration.controller;
 
-import com.coherentsolutions.pot.insurance_service.containers.PostgresTestContainer;
+import com.coherentsolutions.pot.insurance_service.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insurance_service.enums.CompanyStatus;
 import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
 import com.coherentsolutions.pot.insurance_service.model.Company;
