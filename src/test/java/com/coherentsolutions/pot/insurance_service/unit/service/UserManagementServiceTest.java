@@ -17,13 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,8 +83,8 @@ class UserManagementServiceTest {
         UserDto result = userManagementService.getUsersDetails(testUserId);
 
         // Then
-        assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(testUserDto);
+        assertNotNull(result);
+        assertEquals(testUserDto, result);
         verify(userRepository).findById(testUserId);
         verify(userMapper).toDto(testUser);
     }
