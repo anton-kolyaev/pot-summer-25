@@ -9,8 +9,10 @@ import static org.springframework.util.StringUtils.hasText;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
 import com.coherentsolutions.pot.insurance_service.model.User;
+import com.coherentsolutions.pot.insurance_service.model.Company;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -19,6 +21,7 @@ public class UserSpecification {
     public static Specification<User> withFilters(UserFilter filter) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = Stream.of(
+              companyIdPredicate(filter, root, criteriaBuilder),
               namePredicate(filter, root, criteriaBuilder),
               emailPredicate(filter, root, criteriaBuilder),
               dateOfBirthPredicate(filter, root, criteriaBuilder),
@@ -32,6 +35,14 @@ public class UserSpecification {
                     ? criteriaBuilder.conjunction()
                     : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    private static Predicate companyIdPredicate(UserFilter filter, Root<User> root, CriteriaBuilder criteriaBuilder) {
+        if (filter.getCompanyId() != null) {
+            Join<User, Company> companyJoin = root.join("company");
+            return criteriaBuilder.equal(companyJoin.get("id"), filter.getCompanyId());
+        }
+        return null;
     }
 
     private static Predicate namePredicate(UserFilter filter, Root<User> root, CriteriaBuilder criteriaBuilder) {
