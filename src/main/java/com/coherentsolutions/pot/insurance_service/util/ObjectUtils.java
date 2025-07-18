@@ -2,11 +2,11 @@ package com.coherentsolutions.pot.insurance_service.util;
 
 import java.util.function.Consumer;
 
-public class ObjectUtils {
+import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
 
-    private ObjectUtils() {
-        
-    }
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class ObjectUtils {
 
     public static <T> void setIfNotNull(T value, Consumer<T> setter) {
         if (value != null) {
