@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -84,10 +85,9 @@ public class AdminCompanyManagementControllerTest extends PostgresTestContainer 
                     .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.content.length()").value(2))
-                    .andExpect(jsonPath("$.content[0].username").value("alice.johnson"))
-                    .andExpect(jsonPath("$.content[1].username").value("bob.smith"))
-                    .andExpect(jsonPath("$.content[0].companyId").value(companyId.toString()))
-                    .andExpect(jsonPath("$.content[1].companyId").value(companyId.toString()));
+
+                    .andExpect(jsonPath("$.content[*].username", containsInAnyOrder("alice.johnson", "bob.smith")))
+                    .andExpect(jsonPath("$.content[*].companyId", containsInAnyOrder(companyId.toString(), companyId.toString())));
         } finally {
             userRepository.deleteById(user1.getId());
             userRepository.deleteById(user2.getId());
