@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+    id 'checkstyle'
 	id 'org.springframework.boot' version '3.5.3'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'com.ryandens.javaagent-test' version '0.8.0'
@@ -22,6 +23,12 @@ configurations.configureEach {
 		force 'org.apache.commons:commons-compress:1.27.1'
 	}
 }
+
+checkstyle {
+    toolVersion = '10.26.1'
+	configFile = file("config/checkstyle/google_checks.xml")
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
