@@ -1,19 +1,23 @@
 package com.coherentsolutions.pot.insurance_service.unit.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -31,9 +35,6 @@ import com.coherentsolutions.pot.insurance_service.model.Phone;
 import com.coherentsolutions.pot.insurance_service.model.User;
 import com.coherentsolutions.pot.insurance_service.repository.UserRepository;
 import com.coherentsolutions.pot.insurance_service.service.UserManagementService;
-
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class UserManagementServiceTest {
@@ -88,7 +89,6 @@ public class UserManagementServiceTest {
         verify(userMapper).toDto(user);
     }
 
-
     @Test
     @DisplayName("Should update phone and address data when present in request")
     void shouldUpdatePhoneAndAddressData() {
@@ -120,7 +120,7 @@ public class UserManagementServiceTest {
     void shouldThrowExceptionWhenUserNotFound() {
         // Given
         when(userRepository.getByIdOrThrow(userId))
-            .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         // When // Then
         assertThrows(
@@ -152,7 +152,6 @@ public class UserManagementServiceTest {
         verify(userMapper).toDto(activeUser);
     }
 
-
     @Test
     @DisplayName("Should reactivate inactive user successfully")
     void shouldReactivateUserSuccessfully() {
@@ -177,7 +176,6 @@ public class UserManagementServiceTest {
         verify(userMapper).toDto(inactiveUser);
     }
 
-
     @Test
     @DisplayName("Should throw BAD_REQUEST when deactivating already inactive user")
     void shouldThrowWhenUserAlreadyInactive() {
@@ -195,7 +193,7 @@ public class UserManagementServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         assertEquals("User is already inactive", ex.getReason());
     }
-  
+
     @Test
     @DisplayName("Should return all users of a company by companyId")
     void shouldReturnAllUsersOfExistingCompany() {
@@ -266,7 +264,7 @@ public class UserManagementServiceTest {
         verify(userMapper).toDto(user2);
 
     }
-  
+
     @Test
     @DisplayName("Should return empty result when no users match the companyId")
     void shouldReturnEmptyPage() {
@@ -289,5 +287,4 @@ public class UserManagementServiceTest {
         verify(userMapper, times(0)).toDto(Mockito.any());
     }
 
-  
 }
