@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insurance_service.service;
 
-import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -100,7 +99,6 @@ public class UserManagementService {
         }
 
         user.setStatus(UserStatus.INACTIVE);
-        user.setUpdatedAt(Instant.now());
         userRepository.save(user);
 
         return userMapper.toDto(user);
@@ -115,7 +113,6 @@ public class UserManagementService {
         }
 
         user.setStatus(UserStatus.ACTIVE);
-        user.setUpdatedAt(Instant.now());
         userRepository.save(user);
 
         return userMapper.toDto(user);
