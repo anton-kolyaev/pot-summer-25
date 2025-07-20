@@ -32,8 +32,9 @@ To use Google Java Style formatting in VS Code:
      "java.format.settings.profile": "GoogleStyle",
      "editor.formatOnSave": true
    }
-   
-## Running Chekstyle
+   ```   
+
+## Running Checkstyle
 Run Checkstyle on main source code:
 `./gradlew checkstyleMain`
 
