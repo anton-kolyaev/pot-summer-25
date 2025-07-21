@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insurance_service.unit.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -139,7 +140,7 @@ class UserManagementServiceTest {
     @DisplayName("Should get user details by ID")
     void shouldGetUserDetailsById() {
         // Given
-        when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
+        when(userRepository.findByIdOrThrow(testUserId)).thenReturn(user);
         when(userMapper.toDto(user)).thenReturn(testUserDto);
 
         // When
@@ -151,4 +152,125 @@ class UserManagementServiceTest {
         verify(userRepository).findByIdOrThrow(testUserId);
         verify(userMapper).toDto(user);
     }
-}
+
+    @Test
+    @DisplayName("Should throw ResponseStatusException when user not found by ID")
+    void shouldThrowExceptionWhenUserDetailsNotFound() {
+        // Given
+        UUID notFoundId = UUID.randomUUID();
+        when(userRepository.findByIdOrThrow(notFoundId)).thenThrow(
+                new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "User not found"));
+
+        // When / Then
+        assertThrows(ResponseStatusException.class, () -> userManagementService.getUsersDetails(notFoundId));
+        verify(userRepository).findByIdOrThrow(notFoundId);
+    }
+
+    @Test
+    @DisplayName("Should create user and return UserDto")
+    void shouldCreateUserSuccessfully() {
+        // Given
+        UserDto createDto = UserDto.builder()
+                .firstName("Create")
+                .lastName("User")
+                .email("create@user.com")
+                .functions(Set.of(UserFunction.COMPANY_MANAGER))
+                .build();
+        User mappedUser = new User();
+        mappedUser.setFirstName("Create");
+        mappedUser.setLastName("User");
+        mappedUser.setEmail("create@user.com");
+
+        when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
+        when(userRepository.save(mappedUser)).thenReturn(mappedUser);
+        when(userMapper.toDto(mappedUser)).thenReturn(createDto);
+
+        // When
+        UserDto result = userManagementService.createUser(createDto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Create", result.getFirstName());
+        assertEquals("User", result.getLastName());
+        assertEquals("create@user.com", result.getEmail());
+        verify(userMapper).toEntity(createDto);
+        verify(userRepository).save(mappedUser);
+        verify(userMapper).toDto(mappedUser);
+        }
+
+        @Test
+        @DisplayName("Should not call findByIdOrThrow when creating a user")
+        void shouldNotCallFindByIdOrThrowOnCreateUser() {
+        // Given
+        UserDto createDto = UserDto.builder()
+            .firstName("Create")
+            .lastName("User")
+            .email("create@user.com")
+            .functions(Set.of(UserFunction.COMPANY_MANAGER))
+            .build();
+        User mappedUser = new User();
+        mappedUser.setFirstName("Create");
+        mappedUser.setLastName("User");
+        mappedUser.setEmail("create@user.com");
+
+        when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
+        when(userRepository.save(mappedUser)).thenReturn(mappedUser);
+        when(userMapper.toDto(mappedUser)).thenReturn(createDto);
+
+        // When
+        userManagementService.createUser(createDto);
+
+        // Then
+        verify(userMapper).toEntity(createDto);
+        verify(userRepository).save(mappedUser);
+        verify(userMapper).toDto(mappedUser);
+        // Ensure findByIdOrThrow is never called during create
+        org.mockito.Mockito.verify(userRepository, org.mockito.Mockito.never()).findByIdOrThrow(any(UUID.class));
+        }
+
+        @Test
+        @DisplayName("Should throw exception when getUsersDetails is called with non-existent user")
+        void shouldThrowExceptionWhenGetUsersDetailsWithNonExistentUser() {
+        // Given
+        UUID notFoundId = UUID.randomUUID();
+        when(userRepository.findByIdOrThrow(notFoundId)).thenThrow(
+            new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "User not found"));
+
+        // When / Then
+        assertThrows(ResponseStatusException.class, () -> userManagementService.getUsersDetails(notFoundId));
+        verify(userRepository).findByIdOrThrow(notFoundId);
+        }
+
+        @Test
+        @DisplayName("Should update user functions correctly")
+        void shouldUpdateUserFunctions() {
+        // Given
+        User existingUser = new User();
+        existingUser.setId(userId);
+        // Simulate existing function assignments
+        Set<com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment> assignments = new java.util.HashSet<>();
+        com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment assignment = new com.coherentsolutions.pot.insurance_service.model.UserFunctionAssignment();
+        assignment.setFunction(UserFunction.COMPANY_MANAGER);
+        assignment.setUser(existingUser);
+        assignments.add(assignment);
+        existingUser.setFunctions(assignments);
+
+        UserDto requestDto = UserDto.builder()
+            .functions(Set.of(UserFunction.COMPANY_MANAGER, UserFunction.CONSUMER_CLAIM_MANAGER))
+            .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenReturn(existingUser);
+        when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
+
+        // When
+        UserDto result = userManagementService.updateUser(userId, requestDto);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.getFunctions().size());
+        verify(userRepository).save(existingUser);
+        verify(userRepository).findById(userId);
+        verify(userMapper).toDto(existingUser);
+        }
+    }
