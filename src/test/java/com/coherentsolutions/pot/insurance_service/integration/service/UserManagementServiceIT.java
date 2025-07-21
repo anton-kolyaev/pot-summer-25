@@ -39,8 +39,8 @@ class UserManagementServiceIT extends PostgresTestContainer {
     void shouldCreateUserAndRetrieveWithFilters() {
         Company testCompany = new Company();
         testCompany.setName("Test Company");
-        testCompany.setCountryCode("US"); // required by @NotBlank
-        // Add other mandatory fields here if needed
+        testCompany.setCountryCode("US"); 
+        
         Company savedCompany = companyRepository.save(testCompany);
 
         UserDto newUser = UserDto.builder()
