@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'checkstyle'
+    id 'jacoco'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.ryandens.javaagent-test' version '0.8.0'
@@ -22,6 +23,10 @@ configurations.configureEach {
     resolutionStrategy {
         force 'org.apache.commons:commons-compress:1.27.1'
     }
+}
+
+jacoco {
+    toolVersion = "0.8.13"
 }
 
 checkstyle {
@@ -53,4 +58,22 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
+}
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            limit{
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+check {
+    dependsOn jacocoTestCoverageVerification
 }
