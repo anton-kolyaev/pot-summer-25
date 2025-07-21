@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insurance_service.integration.controller;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,44 @@ public class AdminUserManagementControllerIT extends PostgresTestContainer {
     }
 
     @Test
+    @DisplayName("Should return 400 when deactivating an already inactive user")
+    void shouldReturn400WhenDeactivatingAlreadyInactiveUser() throws Exception {
+        Company company = new Company();
+        company.setName("Inactive Co.");
+        company.setCountryCode("US");
+        company.setEmail("inactive@example.com");
+        company.setStatus(com.coherentsolutions.pot.insurance_service.enums.CompanyStatus.ACTIVE);
+        company = companyRepository.save(company);
+
+        User user = new User();
+        user.setFirstName("Mark");
+        user.setLastName("Twain");
+        user.setUsername("mark.twain");
+        user.setEmail("mark@example.com");
+        user.setCompany(company);
+        user.setDateOfBirth(LocalDate.of(1980, 6, 15));
+        user.setSsn("123-45-6789");
+        user.setStatus(UserStatus.INACTIVE);
+        user = userRepository.save(user);
+
+        try {
+            mockMvc.perform(delete("/v1/users/{id}", user.getId()))
+                    .andExpect(status().isBadRequest());
+        } finally {
+            userRepository.deleteById(user.getId());
+            companyRepository.deleteById(company.getId());
+        }
+    }
+
+    @Test
+    @DisplayName("Should return 404 when deactivating a non-existent user")
+    void shouldReturn404WhenDeactivatingNonExistentUser() throws Exception {
+        UUID fakeId = UUID.randomUUID();
+        mockMvc.perform(delete("/v1/users/{id}", fakeId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("Should reactivate inactive user")
     void shouldReactivateUser() throws Exception {
         Company company = new Company();
@@ -99,5 +138,43 @@ public class AdminUserManagementControllerIT extends PostgresTestContainer {
             userRepository.deleteById(user.getId());
             companyRepository.deleteById(company.getId());
         }
+    }
+
+    @Test
+    @DisplayName("Should return 400 when reactivating an already active user")
+    void shouldReturn400WhenReactivatingAlreadyActiveUser() throws Exception {
+        Company company = new Company();
+        company.setName("Active Co.");
+        company.setCountryCode("US");
+        company.setEmail("active@example.com");
+        company.setStatus(com.coherentsolutions.pot.insurance_service.enums.CompanyStatus.ACTIVE);
+        company = companyRepository.save(company);
+
+        User user = new User();
+        user.setFirstName("Lisa");
+        user.setLastName("Simpson");
+        user.setUsername("lisa.simpson");
+        user.setEmail("lisa@example.com");
+        user.setCompany(company);
+        user.setDateOfBirth(LocalDate.of(2000, 1, 1));
+        user.setSsn("555-66-7777");
+        user.setStatus(UserStatus.ACTIVE);
+        user = userRepository.save(user);
+
+        try {
+            mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId()))
+                    .andExpect(status().isBadRequest());
+        } finally {
+            userRepository.deleteById(user.getId());
+            companyRepository.deleteById(company.getId());
+        }
+    }
+
+    @Test
+    @DisplayName("Should return 404 when reactivating a non-existent user")
+    void shouldReturn404WhenReactivatingNonExistentUser() throws Exception {
+        UUID fakeId = UUID.randomUUID();
+        mockMvc.perform(put("/v1/users/{id}/reactivation", fakeId))
+                .andExpect(status().isNotFound());
     }
 }
