@@ -19,8 +19,5 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run Checkstyle on main and test sources
-        run: ./gradlew checkstyleMain checkstyleTest
-
       - name: Build with Gradle Wrapper
         run: ./gradlew build
