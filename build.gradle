@@ -27,6 +27,8 @@ configurations.configureEach {
 checkstyle {
     toolVersion = '10.26.1'
     configFile = file("config/checkstyle/google_checks.xml")
+    ignoreFailures = false
+    showViolations = true
 }
 
 dependencies {
