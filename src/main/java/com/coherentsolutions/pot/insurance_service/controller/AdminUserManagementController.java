@@ -46,12 +46,12 @@ public class AdminUserManagementController {
     }
 
     @DeleteMapping("/{id}")
-    public UserDto deactivateUser(@PathVariable UUID id) {
+    public UserDto deactivateUser(@PathVariable("id") UUID id) {
         return userManagementService.deactivateUser(id);
     }
 
     @PutMapping("/{id}/reactivation")
-    public UserDto reactivateUser(@PathVariable UUID id) {
+    public UserDto reactivateUser(@PathVariable("id") UUID id) {
         return userManagementService.reactivateUser(id);
     }
 }
