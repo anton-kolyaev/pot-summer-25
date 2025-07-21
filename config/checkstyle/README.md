@@ -17,21 +17,23 @@ To apply Google Java Style formatting in IntelliJ IDEA:
 
 To use Google Java Style formatting in VS Code:
 
-1. Ensure you have the **Java Extension Pack** installed.  
-   This extension is **recommended automatically** when opening the project.
+1. Ensure you have the **Java Extension Pack** installed.
 
-2. After installing the Java Extension Pack, code formatting with Checkstyle
-   will apply automatically using the configuration in the project.
-
-3. The project includes `.vscode/settings.json` configured to use the Google Eclipse style:
+2. Add the following configuration to your .vscode/settings.json file 
+   to enable the Google Eclipse style:
 
    ```json
-   {
-     "java.format.settings.url": "./ide/eclipse-java-google-style.xml",
-     "java.format.settings.profile": "GoogleStyle",
-     "editor.formatOnSave": true
-   }
-   ```   
+      {
+        "java.format.settings.url": "./ide/eclipse-java-google-style.xml",
+        "java.format.settings.profile": "GoogleStyle",
+        "editor.formatOnSave": true
+      }
+   ```
+   
+3. Once the Java Extension Pack is installed and the configuration is added,
+   code formatting with Checkstyle will be applied automatically based on the project settings.
+
+
 
 ## Running Checkstyle
 
