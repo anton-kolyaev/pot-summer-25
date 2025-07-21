@@ -54,3 +54,17 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.withType(Checkstyle).configureEach {
+    reports {
+        xml.required.set(true)
+    }
+    doLast {
+        if (reports.xml.outputLocation.get().asFile.exists()) {
+            def reportText = reports.xml.outputLocation.get().asFile.text
+            if (reportText.contains("<error ")) {
+                throw new GradleException("Checkstyle violations found. Failing the build.")
+            }
+        }
+    }
+}
