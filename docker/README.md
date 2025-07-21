@@ -10,16 +10,19 @@ This directory contains Docker configuration for running the Insurance Service a
 ## Quick Start
 
 1. **Start the PostgreSQL database:**
+
 ```bash
 docker compose up -d postgres
 ```
 
 2. **Wait for the database to be ready:**
+
 ```bash
 docker compose ps
 ```
 
 The database will be available at `localhost:5432` with the following credentials:
+
 - **Database:** `insurance_service`
 - **Username:** `insurance_app`
 - **Password:** `insurance_app_password`
@@ -27,6 +30,7 @@ The database will be available at `localhost:5432` with the following credential
 ## Database Configuration
 
 The PostgreSQL container is configured with:
+
 - **Image:** postgres:16.9
 - **Port:** 5432
 - **Data persistence:** Docker volume `postgres_data`
