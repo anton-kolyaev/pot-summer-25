@@ -34,4 +34,6 @@ We use the [JaCoCo Gradle plugin](https://docs.gradle.org/current/userguide/jaco
 #### Locate the report:
 
 After running the tests, you’ll find the complete HTML coverage report here:
-`build/reports/jacoco/test/html/index.html`
+```text
+build/reports/jacoco/test/html/index.html
+```
