@@ -29,6 +29,8 @@ checkstyle {
     configFile = file("config/checkstyle/google_checks.xml")
     ignoreFailures = false
     showViolations = true
+    maxErrors = 0
+    maxWarnings = 0
 }
 
 dependencies {
