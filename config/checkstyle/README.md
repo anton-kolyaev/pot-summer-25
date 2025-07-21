@@ -13,7 +13,6 @@ To apply Google Java Style formatting in IntelliJ IDEA:
 
 4. Apply and save changes.
 
-
 ## VS Code Setup
 
 To use Google Java Style formatting in VS Code:
@@ -35,6 +34,7 @@ To use Google Java Style formatting in VS Code:
    ```   
 
 ## Running Checkstyle
+
 Run Checkstyle on main source code:
 `./gradlew checkstyleMain`
 
@@ -48,6 +48,7 @@ Checkstyle reports are generated at:
 `build/reports/checkstyle/checkstyle.html`
 
 ## Important Note
+
 After the first build, Checkstyle violations may not appear
 in the reports until you run a clean build.
 
