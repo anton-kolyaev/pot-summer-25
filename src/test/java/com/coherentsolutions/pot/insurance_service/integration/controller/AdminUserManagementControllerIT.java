@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insurance_service.integration.controller;
 
 import com.coherentsolutions.pot.insurance_service.dto.user.UserDto;
 import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
+import com.coherentsolutions.pot.insurance_service.integration.IntegrationTestConfiguration;
 import com.coherentsolutions.pot.insurance_service.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insurance_service.model.Company;
 import com.coherentsolutions.pot.insurance_service.model.User;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -29,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(IntegrationTestConfiguration.class)
 @DisplayName("Integration test for AdminUserManagementController")
 public class AdminUserManagementControllerIT extends PostgresTestContainer {
 
