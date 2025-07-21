@@ -1,7 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.util;
 
 import java.util.function.Consumer;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

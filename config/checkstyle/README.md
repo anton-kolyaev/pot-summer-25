@@ -19,7 +19,7 @@ To use Google Java Style formatting in VS Code:
 
 1. Ensure you have the **Java Extension Pack** installed.
 
-2. Add the following configuration to your .vscode/settings.json file 
+2. Add the following configuration to your .vscode/settings.json file
    to enable the Google Eclipse style:
 
    ```json
@@ -29,11 +29,9 @@ To use Google Java Style formatting in VS Code:
         "editor.formatOnSave": true
       }
    ```
-   
+
 3. Once the Java Extension Pack is installed and the configuration is added,
    code formatting with Checkstyle will be applied automatically based on the project settings.
-
-
 
 ## Running Checkstyle
 

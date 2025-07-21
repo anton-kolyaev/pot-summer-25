@@ -1,15 +1,5 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
-import java.util.UUID;
-import java.util.function.Consumer;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyDto;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyFilter;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyReactivationRequest;
@@ -20,12 +10,18 @@ import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanySpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
-
+import java.util.UUID;
+import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Service class for managing {@link Company} entities including creation,
- * updates,
+ * Service class for managing {@link Company} entities including creation, updates,
  * deactivation/reactivation, and retrieval with filtering and pagination.
  */
 @Service
@@ -37,8 +33,8 @@ public class CompanyManagementService {
   private final CompanyMapper companyMapper;
 
   /**
-   * Retrieves a paginated list of companies filtered
-   * by criteria specified in {@link CompanyFilter}.
+   * Retrieves a paginated list of companies filtered by criteria specified in
+   * {@link CompanyFilter}.
    */
   public Page<CompanyDto> getCompaniesWithFilters(CompanyFilter filter, Pageable pageable) {
     // Use JPA Specification to filter at database level with pagination
@@ -48,8 +44,7 @@ public class CompanyManagementService {
   }
 
   /**
-   * Updates an existing company identified by {@code id} with data from
-   * {@link CompanyDto}.
+   * Updates an existing company identified by {@code id} with data from {@link CompanyDto}.
    * Prevents modification of deactivated companies.
    */
   public CompanyDto updateCompany(UUID id, CompanyDto request) {
@@ -82,9 +77,8 @@ public class CompanyManagementService {
   }
 
   /**
-   * Creates a new company entity from the given {@link CompanyDto} and persists
-   * it.
-   * Sets the initial company status to ACTIVE.
+   * Creates a new company entity from the given {@link CompanyDto} and persists it. Sets the
+   * initial company status to ACTIVE.
    */
   public CompanyDto createCompany(CompanyDto companyDto) {
     Company company = companyMapper.toEntity(companyDto);
@@ -111,8 +105,7 @@ public class CompanyManagementService {
   }
 
   /**
-   * Deactivates the company with the specified id and sets all its users to
-   * INACTIVE.
+   * Deactivates the company with the specified id and sets all its users to INACTIVE.
    */
   @Transactional
   public CompanyDto deactivateCompany(UUID id) {
@@ -133,9 +126,8 @@ public class CompanyManagementService {
   }
 
   /**
-   * Reactivates the company with the specified id and optionally reactivates
-   * users
-   * based on the options provided in {@link CompanyReactivationRequest}.
+   * Reactivates the company with the specified id and optionally reactivates users based on the
+   * options provided in {@link CompanyReactivationRequest}.
    */
   @Transactional
   public CompanyDto reactivateCompany(UUID id, CompanyReactivationRequest request) {

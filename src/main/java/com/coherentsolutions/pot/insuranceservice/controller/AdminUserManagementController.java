@@ -1,7 +1,11 @@
 package com.coherentsolutions.pot.insuranceservice.controller;
 
+import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
+import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
+import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
+import jakarta.validation.Valid;
 import java.util.UUID;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -15,19 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
-import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
-import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-
 /**
  * REST controller for managing users by admin.
  *
- * <p>
- * Provides endpoints to create users, update users, and query users with
- * filters.
+ * <p>Provides endpoints to create users, update users, and query users with filters.
  */
 @RestController
 @RequiredArgsConstructor
@@ -62,11 +57,17 @@ public class AdminUserManagementController {
     return userManagementService.updateUser(id, request);
   }
 
+  /**
+   * Deactivates the user with the given ID.
+   */
   @DeleteMapping("/{id}")
   public UserDto deactivateUser(@PathVariable("id") UUID id) {
     return userManagementService.deactivateUser(id);
   }
 
+  /**
+   * Reactivates the user with the given ID.
+   */
   @PutMapping("/{id}/reactivation")
   public UserDto reactivateUser(@PathVariable("id") UUID id) {
     return userManagementService.reactivateUser(id);

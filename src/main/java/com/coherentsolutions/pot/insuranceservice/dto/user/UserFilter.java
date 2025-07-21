@@ -18,6 +18,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserFilter {
+
   private UUID companyId;
   private String name;
   private String email;

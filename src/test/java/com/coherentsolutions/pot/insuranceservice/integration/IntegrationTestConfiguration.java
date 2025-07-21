@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 /**
- * Test configuration for integration tests.
- * Provides custom ObjectMapper with JavaTimeModule support.
+ * Test configuration for integration tests. Provides custom ObjectMapper with JavaTimeModule
+ * support.
  */
 @TestConfiguration
 public class IntegrationTestConfiguration {
