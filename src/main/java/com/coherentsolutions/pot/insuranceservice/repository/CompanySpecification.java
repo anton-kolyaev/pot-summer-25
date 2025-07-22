@@ -1,25 +1,30 @@
 package com.coherentsolutions.pot.insuranceservice.repository;
 
+import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyFilter;
+import com.coherentsolutions.pot.insuranceservice.model.Company;
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
-import com.coherentsolutions.pot.insuranceservice.dto.CompanyFilter;
-import com.coherentsolutions.pot.insuranceservice.model.Company;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+/**
+ * Provides JPA Specifications to filter {@link Company} entities based on
+ * various criteria encapsulated in {@link CompanyFilter}.
+ */
 public class CompanySpecification {
 
-    public static Specification<Company> withFilters(CompanyFilter filter) {
-        return (root, query, criteriaBuilder) -> {
-           List<Predicate> predicates = Stream.of(
+  /**
+   * Creates a Specification for filtering {@link Company} entities
+   * based on the given filter criteria.
+   */
+  public static Specification<Company> withFilters(CompanyFilter filter) {
+    return (root, query, criteriaBuilder) -> {
+      List<Predicate> predicates = Stream.of(
               namePredicate(filter, root, criteriaBuilder),
               countryCodePredicate(filter, root, criteriaBuilder),
               statusPredicate(filter, root, criteriaBuilder),
@@ -29,71 +34,76 @@ public class CompanySpecification {
           .filter(Objects::nonNull)
           .toList();
 
-            return predicates.isEmpty() 
-                ? criteriaBuilder.conjunction() 
-                : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
+      return predicates.isEmpty()
+          ? criteriaBuilder.conjunction()
+          : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+    };
+  }
+
+  private static Predicate namePredicate(CompanyFilter filter, Root<Company> root,
+      CriteriaBuilder criteriaBuilder) {
+    return StringUtils.hasText(filter.getName())
+        ? criteriaBuilder.like(
+        criteriaBuilder.lower(root.get("name")),
+        "%" + filter.getName().toLowerCase() + "%"
+    )
+        : null;
+  }
+
+  private static Predicate countryCodePredicate(CompanyFilter filter, Root<Company> root,
+      CriteriaBuilder criteriaBuilder) {
+    return StringUtils.hasText(filter.getCountryCode())
+        ? criteriaBuilder.equal(
+        root.get("countryCode"),
+        filter.getCountryCode().toUpperCase()
+    )
+        : null;
+  }
+
+  private static Predicate statusPredicate(CompanyFilter filter, Root<Company> root,
+      CriteriaBuilder criteriaBuilder) {
+    if (filter.getStatus() == null) {
+      return null;
     }
 
-    private static Predicate namePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
-        return StringUtils.hasText(filter.getName()) 
-            ? criteriaBuilder.like(
-                criteriaBuilder.lower(root.get("name")),
-                "%" + filter.getName().toLowerCase() + "%"
-            )
-            : null;
-    }
+    return criteriaBuilder.equal(root.get("status"), filter.getStatus());
+  }
 
-    private static Predicate countryCodePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
-        return StringUtils.hasText(filter.getCountryCode())
-            ? criteriaBuilder.equal(
-                root.get("countryCode"),
-                filter.getCountryCode().toUpperCase()
-            )
-            : null;
-    }
+  private static Predicate createdDatePredicate(CompanyFilter filter, Root<Company> root,
+      CriteriaBuilder criteriaBuilder) {
+    return createDateRangePredicate(
+        filter.getCreatedFrom(),
+        filter.getCreatedTo(),
+        root.get("createdAt"),
+        criteriaBuilder
+    );
+  }
 
-    private static Predicate statusPredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
-        if (filter.getStatus() == null) {
-            return null;
-        }
+  private static Predicate updatedDatePredicate(CompanyFilter filter, Root<Company> root,
+      CriteriaBuilder criteriaBuilder) {
+    return createDateRangePredicate(
+        filter.getUpdatedFrom(),
+        filter.getUpdatedTo(),
+        root.get("updatedAt"),
+        criteriaBuilder
+    );
+  }
 
-        return criteriaBuilder.equal(root.get("status"), filter.getStatus());
-    }
+  private static Predicate createDateRangePredicate(
+      java.time.Instant from,
+      java.time.Instant to,
+      Path<java.time.Instant> datePath,
+      CriteriaBuilder criteriaBuilder) {
 
-    private static Predicate createdDatePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
-        return createDateRangePredicate(
-            filter.getCreatedFrom(),
-            filter.getCreatedTo(),
-            root.get("createdAt"),
-            criteriaBuilder
-        );
-    }
-
-    private static Predicate updatedDatePredicate(CompanyFilter filter, Root<Company> root, CriteriaBuilder criteriaBuilder) {
-        return createDateRangePredicate(
-            filter.getUpdatedFrom(),
-            filter.getUpdatedTo(),
-            root.get("updatedAt"),
-            criteriaBuilder
-        );
-    }
-
-    private static Predicate createDateRangePredicate(
-            java.time.Instant from,
-            java.time.Instant to,
-            Path<java.time.Instant> datePath,
-            CriteriaBuilder criteriaBuilder) {
-        
-        List<Predicate> datePredicates = Stream.of(
+    List<Predicate> datePredicates = Stream.of(
             from != null ? criteriaBuilder.greaterThanOrEqualTo(datePath, from) : null,
             to != null ? criteriaBuilder.lessThanOrEqualTo(datePath, to) : null
         )
         .filter(Objects::nonNull)
         .toList();
 
-        return datePredicates.isEmpty() 
-            ? null 
-            : criteriaBuilder.and(datePredicates.toArray(new Predicate[0]));
-    }
+    return datePredicates.isEmpty()
+        ? null
+        : criteriaBuilder.and(datePredicates.toArray(new Predicate[0]));
+  }
 } 

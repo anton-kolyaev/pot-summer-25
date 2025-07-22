@@ -1,230 +1,229 @@
 package com.coherentsolutions.pot.insuranceservice.unit.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-
-import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
-import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.mapper.UserMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
-import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
+import com.coherentsolutions.pot.insuranceservice.model.User;
+import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
+import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.server.ResponseStatusException;
 
-
-
+/**
+ * Tests that updating core user fields (firstName, lastName, username, email) works correctly
+ * when the user exists in the repository.
+ */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("User Company Management Service Tests")
 public class UserManagementServiceTest {
 
-    private static final String FIRST_NAME = "John";
-    private static final String LAST_NAME = "Doe";
-    private static final String EMAIL = "john.doe@example.com";
-    private static final String USERNAME = "john.doe";
-    private static final UUID COMPANY_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
-    private static final UUID USER_ID = UUID.fromString("22222222-2222-2222-2222-222222222222");
+  @Mock
+  private UserRepository userRepository;
 
-    private static final String NEW_FIRST_NAME = "New";
-    private static final String NEW_LAST_NAME = "User";
-    private static final String NEW_EMAIL = "new@email.com";
-    private static final String NEW_USERNAME = "new_username";
+  @Mock
+  private UserMapper userMapper;
 
-    private static final String ALICE_NAME = "Alice";
-    private static final String ALICE_USERNAME = "alice.johnson";
-    private static final String ALICE_EMAIL = "alice@example.com";
+  @InjectMocks
+  private UserManagementService userManagementService;
 
-    private static final String BOB_NAME = "Bob";
-    private static final String BOB_USERNAME = "bob.smith";
-    private static final String BOB_EMAIL = "bob.smith@example.com";
+  private User user;
+  private UUID userId;
 
-    @Mock private UserRepository userRepository;
-    @Mock private UserMapper userMapper;
-    @InjectMocks private UserManagementService userManagementService;
+  @BeforeEach
+  void setUp() {
+    userId = UUID.randomUUID();
+    user = new User();
+    user.setId(userId);
+    user.setFirstName("Old");
+    user.setLastName("Name");
+    user.setUsername("old_username");
+    user.setEmail("old@email.com");
+    user.setStatus(UserStatus.ACTIVE);
+  }
 
-    private User user;
+  @Test
+  @DisplayName("Should update core user fields when user exists")
+  void shouldUpdateUserFieldsSuccessfully() {
+    // Given
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("New");
+    requestDto.setLastName("User");
+    requestDto.setUsername("new_username");
+    requestDto.setEmail("new@email.com");
 
-    @BeforeEach
-    void setUp() {
-        user = new User();
-        user.setId(USER_ID);
-        user.setFirstName(FIRST_NAME);
-        user.setLastName(LAST_NAME);
-        user.setEmail(EMAIL);
-        user.setUsername(USERNAME);
-        user.setStatus(UserStatus.ACTIVE);
-    }
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
 
-    @Test
-    @DisplayName("Should update core user fields when user exists")
-    void shouldUpdateUserFieldsSuccessfully() {
-        UserDto requestDto = new UserDto();
-        requestDto.setFirstName(NEW_FIRST_NAME);
-        requestDto.setLastName(NEW_LAST_NAME);
-        requestDto.setUsername(NEW_USERNAME);
-        requestDto.setEmail(NEW_EMAIL);
+    // When
+    UserDto result = userManagementService.updateUser(userId, requestDto);
 
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
+    // Then
+    assertEquals("new@email.com", result.getEmail());
+    assertEquals("New", result.getFirstName());
+    assertEquals("User", result.getLastName());
+    assertEquals("new_username", result.getUsername());
+    verify(userRepository).save(user);
+    verify(userRepository).findById(userId);
+    verify(userMapper).toDto(user);
+  }
 
-        UserDto result = userManagementService.updateUser(USER_ID, requestDto);
+  @Test
+  @DisplayName("Should update phone and address data when present in request")
+  void shouldUpdatePhoneAndAddressData() {
+    // Given
+    List<Phone> phoneDtos = List.of(new Phone());
+    List<Address> addressDtos = List.of(new Address());
 
-        assertEquals(NEW_EMAIL, result.getEmail());
-        assertEquals(NEW_FIRST_NAME, result.getFirstName());
-        assertEquals(NEW_LAST_NAME, result.getLastName());
-        assertEquals(NEW_USERNAME, result.getUsername());
+    UserDto requestDto = new UserDto();
+    requestDto.setPhoneData(phoneDtos);
+    requestDto.setAddressData(addressDtos);
 
-        verify(userRepository).findById(USER_ID);
-        verify(userRepository).save(user);
-        verify(userMapper).toDto(user);
-    }
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+    when(userRepository.save(any(User.class))).thenReturn(user);
+    when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
 
-    @Test
-    @DisplayName("Should update phone and address data when present in request")
-    void shouldUpdatePhoneAndAddressData() {
-        List<Phone> phoneDtos = List.of(new Phone());
-        List<Address> addressDtos = List.of(new Address());
+    // When
+    UserDto result = userManagementService.updateUser(userId, requestDto);
 
-        UserDto requestDto = new UserDto();
-        requestDto.setPhoneData(phoneDtos);
-        requestDto.setAddressData(addressDtos);
+    // Then
+    assertEquals(phoneDtos, result.getPhoneData());
+    assertEquals(addressDtos, result.getAddressData());
+    verify(userRepository).save(user);
+    verify(userRepository).findById(userId);
+    verify(userMapper).toDto(user);
+  }
 
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-        when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
+  @Test
+  @DisplayName("Should throw ResponseStatusException when attempting to update non-existent user")
+  void shouldThrowExceptionWhenUserNotFound() {
+    // Given
+    when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        UserDto result = userManagementService.updateUser(USER_ID, requestDto);
+    // When // Then
+    assertThrows(
+        ResponseStatusException.class,
+        () -> userManagementService.updateUser(userId, new UserDto()));
+  }
 
-        assertEquals(phoneDtos, result.getPhoneData());
-        assertEquals(addressDtos, result.getAddressData());
-        verify(userRepository).save(user);
-        verify(userRepository).findById(USER_ID);
-        verify(userMapper).toDto(user);
-    }
+  @Test
+  @DisplayName("Should return all users of a company by companyId")
+  void shouldReturnAllUsersOfExistingCompany() {
+    UUID companyId = UUID.randomUUID();
+    Company mockCompany = new Company();
+    mockCompany.setId(companyId);
 
-    @Test
-    @DisplayName("Should throw ResponseStatusException when attempting to update non-existent user")
-    void shouldThrowExceptionWhenUserNotFound() {
-        when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+    User user1 = new User();
+    user1.setId(UUID.randomUUID());
+    user1.setFirstName("Alice");
+    user1.setLastName("Johnson");
+    user1.setUsername("alice.johnson");
+    user1.setEmail("alice@example.com");
+    user1.setCompany(mockCompany);
+    user1.setStatus(UserStatus.ACTIVE);
 
-        assertThrows(ResponseStatusException.class,
-            () -> userManagementService.updateUser(USER_ID, new UserDto()));
-    }
+    User user2 = new User();
+    user2.setId(UUID.randomUUID());
+    user2.setFirstName("Bob");
+    user2.setLastName("Smith");
+    user2.setUsername("bob.smith");
+    user2.setEmail("bob.smith@example.com");
+    user2.setCompany(mockCompany);
+    user2.setStatus(UserStatus.ACTIVE);
 
-    @Test
-    @DisplayName("Should return all users of a company by companyId")
-    void shouldReturnAllUsersOfExistingCompany() {
-        Company company = new Company();
-        company.setId(COMPANY_ID);
+    List<User> users = List.of(user1, user2);
 
-        User user1 = new User();
-        user1.setId(UUID.randomUUID());
-        user1.setFirstName(ALICE_NAME);
-        user1.setLastName("Johnson");
-        user1.setUsername(ALICE_USERNAME);
-        user1.setEmail(ALICE_EMAIL);
-        user1.setCompany(company);
-        user1.setStatus(UserStatus.ACTIVE);
+    UserDto testUserDto1 = UserDto.builder()
+        .id(user1.getId())
+        .firstName(user1.getFirstName())
+        .lastName(user1.getLastName())
+        .email(user1.getEmail())
+        .username(user1.getUsername())
+        .companyId(companyId)
+        .status(user1.getStatus())
+        .build();
 
-        User user2 = new User();
-        user2.setId(UUID.randomUUID());
-        user2.setFirstName(BOB_NAME);
-        user2.setLastName("Smith");
-        user2.setUsername(BOB_USERNAME);
-        user2.setEmail(BOB_EMAIL);
-        user2.setCompany(company);
-        user2.setStatus(UserStatus.ACTIVE);
+    UserFilter filter = new UserFilter();
+    filter.setCompanyId(companyId);
 
-        List<User> users = List.of(user1, user2);
+    Pageable pageable = Pageable.unpaged();
 
-        UserDto dto1 = UserDto.builder()
-                .id(user1.getId())
-                .firstName(ALICE_NAME)
-                .lastName("Johnson")
-                .email(ALICE_EMAIL)
-                .username(ALICE_USERNAME)
-                .companyId(COMPANY_ID)
-                .status(UserStatus.ACTIVE)
-                .build();
+    UserDto testUserDto2 = UserDto.builder()
+        .id(user2.getId())
+        .firstName(user2.getFirstName())
+        .lastName(user2.getLastName())
+        .email(user2.getEmail())
+        .username(user2.getUsername())
+        .companyId(companyId)
+        .status(user2.getStatus())
+        .build();
 
-        UserDto dto2 = UserDto.builder()
-                .id(user2.getId())
-                .firstName(BOB_NAME)
-                .lastName("Smith")
-                .email(BOB_EMAIL)
-                .username(BOB_USERNAME)
-                .companyId(COMPANY_ID)
-                .status(UserStatus.ACTIVE)
-                .build();
+    when(userRepository.findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable)))
+        .thenReturn(new PageImpl<>(users));
 
-        UserFilter filter = new UserFilter();
-        filter.setCompanyId(COMPANY_ID);
+    when(userMapper.toDto(user1)).thenReturn(testUserDto1);
+    when(userMapper.toDto(user2)).thenReturn(testUserDto2);
 
-        Pageable pageable = Pageable.unpaged();
+    Page<UserDto> result = userManagementService.getUsersWithFilters(filter, pageable);
 
-        when(userRepository.findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable)))
-                .thenReturn(new PageImpl<>(users));
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(2, result.getTotalElements());
+    Assertions.assertEquals("alice.johnson", result.getContent().get(0).getUsername());
+    Assertions.assertEquals("bob.smith", result.getContent().get(1).getUsername());
 
-        when(userMapper.toDto(user1)).thenReturn(dto1);
-        when(userMapper.toDto(user2)).thenReturn(dto2);
+    verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
+    verify(userMapper).toDto(user1);
+    verify(userMapper).toDto(user2);
 
-        Page<UserDto> result = userManagementService.getUsersWithFilters(filter, pageable);
+  }
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(2, result.getTotalElements());
-        Assertions.assertEquals(ALICE_USERNAME, result.getContent().get(0).getUsername());
-        Assertions.assertEquals(BOB_USERNAME, result.getContent().get(1).getUsername());
+  @Test
+  @DisplayName("Should return empty result when no users match the companyId")
+  void shouldReturnEmptyPage() {
 
-        verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
-        verify(userMapper).toDto(user1);
-        verify(userMapper).toDto(user2);
-    }
+    UUID nonExistentCompanyId = UUID.randomUUID();
+    UserFilter filter = new UserFilter();
+    filter.setCompanyId(nonExistentCompanyId);
 
-    @Test
-    @DisplayName("Should return empty result when no users match the companyId")
-    void shouldReturnEmptyPage() {
-        UUID randomCompanyId = UUID.randomUUID();
-        UserFilter filter = new UserFilter();
-        filter.setCompanyId(randomCompanyId);
-        Pageable pageable = Pageable.unpaged();
+    Pageable pageable = Pageable.unpaged();
 
-        when(userRepository.findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable)))
-                .thenReturn(Page.empty());
+    when(userRepository.findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable)))
+        .thenReturn(Page.empty());
 
-        Page<UserDto> result = userManagementService.getUsersWithFilters(filter, pageable);
+    Page<UserDto> result = userManagementService.getUsersWithFilters(filter, pageable);
 
-        Assertions.assertNotNull(result, "Result should not be null");
-        Assertions.assertTrue(result.isEmpty(), "");
+    Assertions.assertNotNull(result, "Result should not be null");
+    Assertions.assertTrue(result.isEmpty(), "");
 
-        verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
-        verify(userMapper, times(0)).toDto(Mockito.any());
-    }
+    verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
+    verify(userMapper, times(0)).toDto(Mockito.any());
+  }
+
+
 }

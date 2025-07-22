@@ -1,8 +1,8 @@
-package com.coherentsolutions.pot.insurance_service.unit.dto.user;
+package com.coherentsolutions.pot.insuranceservice.unit.dto.user;
 
-import com.coherentsolutions.pot.insurance_service.dto.user.UserFilter;
-import com.coherentsolutions.pot.insurance_service.enums.UserFunction;
-import com.coherentsolutions.pot.insurance_service.enums.UserStatus;
+import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
+import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
+import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

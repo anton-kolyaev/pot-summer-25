@@ -2,15 +2,21 @@ package com.coherentsolutions.pot.insuranceservice.util;
 
 import java.util.function.Consumer;
 
+/**
+ * Utility class for common object-related helper methods.
+ */
 public class ObjectUtils {
 
-    private ObjectUtils() {
-        
-    }
+  private ObjectUtils() {
 
-    public static <T> void setIfNotNull(T value, Consumer<T> setter) {
-        if (value != null) {
-            setter.accept(value);
-        }
+  }
+
+  /**
+   * Executes the given setter function if the provided value is not null.
+   */
+  public static <T> void setIfNotNull(T value, Consumer<T> setter) {
+    if (value != null) {
+      setter.accept(value);
     }
+  }
 }

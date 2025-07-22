@@ -1,35 +1,36 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
 
+import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GenerationType;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
-
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
-
-
+/**
+ * Represents a company entity in the insurance service domain.
+ * Mapped to the "companies" table in the database.
+ */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
@@ -37,49 +38,50 @@ import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 @Setter
 @Table(name = "companies")
 public class Company {
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Id
-    private UUID id;
 
-    @NotBlank
-    @Column(name = "name", nullable = false)
-    private String name;
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Id
+  private UUID id;
 
-    @NotBlank
-    @Column(name = "country_code", nullable = false, length = 3)
-    private String countryCode;
+  @NotBlank
+  @Column(name = "name", nullable = false)
+  private String name;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "address_data", columnDefinition = "jsonb")
-    private List<Address> addressData;
+  @NotBlank
+  @Column(name = "country_code", nullable = false, length = 3)
+  private String countryCode;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name ="phone_data", columnDefinition = "jsonb")
-    private List<Phone> phoneData;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "address_data", columnDefinition = "jsonb")
+  private List<Address> addressData;
 
-    @Email
-    private String email;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "phone_data", columnDefinition = "jsonb")
+  private List<Phone> phoneData;
 
-    private String website;
+  @Email
+  private String email;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private CompanyStatus status;
+  private String website;
 
-    @CreatedBy
-    @Column(name = "created_by")
-    private UUID createdBy;
+  @Enumerated(EnumType.STRING)
+  @Column(length = 20)
+  private CompanyStatus status;
 
-    @LastModifiedBy
-    @Column(name = "updated_by")
-    private UUID updatedBy;
+  @CreatedBy
+  @Column(name = "created_by")
+  private UUID createdBy;
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+  @LastModifiedBy
+  @Column(name = "updated_by")
+  private UUID updatedBy;
 
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @CreatedDate
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
+
+  @LastModifiedDate
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
 }

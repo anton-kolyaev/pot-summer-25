@@ -1,20 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,76 +16,94 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
+/**
+ * Represents a user within the insurance system.
+ * A user is associated with a company.
+ * This entity is mapped to the "users" table and includes auditing fields.
+ */
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "users")
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
 
-    @NotBlank
-    @Column(name = "first_name", length = 100, nullable = false)
-    private String firstName;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private UUID id;
 
-    @NotBlank
-    @Column(name = "last_name", length = 100, nullable = false)
-    private String lastName;
+  @NotBlank
+  @Column(name = "first_name", length = 100, nullable = false)
+  private String firstName;
 
-    @NotBlank
-    @Column(name = "username", length = 50, unique = true, nullable = false)
-    private String username;
+  @NotBlank
+  @Column(name = "last_name", length = 100, nullable = false)
+  private String lastName;
 
-    @NotBlank
-    @Column(name = "email", unique = true, nullable = false)
-    private String email;
+  @NotBlank
+  @Column(name = "username", length = 50, unique = true, nullable = false)
+  private String username;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "address_data", columnDefinition = "jsonb")
-    private List<Address> addressData;
+  @NotBlank
+  @Column(name = "email", unique = true, nullable = false)
+  private String email;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "phone_data", columnDefinition = "jsonb")
-    private List<Phone> phoneData;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "address_data", columnDefinition = "jsonb")
+  private List<Address> addressData;
 
-    @NotNull
-    @Column(name = "date_of_birth", nullable = false)
-    private LocalDate dateOfBirth;
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "phone_data", columnDefinition = "jsonb")
+  private List<Phone> phoneData;
 
-    @NotBlank
-    @Column(name = "ssn", length = 11, unique = true, nullable = false)
-    private String ssn;
+  @NotNull
+  @Column(name = "date_of_birth", nullable = false)
+  private LocalDate dateOfBirth;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+  @NotBlank
+  @Column(name = "ssn", length = 11, unique = true, nullable = false)
+  private String ssn;
 
-    @Enumerated(EnumType.STRING)
-    private UserStatus status;
+  @ManyToOne
+  @JoinColumn(name = "company_id", nullable = false)
+  private Company company;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private Set<UserFunctionAssignment> functions;
+  @Enumerated(EnumType.STRING)
+  private UserStatus status;
 
-    @CreatedBy
-    @Column(name = "created_by")
-    private UUID createdBy;
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
+      orphanRemoval = true, fetch = FetchType.EAGER)
+  private Set<UserFunctionAssignment> functions;
 
-    @LastModifiedBy
-    @Column(name = "updated_by")
-    private UUID updatedBy;
+  @CreatedBy
+  @Column(name = "created_by")
+  private UUID createdBy;
 
-    @CreatedDate
-    @Column(name = "created_at",nullable = false, updatable = false)
-    private Instant createdAt;
+  @LastModifiedBy
+  @Column(name = "updated_by")
+  private UUID updatedBy;
 
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+  @CreatedDate
+  @Column(name = "created_at", nullable = false, updatable = false)
+  private Instant createdAt;
+
+  @LastModifiedDate
+  @Column(name = "updated_at")
+  private Instant updatedAt;
 
 }
