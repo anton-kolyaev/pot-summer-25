@@ -10,8 +10,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
- * Mapper interface for converting between {@link User} entities and {@link UserDto} objects.
- * Uses MapStruct for automatic mapping and contains custom mapping logic for user functions.
+ * Mapper interface for converting between {@link User} entities and {@link UserDto} objects. Uses
+ * MapStruct for automatic mapping and contains custom mapping logic for user functions.
  */
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -23,8 +23,8 @@ public interface UserMapper {
   UserDto toDto(User user);
 
   /**
-   * Converts a {@link UserDto} to a {@link User} entity.
-   * Ignores id, createdAt, updatedAt, createdBy, updatedBy fields and sets status to ACTIVE.
+   * Converts a {@link UserDto} to a {@link User} entity. Ignores id, createdAt, updatedAt,
+   * createdBy, updatedBy fields and sets status to ACTIVE.
    */
   @Mapping(source = "companyId", target = "company.id")
   @Mapping(target = "id", ignore = true)

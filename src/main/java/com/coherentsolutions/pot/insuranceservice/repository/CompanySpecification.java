@@ -13,14 +13,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 /**
- * Provides JPA Specifications to filter {@link Company} entities based on
- * various criteria encapsulated in {@link CompanyFilter}.
+ * Provides JPA Specifications to filter {@link Company} entities based on various criteria
+ * encapsulated in {@link CompanyFilter}.
  */
 public class CompanySpecification {
 
   /**
-   * Creates a Specification for filtering {@link Company} entities
-   * based on the given filter criteria.
+   * Creates a Specification for filtering {@link Company} entities based on the given filter
+   * criteria.
    */
   public static Specification<Company> withFilters(CompanyFilter filter) {
     return (root, query, criteriaBuilder) -> {

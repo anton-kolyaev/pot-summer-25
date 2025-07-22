@@ -25,8 +25,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Integration tests for AdminCompanyManagementController.
- * Tests user listing endpoints and request validation using real database containers.
+ * Integration tests for AdminCompanyManagementController. Tests user listing endpoints and request
+ * validation using real database containers.
  */
 @ActiveProfiles("test")
 @SpringBootTest

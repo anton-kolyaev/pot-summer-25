@@ -7,8 +7,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Abstract base class for integration tests using a PostgreSQL container.
- * Utilizes Testcontainers to run PostgreSQL in a Docker environment.
+ * Abstract base class for integration tests using a PostgreSQL container. Utilizes Testcontainers
+ * to run PostgreSQL in a Docker environment.
  */
 @Testcontainers
 public abstract class PostgresTestContainer {

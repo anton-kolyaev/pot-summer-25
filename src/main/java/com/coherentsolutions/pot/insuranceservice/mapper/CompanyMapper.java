@@ -14,8 +14,8 @@ import org.mapstruct.Mapping;
 public interface CompanyMapper {
 
   /**
-   * Maps a {@link CompanyDto} to a {@link Company} entity.
-   * Ignores fields: id, createdAt, updatedAt; maps status directly.
+   * Maps a {@link CompanyDto} to a {@link Company} entity. Ignores fields: id, createdAt,
+   * updatedAt; maps status directly.
    */
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "createdAt", ignore = true)
