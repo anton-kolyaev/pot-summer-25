@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -9,15 +10,20 @@ import static org.mockito.Mockito.when;
 
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
+import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.mapper.UserMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.model.User;
+import com.coherentsolutions.pot.insuranceservice.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,10 +60,15 @@ public class UserManagementServiceTest {
 
   private User user;
   private UUID userId;
+  private UserDto testUserDto;
+  private UserFunctionAssignment testAssignment;
 
   @BeforeEach
   void setUp() {
     userId = UUID.randomUUID();
+
+    testAssignment = new UserFunctionAssignment();
+    testAssignment.setFunction(UserFunction.COMPANY_MANAGER);
     user = new User();
     user.setId(userId);
     user.setFirstName("Old");
@@ -65,6 +76,11 @@ public class UserManagementServiceTest {
     user.setUsername("old_username");
     user.setEmail("old@email.com");
     user.setStatus(UserStatus.ACTIVE);
+    user.setFunctions(Set.of(testAssignment));
+
+    testUserDto = UserDto.builder().id(userId).firstName("Test User").email("test@user.com")
+        .dateOfBirth(LocalDate.of(1990, 1, 1)).status(UserStatus.ACTIVE).ssn("123-45-6789")
+        .functions(Set.of(UserFunction.COMPANY_MANAGER)).build();
   }
 
   @Test
@@ -124,12 +140,11 @@ public class UserManagementServiceTest {
   @DisplayName("Should throw ResponseStatusException when attempting to update non-existent user")
   void shouldThrowExceptionWhenUserNotFound() {
     // Given
-    when(userRepository.getByIdOrThrow(userId))
-        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    when(userRepository.getByIdOrThrow(userId)).thenThrow(
+        new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
     // When // Then
-    assertThrows(
-        ResponseStatusException.class,
+    assertThrows(ResponseStatusException.class,
         () -> userManagementService.updateUser(userId, new UserDto()));
   }
 
@@ -226,33 +241,21 @@ public class UserManagementServiceTest {
 
     List<User> users = List.of(user1, user2);
 
-    UserDto testUserDto1 = UserDto.builder()
-        .id(user1.getId())
-        .firstName(user1.getFirstName())
-        .lastName(user1.getLastName())
-        .email(user1.getEmail())
-        .username(user1.getUsername())
-        .companyId(companyId)
-        .status(user1.getStatus())
-        .build();
+    UserDto testUserDto1 = UserDto.builder().id(user1.getId()).firstName(user1.getFirstName())
+        .lastName(user1.getLastName()).email(user1.getEmail()).username(user1.getUsername())
+        .companyId(companyId).status(user1.getStatus()).build();
 
     UserFilter filter = new UserFilter();
     filter.setCompanyId(companyId);
 
     Pageable pageable = Pageable.unpaged();
 
-    UserDto testUserDto2 = UserDto.builder()
-        .id(user2.getId())
-        .firstName(user2.getFirstName())
-        .lastName(user2.getLastName())
-        .email(user2.getEmail())
-        .username(user2.getUsername())
-        .companyId(companyId)
-        .status(user2.getStatus())
-        .build();
+    UserDto testUserDto2 = UserDto.builder().id(user2.getId()).firstName(user2.getFirstName())
+        .lastName(user2.getLastName()).email(user2.getEmail()).username(user2.getUsername())
+        .companyId(companyId).status(user2.getStatus()).build();
 
-    when(userRepository.findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable)))
-        .thenReturn(new PageImpl<>(users));
+    when(userRepository.findAll(Mockito.<Specification<User>>any(),
+        Mockito.eq(pageable))).thenReturn(new PageImpl<>(users));
 
     when(userMapper.toDto(user1)).thenReturn(testUserDto1);
     when(userMapper.toDto(user2)).thenReturn(testUserDto2);
@@ -271,6 +274,23 @@ public class UserManagementServiceTest {
   }
 
   @Test
+  @DisplayName("Should get user details by ID")
+  void shouldGetUserDetailsById() {
+    // Given
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
+    when(userMapper.toDto(user)).thenReturn(testUserDto);
+
+    // When
+    UserDto result = userManagementService.getUsersDetails(userId);
+
+    // Then
+    assertNotNull(result);
+    assertEquals(testUserDto, result);
+    verify(userRepository).findByIdOrThrow(userId);
+    verify(userMapper).toDto(user);
+  }
+
+  @Test
   @DisplayName("Should return empty result when no users match the companyId")
   void shouldReturnEmptyPage() {
 
@@ -280,8 +300,8 @@ public class UserManagementServiceTest {
 
     Pageable pageable = Pageable.unpaged();
 
-    when(userRepository.findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable)))
-        .thenReturn(Page.empty());
+    when(userRepository.findAll(Mockito.<Specification<User>>any(),
+        Mockito.eq(pageable))).thenReturn(Page.empty());
 
     Page<UserDto> result = userManagementService.getUsersWithFilters(filter, pageable);
 
@@ -292,4 +312,90 @@ public class UserManagementServiceTest {
     verify(userMapper, times(0)).toDto(Mockito.any());
   }
 
+  @Test
+  @DisplayName("Should throw ResponseStatusException when user not found by ID")
+  void shouldThrowExceptionWhenUserDetailsNotFound() {
+    // Given
+    UUID notFoundId = UUID.randomUUID();
+    when(userRepository.findByIdOrThrow(notFoundId)).thenThrow(
+        new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,
+            "User not found"));
+
+    // When / Then
+    assertThrows(ResponseStatusException.class,
+        () -> userManagementService.getUsersDetails(notFoundId));
+    verify(userRepository).findByIdOrThrow(notFoundId);
+  }
+
+  @Test
+  @DisplayName("Should create user and return UserDto")
+  void shouldCreateUserSuccessfully() {
+    // Given
+    User mappedUser = new User();
+    mappedUser.setFirstName("Create");
+    mappedUser.setLastName("User");
+    mappedUser.setEmail("create@user.com");
+
+    UserDto createDto = UserDto.builder().firstName("Create").lastName("User")
+        .email("create@user.com").functions(Set.of(UserFunction.COMPANY_MANAGER)).build();
+
+    when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
+    when(userRepository.save(mappedUser)).thenReturn(mappedUser);
+    when(userMapper.toDto(mappedUser)).thenReturn(createDto);
+
+    // When
+    UserDto result = userManagementService.createUser(createDto);
+
+    // Then
+    assertNotNull(result);
+    assertEquals("Create", result.getFirstName());
+    assertEquals("User", result.getLastName());
+    assertEquals("create@user.com", result.getEmail());
+    verify(userMapper).toEntity(createDto);
+    verify(userRepository).save(mappedUser);
+    verify(userMapper).toDto(mappedUser);
+  }
+
+  @Test
+  @DisplayName("Should not call findByIdOrThrow when creating a user")
+  void shouldNotCallFindByIdOrThrowOnCreateUser() {
+    // Given
+    User mappedUser = new User();
+    mappedUser.setFirstName("Create");
+    mappedUser.setLastName("User");
+    mappedUser.setEmail("create@user.com");
+
+    UserDto createDto = UserDto.builder().firstName("Create").lastName("User")
+        .email("create@user.com").functions(Set.of(UserFunction.COMPANY_MANAGER)).build();
+
+    when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
+    when(userRepository.save(mappedUser)).thenReturn(mappedUser);
+    when(userMapper.toDto(mappedUser)).thenReturn(createDto);
+
+    // When
+    userManagementService.createUser(createDto);
+
+    // Then
+    verify(userMapper).toEntity(createDto);
+    verify(userRepository).save(mappedUser);
+    verify(userMapper).toDto(mappedUser);
+    // Ensure findByIdOrThrow is never called during create
+    org.mockito.Mockito.verify(userRepository, org.mockito.Mockito.never())
+        .findByIdOrThrow(any(UUID.class));
+  }
+
+  @Test
+  @DisplayName("Should throw exception when getUsersDetails is called with non-existent user")
+  void shouldThrowExceptionWhenGetUsersDetailsWithNonExistentUser() {
+    // Given
+    UUID notFoundId = UUID.randomUUID();
+    when(userRepository.findByIdOrThrow(notFoundId)).thenThrow(
+        new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,
+            "User not found"));
+
+    // When / Then
+    assertThrows(ResponseStatusException.class,
+        () -> userManagementService.getUsersDetails(notFoundId));
+    verify(userRepository).findByIdOrThrow(notFoundId);
+  }
 }
