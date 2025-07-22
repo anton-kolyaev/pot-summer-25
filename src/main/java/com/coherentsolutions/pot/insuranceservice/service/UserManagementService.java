@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
 import static com.coherentsolutions.pot.insuranceservice.util.ObjectUtils.setIfNotNull;
+
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
 import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
