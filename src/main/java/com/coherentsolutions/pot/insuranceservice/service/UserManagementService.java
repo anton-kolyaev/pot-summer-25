@@ -1,7 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
 import static com.coherentsolutions.pot.insuranceservice.util.ObjectUtils.setIfNotNull;
-
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
 import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
@@ -33,7 +32,9 @@ public class UserManagementService {
   private final UserRepository userRepository;
   private final UserMapper userMapper;
 
-  /** Retrieves a paginated list of users filtered by criteria specified in {@link UserFilter}. */
+  /**
+   * Retrieves a paginated list of users filtered by criteria specified in {@link UserFilter}.
+   */
   public Page<UserDto> getUsersWithFilters(UserFilter filter, Pageable pageable) {
     Page<User> users = userRepository.findAll(UserSpecification.withFilters(filter), pageable);
     return users.map(userMapper::toDto);
@@ -103,13 +104,17 @@ public class UserManagementService {
     return userMapper.toDto(updated);
   }
 
-  /** Sets the user status to inactive. */
+  /**
+   * Sets the user status to inactive.
+   */
   @Transactional
   public UserDto deactivateUser(UUID id) {
     return updateUserStatus(id, UserStatus.INACTIVE);
   }
 
-  /** Sets the user status to active. */
+  /**
+   * Sets the user status to active.
+   */
   @Transactional
   public UserDto reactivateUser(UUID id) {
     return updateUserStatus(id, UserStatus.ACTIVE);
