@@ -72,79 +72,33 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should create and retrieve company successfully")
   void shouldCreateAndRetrieveCompanySuccessfully() throws Exception {
     // Given
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Integration Test Company")
-            .countryCode("USA")
-            .email("integration@test.com")
-            .website("https://integration-test.com")
-            .build();
+    CompanyDto createRequest = buildCompanyDto("Integration Test Company", "USA", "integration@test.com", "https://integration-test.com");
 
     // When & Then - Create company
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    // Parse and validate response
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createdCompany = createCompany(createRequest);
     assertNotNull(createdCompany.getId());
-    assertEquals("Integration Test Company", createdCompany.getName());
-    assertEquals("USA", createdCompany.getCountryCode());
-    assertEquals("integration@test.com", createdCompany.getEmail());
-    assertEquals("https://integration-test.com", createdCompany.getWebsite());
-    assertEquals(CompanyStatus.ACTIVE, createdCompany.getStatus());
+    validateCompanyWithWebsite(createdCompany, "Integration Test Company", "USA", "integration@test.com", "https://integration-test.com");
+    validateCompanyStatus(createdCompany, CompanyStatus.ACTIVE);
 
     UUID companyId = createdCompany.getId();
 
     // When & Then - Retrieve the created company
-    String getResponseJson = mockMvc.perform(get("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    // Parse and validate retrieved company
-    CompanyDto retrievedCompany = objectMapper.readValue(getResponseJson, CompanyDto.class);
+    CompanyDto retrievedCompany = getCompany(companyId);
     assertEquals(companyId, retrievedCompany.getId());
-    assertEquals("Integration Test Company", retrievedCompany.getName());
-    assertEquals("USA", retrievedCompany.getCountryCode());
-    assertEquals("integration@test.com", retrievedCompany.getEmail());
-    assertEquals("https://integration-test.com", retrievedCompany.getWebsite());
-    assertEquals(CompanyStatus.ACTIVE, retrievedCompany.getStatus());
+    validateCompanyWithWebsite(retrievedCompany, "Integration Test Company", "USA", "integration@test.com", "https://integration-test.com");
+    validateCompanyStatus(retrievedCompany, CompanyStatus.ACTIVE);
   }
 
   @Test
   @DisplayName("Should get companies with search filters")
   void shouldGetCompaniesWithSearchFilters() throws Exception {
     // Given - Create multiple companies
-    CompanyDto company1 = CompanyDto.builder()
-            .name("Alpha Company")
-            .countryCode("USA")
-            .email("alpha@company.com")
-            .status(CompanyStatus.ACTIVE)
-            .build();
-
-    CompanyDto company2 = CompanyDto.builder()
-            .name("Beta Company")
-            .countryCode("CAN")
-            .email("beta@company.com")
-            .status(CompanyStatus.ACTIVE)
-            .build();
+    CompanyDto company1 = buildCompanyDto("Alpha Company", "USA", "alpha@company.com", CompanyStatus.ACTIVE);
+    CompanyDto company2 = buildCompanyDto("Beta Company", "CAN", "beta@company.com", CompanyStatus.ACTIVE);
 
     // Create companies
-    mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(company1))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
-
-    mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(company2))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+    createCompany(company1);
+    createCompany(company2);
 
     // When & Then - Search by name
     String searchByNameResponse = mockMvc.perform(get("/v1/companies")
@@ -201,58 +155,20 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should update company successfully")
   void shouldUpdateCompanySuccessfully() throws Exception {
     // Given - Create a company first
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Original Company")
-            .countryCode("USA")
-            .email("original@company.com")
-            .build();
-
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createRequest = buildCompanyDto("Original Company", "USA", "original@company.com");
+    CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
     // Given - Update request
-    CompanyDto updateRequest = CompanyDto.builder()
-            .name("Updated Company")
-            .countryCode("CAN")
-            .email("updated@company.com")
-            .website("https://updated-company.com")
-            .build();
+    CompanyDto updateRequest = buildCompanyDto("Updated Company", "CAN", "updated@company.com", "https://updated-company.com");
 
     // When & Then - Update the company
-    String updateResponseJson = mockMvc.perform(put("/v1/companies/{id}", companyId)
-                    .content(objectMapper.writeValueAsString(updateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    // Parse and validate updated company
-    CompanyDto updatedCompany = objectMapper.readValue(updateResponseJson, CompanyDto.class);
+    CompanyDto updatedCompany = updateCompany(companyId, updateRequest);
     assertEquals(companyId, updatedCompany.getId());
-    assertEquals("Updated Company", updatedCompany.getName());
-    assertEquals("CAN", updatedCompany.getCountryCode());
-    assertEquals("updated@company.com", updatedCompany.getEmail());
-    assertEquals("https://updated-company.com", updatedCompany.getWebsite());
+    validateCompanyWithWebsite(updatedCompany, "Updated Company", "CAN", "updated@company.com", "https://updated-company.com");
 
     // Verify the update persisted by retrieving the company
-    String getResponseJson = mockMvc.perform(get("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    // Parse and validate retrieved company
-    CompanyDto retrievedCompany = objectMapper.readValue(getResponseJson, CompanyDto.class);
+    CompanyDto retrievedCompany = getCompany(companyId);
     assertEquals("Updated Company", retrievedCompany.getName());
     assertEquals("CAN", retrievedCompany.getCountryCode());
   }
@@ -274,10 +190,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   void shouldReturn404WhenUpdatingNonExistentCompany() throws Exception {
     // Given
     UUID nonExistentId = UUID.randomUUID();
-    CompanyDto updateRequest = CompanyDto.builder()
-            .name("Updated Company")
-            .countryCode("CAN")
-            .build();
+    CompanyDto updateRequest = buildCompanyDto("Updated Company", "CAN", "updated@company.com");
 
     // When & Then
     mockMvc.perform(put("/v1/companies/{id}", nonExistentId)
@@ -404,10 +317,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should handle missing content type header")
   void shouldHandleMissingContentTypeHeader() throws Exception {
     // Given
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("New Company")
-            .countryCode("USA")
-            .build();
+    CompanyDto createRequest = buildCompanyDto("New Company", "USA", "new@company.com");
 
     // When & Then
     mockMvc.perform(post("/v1/companies")
@@ -423,10 +333,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should handle unsupported content type")
   void shouldHandleUnsupportedContentType() throws Exception {
     // Given
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("New Company")
-            .countryCode("USA")
-            .build();
+    CompanyDto createRequest = buildCompanyDto("New Company", "USA", "new@company.com");
 
     // When & Then
     mockMvc.perform(post("/v1/companies")
@@ -444,103 +351,45 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should handle database constraint violations")
   void shouldHandleDatabaseConstraintViolations() throws Exception {
     // Given - Create a company with required fields
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Test Company")
-            .countryCode("USA")
-            .email("test@company.com")
-            .build();
+    CompanyDto createRequest = buildCompanyDto("Test Company", "USA", "test@company.com");
 
     // Create the first company successfully
-    mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated());
+    createCompany(createRequest);
 
     // Try to create another company with the same email (assuming unique constraint on email)
-    CompanyDto duplicateRequest = CompanyDto.builder()
-            .name("Different Company") // Different name
-            .countryCode("CAN")       // Different country
-            .email("test@company.com") // Same email
-            .build();
+    CompanyDto duplicateRequest = buildCompanyDto("Different Company", "CAN", "test@company.com");
 
-    mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(duplicateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated()); // Since there's no unique constraint, this should succeed
+    createCompany(duplicateRequest); // Since there's no unique constraint, this should succeed
   }
 
   @Test
   @DisplayName("Should deactivate company successfully")
   void shouldDeactivateCompanySuccessfully() throws Exception {
     // Given - Create a company first
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Company to Deactivate")
-            .countryCode("USA")
-            .email("deactivate@company.com")
-            .build();
-
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", "deactivate@company.com");
+    CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
     // When & Then - Deactivate the company
-    String deactivateResponseJson = mockMvc.perform(delete("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    // Parse and validate deactivated company
-    CompanyDto deactivatedCompany = objectMapper.readValue(deactivateResponseJson,
-            CompanyDto.class);
+    CompanyDto deactivatedCompany = deactivateCompany(companyId);
     assertEquals(companyId, deactivatedCompany.getId());
-    assertEquals(CompanyStatus.DEACTIVATED, deactivatedCompany.getStatus());
+    validateCompanyStatus(deactivatedCompany, CompanyStatus.DEACTIVATED);
 
     // Verify the deactivation persisted by retrieving the company
-    String getResponseJson = mockMvc.perform(get("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto retrievedCompany = objectMapper.readValue(getResponseJson, CompanyDto.class);
-    assertEquals(CompanyStatus.DEACTIVATED, retrievedCompany.getStatus());
+    CompanyDto retrievedCompany = getCompany(companyId);
+    validateCompanyStatus(retrievedCompany, CompanyStatus.DEACTIVATED);
   }
 
   @Test
   @DisplayName("Should return 400 when deactivating already deactivated company")
   void shouldReturn400WhenDeactivatingAlreadyDeactivatedCompany() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Company to Deactivate")
-            .countryCode("USA")
-            .email("deactivate@company.com")
-            .build();
-
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", "deactivate@company.com");
+    CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
     // Deactivate the company
-    mockMvc.perform(delete("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+    deactivateCompany(companyId);
 
     // When & Then - Try to deactivate again
     mockMvc.perform(delete("/v1/companies/{id}", companyId)
@@ -552,129 +401,57 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should reactivate company with all users successfully")
   void shouldReactivateCompanyWithAllUsersSuccessfully() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Company to Reactivate")
-            .countryCode("USA")
-            .email("reactivate@company.com")
-            .build();
-
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
+    CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
     // Deactivate the company
-    mockMvc.perform(delete("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+    deactivateCompany(companyId);
 
     // When & Then - Reactivate with ALL users option
     CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
             CompanyReactivationRequest.UserReactivationOption.ALL, null);
 
-    String reactivateResponseJson = mockMvc.perform(post("/v1/companies/{id}/reactivate", companyId)
-                    .content(objectMapper.writeValueAsString(reactivateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    // Parse and validate reactivated company
-    CompanyDto reactivatedCompany = objectMapper.readValue(reactivateResponseJson,
-            CompanyDto.class);
+    CompanyDto reactivatedCompany = reactivateCompany(companyId, reactivateRequest);
     assertEquals(companyId, reactivatedCompany.getId());
-    assertEquals(CompanyStatus.ACTIVE, reactivatedCompany.getStatus());
+    validateCompanyStatus(reactivatedCompany, CompanyStatus.ACTIVE);
 
     // Verify the reactivation persisted
-    String getResponseJson = mockMvc.perform(get("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto retrievedCompany = objectMapper.readValue(getResponseJson, CompanyDto.class);
-    assertEquals(CompanyStatus.ACTIVE, retrievedCompany.getStatus());
+    CompanyDto retrievedCompany = getCompany(companyId);
+    validateCompanyStatus(retrievedCompany, CompanyStatus.ACTIVE);
   }
 
   @Test
   @DisplayName("Should reactivate company with selected users successfully")
   void shouldReactivateCompanyWithSelectedUsersSuccessfully() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Company to Reactivate")
-            .countryCode("USA")
-            .email("reactivate@company.com")
-            .build();
-
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
+    CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
     // Deactivate the company
-    mockMvc.perform(delete("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+    deactivateCompany(companyId);
 
     // When & Then - Reactivate with SELECTED users option
     List<UUID> selectedUserIds = List.of(UUID.randomUUID(), UUID.randomUUID());
     CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
             CompanyReactivationRequest.UserReactivationOption.SELECTED, selectedUserIds);
 
-    String reactivateResponseJson = mockMvc.perform(post("/v1/companies/{id}/reactivate", companyId)
-                    .content(objectMapper.writeValueAsString(reactivateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    // Parse and validate reactivated company
-    CompanyDto reactivatedCompany = objectMapper.readValue(reactivateResponseJson,
-            CompanyDto.class);
+    CompanyDto reactivatedCompany = reactivateCompany(companyId, reactivateRequest);
     assertEquals(companyId, reactivatedCompany.getId());
-    assertEquals(CompanyStatus.ACTIVE, reactivatedCompany.getStatus());
+    validateCompanyStatus(reactivatedCompany, CompanyStatus.ACTIVE);
   }
 
   @Test
   @DisplayName("Should return 400 when reactivating with SELECTED option but no user IDs")
   void shouldReturn400WhenReactivatingWithSelectedOptionButNoUserIds() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Company to Reactivate")
-            .countryCode("USA")
-            .email("reactivate@company.com")
-            .build();
-
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
+    CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
     // Deactivate the company
-    mockMvc.perform(delete("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+    deactivateCompany(companyId);
 
     // When & Then - Reactivate with SELECTED option but no user IDs
     CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
@@ -690,21 +467,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 when reactivating already active company")
   void shouldReturn400WhenReactivatingAlreadyActiveCompany() throws Exception {
     // Given - Create a company (already active)
-    CompanyDto createRequest = CompanyDto.builder()
-            .name("Active Company")
-            .countryCode("USA")
-            .email("active@company.com")
-            .build();
-
-    String responseJson = mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-
-    CompanyDto createdCompany = objectMapper.readValue(responseJson, CompanyDto.class);
+    CompanyDto createRequest = buildCompanyDto("Active Company", "USA", "active@company.com");
+    CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
     // When & Then - Try to reactivate already active company
@@ -747,37 +511,11 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return all users of a company by companyId")
   void shouldReturnAllUsersOfExistingCompany() throws Exception {
-    Company company = new Company();
-    company.setName("Test Company");
-    company.setCountryCode("USA");
-    company.setEmail("test@example.com");
-    company.setWebsite("https://example.com");
-    company.setStatus(CompanyStatus.ACTIVE);
-    company = companyRepository.save(company);
+    Company company = createTestCompany("Test Company", "USA", "test@example.com", "https://example.com");
     UUID companyId = company.getId();
 
-    User user1 = new User();
-    user1.setFirstName("Alice");
-    user1.setLastName("Johnson");
-    user1.setUsername("alice.johnson");
-    user1.setEmail("alice@example.com");
-    user1.setCompany(company);
-    user1.setStatus(UserStatus.ACTIVE);
-    user1.setDateOfBirth(LocalDate.of(1990, 1, 1));
-    user1.setSsn("111-22-3333");
-
-    User user2 = new User();
-    user2.setFirstName("Bob");
-    user2.setLastName("Smith");
-    user2.setUsername("bob.smith");
-    user2.setEmail("bob@example.com");
-    user2.setCompany(company);
-    user2.setStatus(UserStatus.INACTIVE);
-    user2.setDateOfBirth(LocalDate.of(1985, 5, 15));
-    user2.setSsn("444-55-6666");
-
-    userRepository.save(user1);
-    userRepository.save(user2);
+    User user1 = createTestUser("Alice", "Johnson", "alice.johnson", "alice@example.com", company);
+    User user2 = createTestUser("Bob", "Smith", "bob.smith", "bob@example.com", company, UserStatus.INACTIVE);
 
     try {
       mockMvc.perform(get("/v1/companies/{id}/users", companyId)
@@ -804,12 +542,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return empty page if no users found for company")
   void shouldReturnEmptyPageIfNoUsersFoundForCompany() throws Exception {
-    Company emptyCompany = new Company();
-    emptyCompany.setName("Empty Company");
-    emptyCompany.setCountryCode("USA");
-    emptyCompany.setEmail("empty@example.com");
-    emptyCompany.setStatus(CompanyStatus.ACTIVE);
-    emptyCompany = companyRepository.save(emptyCompany);
+    Company emptyCompany = createTestCompany("Empty Company", "USA", "empty@example.com");
 
     try {
       mockMvc.perform(get("/v1/companies/{id}/users", emptyCompany.getId())
@@ -836,5 +569,233 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
             .param("size", "10")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  // ========== PRIVATE HELPER METHODS ==========
+
+  /**
+   * Creates a company via POST request and returns the created company DTO.
+   */
+  private CompanyDto createCompany(CompanyDto createRequest) throws Exception {
+    String responseJson = mockMvc.perform(post("/v1/companies")
+                    .content(objectMapper.writeValueAsString(createRequest))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    return objectMapper.readValue(responseJson, CompanyDto.class);
+  }
+
+  /**
+   * Creates a company via POST request with minimal required fields.
+   */
+  private CompanyDto createCompany(String name, String countryCode, String email) throws Exception {
+    CompanyDto createRequest = CompanyDto.builder()
+            .name(name)
+            .countryCode(countryCode)
+            .email(email)
+            .build();
+
+    return createCompany(createRequest);
+  }
+
+  /**
+   * Creates a company via POST request with all fields.
+   */
+  private CompanyDto createCompany(String name, String countryCode, String email, String website) throws Exception {
+    CompanyDto createRequest = CompanyDto.builder()
+            .name(name)
+            .countryCode(countryCode)
+            .email(email)
+            .website(website)
+            .build();
+
+    return createCompany(createRequest);
+  }
+
+  /**
+   * Retrieves a company by ID via GET request.
+   */
+  private CompanyDto getCompany(UUID companyId) throws Exception {
+    String responseJson = mockMvc.perform(get("/v1/companies/{id}", companyId)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    return objectMapper.readValue(responseJson, CompanyDto.class);
+  }
+
+  /**
+   * Updates a company via PUT request and returns the updated company DTO.
+   */
+  private CompanyDto updateCompany(UUID companyId, CompanyDto updateRequest) throws Exception {
+    String responseJson = mockMvc.perform(put("/v1/companies/{id}", companyId)
+                    .content(objectMapper.writeValueAsString(updateRequest))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    return objectMapper.readValue(responseJson, CompanyDto.class);
+  }
+
+  /**
+   * Deactivates a company via DELETE request and returns the deactivated company DTO.
+   */
+  private CompanyDto deactivateCompany(UUID companyId) throws Exception {
+    String responseJson = mockMvc.perform(delete("/v1/companies/{id}", companyId)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    return objectMapper.readValue(responseJson, CompanyDto.class);
+  }
+
+  /**
+   * Reactivates a company via POST request and returns the reactivated company DTO.
+   */
+  private CompanyDto reactivateCompany(UUID companyId, CompanyReactivationRequest reactivateRequest) throws Exception {
+    String responseJson = mockMvc.perform(post("/v1/companies/{id}/reactivate", companyId)
+                    .content(objectMapper.writeValueAsString(reactivateRequest))
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+    return objectMapper.readValue(responseJson, CompanyDto.class);
+  }
+
+  /**
+   * Creates a CompanyDto with the specified fields.
+   */
+  private CompanyDto buildCompanyDto(String name, String countryCode, String email) {
+    return CompanyDto.builder()
+            .name(name)
+            .countryCode(countryCode)
+            .email(email)
+            .build();
+  }
+
+  /**
+   * Creates a CompanyDto with all fields.
+   */
+  private CompanyDto buildCompanyDto(String name, String countryCode, String email, String website) {
+    return CompanyDto.builder()
+            .name(name)
+            .countryCode(countryCode)
+            .email(email)
+            .website(website)
+            .build();
+  }
+
+  /**
+   * Creates a CompanyDto with status.
+   */
+  private CompanyDto buildCompanyDto(String name, String countryCode, String email, CompanyStatus status) {
+    return CompanyDto.builder()
+            .name(name)
+            .countryCode(countryCode)
+            .email(email)
+            .status(status)
+            .build();
+  }
+
+  /**
+   * Creates and saves a Company entity for testing.
+   */
+  private Company createTestCompany(String name, String countryCode, String email) {
+    Company company = new Company();
+    company.setName(name);
+    company.setCountryCode(countryCode);
+    company.setEmail(email);
+    company.setStatus(CompanyStatus.ACTIVE);
+    return companyRepository.save(company);
+  }
+
+  /**
+   * Creates and saves a Company entity with all fields.
+   */
+  private Company createTestCompany(String name, String countryCode, String email, String website) {
+    Company company = new Company();
+    company.setName(name);
+    company.setCountryCode(countryCode);
+    company.setEmail(email);
+    company.setWebsite(website);
+    company.setStatus(CompanyStatus.ACTIVE);
+    return companyRepository.save(company);
+  }
+
+  /**
+   * Creates and saves a User entity for testing.
+   */
+  private User createTestUser(String firstName, String lastName, String username, String email, Company company) {
+    User user = new User();
+    user.setFirstName(firstName);
+    user.setLastName(lastName);
+    user.setUsername(username);
+    user.setEmail(email);
+    user.setCompany(company);
+    user.setStatus(UserStatus.ACTIVE);
+    user.setDateOfBirth(LocalDate.of(1990, 1, 1));
+    user.setSsn(generateUniqueSsn());
+    return userRepository.save(user);
+  }
+
+  /**
+   * Creates and saves a User entity with custom status.
+   */
+  private User createTestUser(String firstName, String lastName, String username, String email, Company company, UserStatus status) {
+    User user = new User();
+    user.setFirstName(firstName);
+    user.setLastName(lastName);
+    user.setUsername(username);
+    user.setEmail(email);
+    user.setCompany(company);
+    user.setStatus(status);
+    user.setDateOfBirth(LocalDate.of(1990, 1, 1));
+    user.setSsn(generateUniqueSsn());
+    return userRepository.save(user);
+  }
+
+  /**
+   * Generates a unique SSN for testing purposes.
+   */
+  private String generateUniqueSsn() {
+    return String.format("%03d-%02d-%04d", 
+        (int) (Math.random() * 1000), 
+        (int) (Math.random() * 100), 
+        (int) (Math.random() * 10000));
+  }
+
+  /**
+   * Validates that a company has the expected basic fields.
+   */
+  private void validateCompanyBasicFields(CompanyDto company, String expectedName, String expectedCountryCode, String expectedEmail) {
+    assertEquals(expectedName, company.getName());
+    assertEquals(expectedCountryCode, company.getCountryCode());
+    assertEquals(expectedEmail, company.getEmail());
+  }
+
+  /**
+   * Validates that a company has the expected fields including website.
+   */
+  private void validateCompanyWithWebsite(CompanyDto company, String expectedName, String expectedCountryCode, String expectedEmail, String expectedWebsite) {
+    validateCompanyBasicFields(company, expectedName, expectedCountryCode, expectedEmail);
+    assertEquals(expectedWebsite, company.getWebsite());
+  }
+
+  /**
+   * Validates that a company has the expected status.
+   */
+  private void validateCompanyStatus(CompanyDto company, CompanyStatus expectedStatus) {
+    assertEquals(expectedStatus, company.getStatus());
   }
 }
