@@ -28,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
    * Retrieves a {@link User} by its ID or throws {@link ResponseStatusException} with
    * 404 NOT FOUND if the user does not exist.
    */
-  default User getByIdOrThrow(UUID id) {
+  default User findByIdOrThrow(UUID id) {
     return findById(id).orElseThrow(
         () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
   }

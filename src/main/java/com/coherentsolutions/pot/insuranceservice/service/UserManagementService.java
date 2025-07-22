@@ -63,7 +63,7 @@ public class UserManagementService {
    * user's function assignments with the incoming data.
    */
   public UserDto updateUser(UUID id, UserDto request) {
-    User user = userRepository.getByIdOrThrow(id);
+    User user = userRepository.findByIdOrThrow(id);
 
     if (user.getStatus() == UserStatus.INACTIVE) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot modify an inactive user");
@@ -111,7 +111,7 @@ public class UserManagementService {
    */
   @Transactional
   public UserDto deactivateUser(UUID id) {
-    User user = userRepository.getByIdOrThrow(id);
+    User user = userRepository.findByIdOrThrow(id);
 
     if (user.getStatus() == UserStatus.INACTIVE) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already inactive");
@@ -129,7 +129,7 @@ public class UserManagementService {
    */
   @Transactional
   public UserDto reactivateUser(UUID id) {
-    User user = userRepository.getByIdOrThrow(id);
+    User user = userRepository.findByIdOrThrow(id);
 
     if (user.getStatus() == UserStatus.ACTIVE) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already active");
