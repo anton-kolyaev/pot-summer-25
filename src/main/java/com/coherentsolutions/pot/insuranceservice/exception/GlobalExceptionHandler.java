@@ -34,8 +34,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * Global exception handler for the Insurance Service API.
  *
  * <p>This class extends {@link ResponseEntityExceptionHandler} and handles common exceptions
- * such as validation failures, unsupported media types, missing parameters, and others.
- * It provides structured {@link ErrorResponseDto} responses for all handled exceptions.
+ * such as validation failures, unsupported media types, missing parameters, and others. It provides
+ * structured {@link ErrorResponseDto} responses for all handled exceptions.
  */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {

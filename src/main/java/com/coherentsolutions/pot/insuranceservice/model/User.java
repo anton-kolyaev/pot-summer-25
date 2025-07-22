@@ -32,9 +32,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 /**
- * Represents a user within the insurance system.
- * A user is associated with a company.
- * This entity is mapped to the "users" table and includes auditing fields.
+ * Represents a user within the insurance system. A user is associated with a company. This entity
+ * is mapped to the "users" table and includes auditing fields.
  */
 @Entity
 @NoArgsConstructor

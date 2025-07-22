@@ -18,9 +18,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Entity representing the assignment of a {@link UserFunction} to a {@link User}.
- * This allows users to have multiple functional roles within the system.
- * Mapped to the "user_functions" table.
+ * Entity representing the assignment of a {@link UserFunction} to a {@link User}. This allows users
+ * to have multiple functional roles within the system. Mapped to the "user_functions" table.
  */
 @Entity
 @Table(name = "user_functions")

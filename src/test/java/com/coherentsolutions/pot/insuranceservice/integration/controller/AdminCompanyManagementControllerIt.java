@@ -42,8 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Integration tests for AdminCompanyManagementController.
- * Tests user listing endpoints and request validation using real database containers.
+ * Integration tests for AdminCompanyManagementController. Tests user listing endpoints and request
+ * validation using real database containers.
  */
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

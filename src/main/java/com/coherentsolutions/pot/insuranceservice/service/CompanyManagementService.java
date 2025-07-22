@@ -33,8 +33,8 @@ public class CompanyManagementService {
   private final CompanyMapper companyMapper;
 
   /**
-   * Retrieves a paginated list of companies filtered
-   * by criteria specified in {@link CompanyFilter}.
+   * Retrieves a paginated list of companies filtered by criteria specified in
+   * {@link CompanyFilter}.
    */
   public Page<CompanyDto> getCompaniesWithFilters(CompanyFilter filter, Pageable pageable) {
     // Use JPA Specification to filter at database level with pagination
@@ -77,8 +77,8 @@ public class CompanyManagementService {
   }
 
   /**
-   * Creates a new company entity from the given {@link CompanyDto} and persists it.
-   * Sets the initial company status to ACTIVE.
+   * Creates a new company entity from the given {@link CompanyDto} and persists it. Sets the
+   * initial company status to ACTIVE.
    */
   public CompanyDto createCompany(CompanyDto companyDto) {
     Company company = companyMapper.toEntity(companyDto);
@@ -126,8 +126,8 @@ public class CompanyManagementService {
   }
 
   /**
-   * Reactivates the company with the specified id and optionally reactivates users
-   * based on the options provided in {@link CompanyReactivationRequest}.
+   * Reactivates the company with the specified id and optionally reactivates users based on the
+   * options provided in {@link CompanyReactivationRequest}.
    */
   @Transactional
   public CompanyDto reactivateCompany(UUID id, CompanyReactivationRequest request) {

@@ -125,7 +125,6 @@ class CompanyManagementServiceTest {
   void shouldCreateCompanySuccessfully() {
     // Given
 
-
     Company newCompany = new Company();
     newCompany.setId(UUID.randomUUID());
     newCompany.setName("New Company");
@@ -264,4 +263,4 @@ class CompanyManagementServiceTest {
     verify(companyRepository).findByIdOrThrow(testCompanyId);
     verify(companyRepository, never()).save(any());
   }
-} 
+}
