@@ -24,9 +24,8 @@ To use Google Java Style formatting in VS Code:
 
    ```json
       {
-        "java.format.settings.url": "./ide/eclipse-java-google-style.xml",
-        "java.format.settings.profile": "GoogleStyle",
-        "editor.formatOnSave": true
+        "java.format.settings.url": "config/ide/eclipse-java-google-style.xml",
+        "java.format.settings.profile": "GoogleStyle"
       }
    ```
    

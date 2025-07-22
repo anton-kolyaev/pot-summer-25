@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'checkstyle'
+    id 'jacoco'
     id 'org.springframework.boot' version '3.5.3'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'com.ryandens.javaagent-test' version '0.8.0'
@@ -24,11 +25,17 @@ configurations.configureEach {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.13"
+}
+
 checkstyle {
     toolVersion = '10.26.1'
     configFile = file("config/checkstyle/google_checks.xml")
     ignoreFailures = false
     showViolations = true
+    maxErrors = 0
+    maxWarnings = 0
 }
 
 dependencies {
@@ -53,4 +60,22 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+    dependsOn test
+}
+jacocoTestCoverageVerification {
+    dependsOn test
+    violationRules {
+        rule {
+            limit{
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+check {
+    dependsOn jacocoTestCoverageVerification
 }
