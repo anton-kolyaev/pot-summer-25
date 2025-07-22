@@ -1,5 +1,16 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -12,22 +23,11 @@ import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
-import java.time.LocalDate;
-import java.util.UUID;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Integration tests for AdminUserManagementController.
- * This test class verifies user management functionality
- * such as deactivation and reactivation of users,
- * including edge cases like already inactive or non-existent users.
+ * Integration tests for AdminUserManagementController. This test class verifies user management
+ * functionality such as deactivation and reactivation of users, including edge cases like already
+ * inactive or non-existent users.
  */
 @ActiveProfiles("test")
 @SpringBootTest
@@ -36,14 +36,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @DisplayName("Integration test for AdminUserManagementController")
 public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private CompanyRepository companyRepository;
+  @Autowired private CompanyRepository companyRepository;
 
   @Test
   @DisplayName("Should deactivate active user")
@@ -67,7 +64,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
+      mockMvc
+          .perform(delete("/v1/users/{id}", user.getId()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.INACTIVE.name()));
     } finally {
@@ -98,8 +96,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
-          .andExpect(status().isBadRequest());
+      mockMvc.perform(delete("/v1/users/{id}", user.getId())).andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
       companyRepository.deleteById(company.getId());
@@ -110,8 +107,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 404 when deactivating a non-existent user")
   void shouldReturn404WhenDeactivatingNonExistentUser() throws Exception {
     UUID fakeId = UUID.randomUUID();
-    mockMvc.perform(delete("/v1/users/{id}", fakeId))
-        .andExpect(status().isNotFound());
+    mockMvc.perform(delete("/v1/users/{id}", fakeId)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -136,7 +132,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId()))
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.ACTIVE.name()));
     } finally {
@@ -167,7 +164,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId()))
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
           .andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
@@ -179,7 +177,6 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 404 when reactivating a non-existent user")
   void shouldReturn404WhenReactivatingNonExistentUser() throws Exception {
     UUID fakeId = UUID.randomUUID();
-    mockMvc.perform(put("/v1/users/{id}/reactivation", fakeId))
-        .andExpect(status().isNotFound());
+    mockMvc.perform(put("/v1/users/{id}/reactivation", fakeId)).andExpect(status().isNotFound());
   }
 }
