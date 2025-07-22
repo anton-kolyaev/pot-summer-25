@@ -1,8 +1,18 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
+import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
+import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
+import com.coherentsolutions.pot.insuranceservice.model.Company;
+import com.coherentsolutions.pot.insuranceservice.model.User;
+import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
+import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import java.time.LocalDate;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,18 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
-import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
-import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
-import com.coherentsolutions.pot.insuranceservice.model.Company;
-import com.coherentsolutions.pot.insuranceservice.model.User;
-import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
-import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 
 /**
  * Integration tests for AdminUserManagementController. This test class verifies user management
@@ -36,11 +34,14 @@ import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 @DisplayName("Integration test for AdminUserManagementController")
 public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
-  @Autowired private MockMvc mockMvc;
+  @Autowired
+  private MockMvc mockMvc;
 
-  @Autowired private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
-  @Autowired private CompanyRepository companyRepository;
+  @Autowired
+  private CompanyRepository companyRepository;
 
   @Test
   @DisplayName("Should deactivate active user")
