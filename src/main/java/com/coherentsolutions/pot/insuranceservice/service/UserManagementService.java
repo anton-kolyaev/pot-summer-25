@@ -125,8 +125,7 @@ public class UserManagementService {
    * Updates the user status to the given target status if different from the current one. Throws an
    * exception if the status is already set.
    */
-  @Transactional
-  public UserDto updateUserStatus(UUID id, UserStatus targetStatus) {
+  private UserDto updateUserStatus(UUID id, UserStatus targetStatus) {
     User user = userRepository.findByIdOrThrow(id);
 
     if (user.getStatus() == targetStatus) {
