@@ -22,10 +22,6 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
   /**
    * Finds a user by its ID or throws an {@link EntityNotFoundException} if the user does not exist.
-   *
-   * @param id
-   * @return the found user
-   * @throws EntityNotFoundException if no user is found with the given ID
    */
   default User findByIdOrThrow(UUID id) {
     return findById(id)

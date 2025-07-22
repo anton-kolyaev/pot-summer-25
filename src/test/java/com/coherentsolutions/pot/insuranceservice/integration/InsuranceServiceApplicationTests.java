@@ -8,7 +8,7 @@ import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(classes = InsuranceServiceApplication.class)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
-class InsuranceServiceApplicationIT extends PostgresTestContainer {
+class InsuranceServiceApplicationTests extends PostgresTestContainer {
 
   @Test
   void contextLoads() {}

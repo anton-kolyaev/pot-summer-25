@@ -21,7 +21,6 @@ import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -347,6 +346,10 @@ public class UserManagementServiceTest {
   @DisplayName("Should create user and return UserDto")
   void shouldCreateUserSuccessfully() {
     // Given
+    User mappedUser = new User();
+    mappedUser.setFirstName("Create");
+    mappedUser.setLastName("User");
+    mappedUser.setEmail("create@user.com");
     UserDto createDto =
         UserDto.builder()
             .firstName("Create")
@@ -354,11 +357,6 @@ public class UserManagementServiceTest {
             .email("create@user.com")
             .functions(Set.of(UserFunction.COMPANY_MANAGER))
             .build();
-    User mappedUser = new User();
-    mappedUser.setFirstName("Create");
-    mappedUser.setLastName("User");
-    mappedUser.setEmail("create@user.com");
-
     when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
     when(userRepository.save(mappedUser)).thenReturn(mappedUser);
     when(userMapper.toDto(mappedUser)).thenReturn(createDto);
@@ -384,14 +382,11 @@ public class UserManagementServiceTest {
         UserDto.builder()
             .firstName("Create")
             .lastName("User")
-            .email("create@user.com")
             .functions(Set.of(UserFunction.COMPANY_MANAGER))
             .build();
     User mappedUser = new User();
     mappedUser.setFirstName("Create");
     mappedUser.setLastName("User");
-    mappedUser.setEmail("create@user.com");
-
     when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
     when(userRepository.save(mappedUser)).thenReturn(mappedUser);
     when(userMapper.toDto(mappedUser)).thenReturn(createDto);
@@ -430,6 +425,7 @@ public class UserManagementServiceTest {
     // Given
     User existingUser = new User();
     existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
     // Simulate existing function assignments
     Set<com.coherentsolutions.pot.insuranceservice.model.UserFunctionAssignment> assignments =
         new java.util.HashSet<>();
@@ -445,7 +441,7 @@ public class UserManagementServiceTest {
             .functions(Set.of(UserFunction.COMPANY_MANAGER, UserFunction.CONSUMER_CLAIM_MANAGER))
             .build();
 
-    when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+    when(userRepository.getByIdOrThrow(userId)).thenReturn(existingUser);
     when(userRepository.save(any(User.class))).thenReturn(existingUser);
     when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
 
@@ -456,7 +452,7 @@ public class UserManagementServiceTest {
     assertNotNull(result);
     assertEquals(2, result.getFunctions().size());
     verify(userRepository).save(existingUser);
-    verify(userRepository).findById(userId);
+    verify(userRepository).getByIdOrThrow(userId);
     verify(userMapper).toDto(existingUser);
   }
 }
