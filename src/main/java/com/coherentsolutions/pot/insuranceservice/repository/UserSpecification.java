@@ -15,14 +15,14 @@ import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Provides JPA Specifications to filter {@link User} entities based on
- * various criteria encapsulated in {@link UserFilter}.
+ * Provides JPA Specifications to filter {@link User} entities based on various criteria
+ * encapsulated in {@link UserFilter}.
  */
 public class UserSpecification {
 
   /**
-   * Creates a Specification for filtering {@link User} entities according
-   * to the criteria defined in the given {@link UserFilter}.
+   * Creates a Specification for filtering {@link User} entities according to the criteria defined
+   * in the given {@link UserFilter}.
    */
   public static Specification<User> withFilters(UserFilter filter) {
     return (root, query, criteriaBuilder) -> {

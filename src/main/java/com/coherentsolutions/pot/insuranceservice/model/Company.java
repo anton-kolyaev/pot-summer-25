@@ -28,8 +28,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
- * Represents a company entity in the insurance service domain.
- * Mapped to the "companies" table in the database.
+ * Represents a company entity in the insurance service domain. Mapped to the "companies" table in
+ * the database.
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)

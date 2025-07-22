@@ -9,7 +9,7 @@ To apply Google Java Style formatting in IntelliJ IDEA:
 2. Click the gear icon (⚙) near the scheme dropdown →  
    `Import Scheme` → `IntelliJ IDEA code style XML`
 
-3. Select the file `projectDir\config\checkstyle\google_checks.xml`.
+3. Select the file `projectDir\config\ide\intelij-java-google-style.xml`.
 
 4. Apply and save changes.
 
@@ -17,22 +17,35 @@ To apply Google Java Style formatting in IntelliJ IDEA:
 
 To use Google Java Style formatting in VS Code:
 
-1. Ensure you have the **Java Extension Pack** installed.
+1. Install one of the following formatter extensions:
+   **Google Java Formatter (Liangcheng Juves)**
+   or
+   **Google Java Format for VS Code (Jose V Sebastian)**
 
-2. Add the following configuration to your .vscode/settings.json file 
-   to enable the Google Eclipse style:
+2. Add the following configuration to your .vscode/settings.json file
+   to enable automatic formatting on save using the installed formater:
 
    ```json
-      {
-        "java.format.settings.url": "config/ide/eclipse-java-google-style.xml",
-        "java.format.settings.profile": "GoogleStyle"
-      }
+   {
+    "editor.formatOnSave": true,
+    "[java]": {
+      "editor.defaultFormatter": "liangcheng.javes-google-java-formatter" 
+    }
+   }
    ```
-   
-3. Once the Java Extension Pack is installed and the configuration is added,
-   code formatting with Checkstyle will be applied automatically based on the project settings.
+   or
+   ```json
+   {
+    "editor.formatOnSave": true,
+    "[java]": {
+      "editor.defaultFormatter": "liangcheng.javes-google-java-formatter"
+    }
+   }
+   ```
 
 
+3. Now, whenever you save Java files in VS Code, they will be automatically formatted 
+   according to the Google Java Style via the chosen plugin.
 
 ## Running Checkstyle
 

@@ -12,8 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
- * Base abstract test class for controller unit tests.
- * Provides common setup for MockMvc, ObjectMapper, and test data factories.
+ * Base abstract test class for controller unit tests. Provides common setup for MockMvc,
+ * ObjectMapper, and test data factories.
  */
 public abstract class AbstractControllerTest {
 
