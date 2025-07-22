@@ -24,10 +24,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Integration tests for AdminUserManagementController.
- * This test class verifies user management functionality
- * such as deactivation and reactivation of users,
- * including edge cases like already inactive or non-existent users.
+ * Integration tests for AdminUserManagementController. This test class verifies user management
+ * functionality such as deactivation and reactivation of users, including edge cases like already
+ * inactive or non-existent users.
  */
 @ActiveProfiles("test")
 @SpringBootTest
