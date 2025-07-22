@@ -1,12 +1,15 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,12 +24,11 @@ import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,12 +74,14 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should create and retrieve company successfully")
   void shouldCreateAndRetrieveCompanySuccessfully() throws Exception {
     // Given
-    CompanyDto createRequest = buildCompanyDto("Integration Test Company", "USA", "integration@test.com", "https://integration-test.com");
+    CompanyDto createRequest = buildCompanyDto("Integration Test Company", "USA", 
+        "integration@test.com", "https://integration-test.com");
 
     // When & Then - Create company
     CompanyDto createdCompany = createCompany(createRequest);
     assertNotNull(createdCompany.getId());
-    validateCompanyWithWebsite(createdCompany, "Integration Test Company", "USA", "integration@test.com", "https://integration-test.com");
+    validateCompanyWithWebsite(createdCompany, "Integration Test Company", "USA", 
+        "integration@test.com", "https://integration-test.com");
     validateCompanyStatus(createdCompany, CompanyStatus.ACTIVE);
 
     UUID companyId = createdCompany.getId();
@@ -85,7 +89,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     // When & Then - Retrieve the created company
     CompanyDto retrievedCompany = getCompany(companyId);
     assertEquals(companyId, retrievedCompany.getId());
-    validateCompanyWithWebsite(retrievedCompany, "Integration Test Company", "USA", "integration@test.com", "https://integration-test.com");
+    validateCompanyWithWebsite(retrievedCompany, "Integration Test Company", "USA", 
+        "integration@test.com", "https://integration-test.com");
     validateCompanyStatus(retrievedCompany, CompanyStatus.ACTIVE);
   }
 
@@ -93,8 +98,10 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should get companies with search filters")
   void shouldGetCompaniesWithSearchFilters() throws Exception {
     // Given - Create multiple companies
-    CompanyDto company1 = buildCompanyDto("Alpha Company", "USA", "alpha@company.com", CompanyStatus.ACTIVE);
-    CompanyDto company2 = buildCompanyDto("Beta Company", "CAN", "beta@company.com", CompanyStatus.ACTIVE);
+    CompanyDto company1 = buildCompanyDto("Alpha Company", "USA", "alpha@company.com", 
+        CompanyStatus.ACTIVE);
+    CompanyDto company2 = buildCompanyDto("Beta Company", "CAN", "beta@company.com", 
+        CompanyStatus.ACTIVE);
 
     // Create companies
     createCompany(company1);
@@ -120,7 +127,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     List<CompanyDto> searchByNameCompanies = objectMapper.readValue(
             searchByNameResult.get("content").toString(),
             new TypeReference<List<CompanyDto>>() {
-            }
+          }
     );
     assertFalse(searchByNameCompanies.isEmpty());
     assertEquals("Alpha Company", searchByNameCompanies.get(0).getName());
@@ -145,7 +152,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     List<CompanyDto> searchByCountryCompanies = objectMapper.readValue(
             searchByCountryResult.get("content").toString(),
             new TypeReference<List<CompanyDto>>() {
-            }
+          }
     );
     assertFalse(searchByCountryCompanies.isEmpty());
     assertEquals("CAN", searchByCountryCompanies.get(0).getCountryCode());
@@ -160,12 +167,14 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     UUID companyId = createdCompany.getId();
 
     // Given - Update request
-    CompanyDto updateRequest = buildCompanyDto("Updated Company", "CAN", "updated@company.com", "https://updated-company.com");
+    CompanyDto updateRequest = buildCompanyDto("Updated Company", "CAN", "updated@company.com", 
+        "https://updated-company.com");
 
     // When & Then - Update the company
     CompanyDto updatedCompany = updateCompany(companyId, updateRequest);
     assertEquals(companyId, updatedCompany.getId());
-    validateCompanyWithWebsite(updatedCompany, "Updated Company", "CAN", "updated@company.com", "https://updated-company.com");
+    validateCompanyWithWebsite(updatedCompany, "Updated Company", "CAN", "updated@company.com", 
+        "https://updated-company.com");
 
     // Verify the update persisted by retrieving the company
     CompanyDto retrievedCompany = getCompany(companyId);
@@ -366,7 +375,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should deactivate company successfully")
   void shouldDeactivateCompanySuccessfully() throws Exception {
     // Given - Create a company first
-    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", "deactivate@company.com");
+    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", 
+        "deactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -384,7 +394,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 when deactivating already deactivated company")
   void shouldReturn400WhenDeactivatingAlreadyDeactivatedCompany() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", "deactivate@company.com");
+    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", 
+        "deactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -401,7 +412,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should reactivate company with all users successfully")
   void shouldReactivateCompanyWithAllUsersSuccessfully() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
+    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", 
+        "reactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -425,7 +437,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should reactivate company with selected users successfully")
   void shouldReactivateCompanyWithSelectedUsersSuccessfully() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
+    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", 
+        "reactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -446,7 +459,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 when reactivating with SELECTED option but no user IDs")
   void shouldReturn400WhenReactivatingWithSelectedOptionButNoUserIds() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
+    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", 
+        "reactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -511,11 +525,14 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return all users of a company by companyId")
   void shouldReturnAllUsersOfExistingCompany() throws Exception {
-    Company company = createTestCompany("Test Company", "USA", "test@example.com", "https://example.com");
+    Company company = createTestCompany("Test Company", "USA", "test@example.com", 
+        "https://example.com");
     UUID companyId = company.getId();
 
-    User user1 = createTestUser("Alice", "Johnson", "alice.johnson", "alice@example.com", company);
-    User user2 = createTestUser("Bob", "Smith", "bob.smith", "bob@example.com", company, UserStatus.INACTIVE);
+    User user1 = createTestUser("Alice", "Johnson", "alice.johnson", "alice@example.com", 
+        company);
+    User user2 = createTestUser("Bob", "Smith", "bob.smith", "bob@example.com", company, 
+        UserStatus.INACTIVE);
 
     mockMvc.perform(get("/v1/companies/{id}/users", companyId)
             .param("page", "0")
@@ -591,7 +608,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Creates a company via POST request with all fields.
    */
-  private CompanyDto createCompany(String name, String countryCode, String email, String website) throws Exception {
+  private CompanyDto createCompany(String name, String countryCode, String email, 
+      String website) throws Exception {
     CompanyDto createRequest = CompanyDto.builder()
             .name(name)
             .countryCode(countryCode)
@@ -648,7 +666,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Reactivates a company via POST request and returns the reactivated company DTO.
    */
-  private CompanyDto reactivateCompany(UUID companyId, CompanyReactivationRequest reactivateRequest) throws Exception {
+  private CompanyDto reactivateCompany(UUID companyId, 
+      CompanyReactivationRequest reactivateRequest) throws Exception {
     String responseJson = mockMvc.perform(post("/v1/companies/{id}/reactivate", companyId)
                     .content(objectMapper.writeValueAsString(reactivateRequest))
                     .contentType(MediaType.APPLICATION_JSON))
@@ -674,7 +693,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Creates a CompanyDto with all fields.
    */
-  private CompanyDto buildCompanyDto(String name, String countryCode, String email, String website) {
+  private CompanyDto buildCompanyDto(String name, String countryCode, String email, 
+      String website) {
     return CompanyDto.builder()
             .name(name)
             .countryCode(countryCode)
@@ -686,7 +706,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Creates a CompanyDto with status.
    */
-  private CompanyDto buildCompanyDto(String name, String countryCode, String email, CompanyStatus status) {
+  private CompanyDto buildCompanyDto(String name, String countryCode, String email, 
+      CompanyStatus status) {
     return CompanyDto.builder()
             .name(name)
             .countryCode(countryCode)
@@ -710,7 +731,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Creates and saves a Company entity with all fields.
    */
-  private Company createTestCompany(String name, String countryCode, String email, String website) {
+  private Company createTestCompany(String name, String countryCode, String email, 
+      String website) {
     Company company = new Company();
     company.setName(name);
     company.setCountryCode(countryCode);
@@ -723,7 +745,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Creates and saves a User entity for testing.
    */
-  private User createTestUser(String firstName, String lastName, String username, String email, Company company) {
+  private User createTestUser(String firstName, String lastName, String username, String email, 
+      Company company) {
     User user = new User();
     user.setFirstName(firstName);
     user.setLastName(lastName);
@@ -739,7 +762,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Creates and saves a User entity with custom status.
    */
-  private User createTestUser(String firstName, String lastName, String username, String email, Company company, UserStatus status) {
+  private User createTestUser(String firstName, String lastName, String username, String email, 
+      Company company, UserStatus status) {
     User user = new User();
     user.setFirstName(firstName);
     user.setLastName(lastName);
@@ -765,7 +789,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Validates that a company has the expected basic fields.
    */
-  private void validateCompanyBasicFields(CompanyDto company, String expectedName, String expectedCountryCode, String expectedEmail) {
+  private void validateCompanyBasicFields(CompanyDto company, String expectedName, 
+      String expectedCountryCode, String expectedEmail) {
     assertEquals(expectedName, company.getName());
     assertEquals(expectedCountryCode, company.getCountryCode());
     assertEquals(expectedEmail, company.getEmail());
@@ -774,7 +799,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   /**
    * Validates that a company has the expected fields including website.
    */
-  private void validateCompanyWithWebsite(CompanyDto company, String expectedName, String expectedCountryCode, String expectedEmail, String expectedWebsite) {
+  private void validateCompanyWithWebsite(CompanyDto company, String expectedName, 
+      String expectedCountryCode, String expectedEmail, String expectedWebsite) {
     validateCompanyBasicFields(company, expectedName, expectedCountryCode, expectedEmail);
     assertEquals(expectedWebsite, company.getWebsite());
   }
