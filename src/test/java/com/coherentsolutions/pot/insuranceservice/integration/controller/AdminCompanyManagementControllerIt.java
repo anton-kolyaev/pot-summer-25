@@ -517,26 +517,18 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     User user1 = createTestUser("Alice", "Johnson", "alice.johnson", "alice@example.com", company);
     User user2 = createTestUser("Bob", "Smith", "bob.smith", "bob@example.com", company, UserStatus.INACTIVE);
 
-    try {
-      mockMvc.perform(get("/v1/companies/{id}/users", companyId)
-              .param("page", "0")
-              .param("size", "10")
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-          .andExpect(jsonPath("$.content").isArray())
-          .andExpect(jsonPath("$.content.length()").value(2))
-
-          .andExpect(
-              jsonPath("$.content[*].username", containsInAnyOrder("alice.johnson", "bob.smith")))
-          .andExpect(jsonPath("$.content[*].companyId",
-              containsInAnyOrder(companyId.toString(), companyId.toString())));
-    } finally {
-      userRepository.deleteById(user1.getId());
-      userRepository.deleteById(user2.getId());
-      companyRepository.deleteById(companyId);
-    }
-
+    mockMvc.perform(get("/v1/companies/{id}/users", companyId)
+            .param("page", "0")
+            .param("size", "10")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(2))
+        .andExpect(
+            jsonPath("$.content[*].username", containsInAnyOrder("alice.johnson", "bob.smith")))
+        .andExpect(jsonPath("$.content[*].companyId",
+            containsInAnyOrder(companyId.toString(), companyId.toString())));
   }
 
   @Test
@@ -544,20 +536,15 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   void shouldReturnEmptyPageIfNoUsersFoundForCompany() throws Exception {
     Company emptyCompany = createTestCompany("Empty Company", "USA", "empty@example.com");
 
-    try {
-      mockMvc.perform(get("/v1/companies/{id}/users", emptyCompany.getId())
-              .param("page", "0")
-              .param("size", "10")
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-          .andExpect(jsonPath("$.content").isArray())
-          .andExpect(jsonPath("$.content.length()").value(0))
-          .andExpect(jsonPath("$.totalElements").value(0));
-    } finally {
-      companyRepository.deleteById(emptyCompany.getId());
-    }
-
+    mockMvc.perform(get("/v1/companies/{id}/users", emptyCompany.getId())
+            .param("page", "0")
+            .param("size", "10")
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(0))
+        .andExpect(jsonPath("$.totalElements").value(0));
   }
 
   @Test
