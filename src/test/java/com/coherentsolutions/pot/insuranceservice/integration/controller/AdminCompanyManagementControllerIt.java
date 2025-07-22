@@ -1,8 +1,10 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -65,11 +67,6 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
 
   @Autowired
   private MockMvc mockMvc;
-
-  @BeforeEach
-  void setUp() {
-    mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-  }
 
   @Test
   @DisplayName("Should create and retrieve company successfully")
