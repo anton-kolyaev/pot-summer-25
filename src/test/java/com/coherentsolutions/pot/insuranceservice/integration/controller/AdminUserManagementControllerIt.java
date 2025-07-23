@@ -366,4 +366,13 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
       companyRepository.deleteById(emptyCompany.getId());
     }
   }
+
+  @Test
+  @DisplayName("Should return Bad Request when companyId has invalid format")
+  void shouldReturnBadRequestForInvalidCompanyId() throws Exception {
+    String invalidCompanyId = "invalid-company-id";
+    mockMvc.perform(
+        get("/v1/companies/{id}/users", invalidCompanyId).param("page", "0").param("size", "10")
+            .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
+  }
 }
