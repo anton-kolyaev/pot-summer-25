@@ -73,10 +73,17 @@ public class InsurancePackage {
 
   @Transient
   public PackageStatus getStatus() {
+    if (startDate == null || endDate == null) {
+      return PackageStatus.DEACTIVATED;
+    }
     LocalDate now = LocalDate.now();
-    if (endDate != null && now.isBefore(endDate) && startDate != null && now.isAfter(startDate)) {
+    if (now.isBefore(startDate)) {
+      return PackageStatus.INITIALIZED;
+    }
+    if (!now.isBefore(startDate) && !now.isAfter(endDate)) {
       return PackageStatus.ACTIVE;
-    } else if (endDate != null & now.isAfter(endDate)) {
+    }
+    if (now.isAfter(endDate)) {
       return PackageStatus.EXPIRED;
     }
     return PackageStatus.DEACTIVATED;
