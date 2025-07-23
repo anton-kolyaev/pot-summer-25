@@ -380,7 +380,7 @@ public class UserManagementServiceTest {
     verify(userRepository).save(mappedUser);
     verify(userMapper).toDto(mappedUser);
     // Ensure findByIdOrThrow is never called during create
-    org.mockito.Mockito.verify(userRepository, org.mockito.Mockito.never())
+    verify(userRepository, never())
         .findByIdOrThrow(any(UUID.class));
   }
 
