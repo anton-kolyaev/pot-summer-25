@@ -4,6 +4,7 @@ import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -45,9 +46,11 @@ public class UserDto {
   private String ssn;
 
   @NotNull(message = "Address is required")
+  @Valid
   private List<Address> addressData;
 
   @NotNull(message = "Phone is required")
+  @Valid
   private List<Phone> phoneData;
   private Set<UserFunction> functions;
   private UserStatus status;
