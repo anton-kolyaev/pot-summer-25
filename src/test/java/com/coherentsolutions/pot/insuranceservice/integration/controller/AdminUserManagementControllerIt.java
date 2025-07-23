@@ -24,10 +24,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Integration tests for AdminUserManagementController.
- * This test class verifies user management functionality
- * such as deactivation and reactivation of users,
- * including edge cases like already inactive or non-existent users.
+ * Integration tests for AdminUserManagementController. This test class verifies user management
+ * functionality such as deactivation and reactivation of users, including edge cases like already
+ * inactive or non-existent users.
  */
 @ActiveProfiles("test")
 @SpringBootTest
@@ -67,7 +66,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
+      mockMvc
+          .perform(delete("/v1/users/{id}", user.getId()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.INACTIVE.name()));
     } finally {
@@ -98,8 +98,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
-          .andExpect(status().isBadRequest());
+      mockMvc.perform(delete("/v1/users/{id}", user.getId())).andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
       companyRepository.deleteById(company.getId());
@@ -110,8 +109,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 404 when deactivating a non-existent user")
   void shouldReturn404WhenDeactivatingNonExistentUser() throws Exception {
     UUID fakeId = UUID.randomUUID();
-    mockMvc.perform(delete("/v1/users/{id}", fakeId))
-        .andExpect(status().isNotFound());
+    mockMvc.perform(delete("/v1/users/{id}", fakeId)).andExpect(status().isNotFound());
   }
 
   @Test
@@ -136,7 +134,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId()))
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.ACTIVE.name()));
     } finally {
@@ -167,7 +166,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId()))
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
           .andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
@@ -179,7 +179,6 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 404 when reactivating a non-existent user")
   void shouldReturn404WhenReactivatingNonExistentUser() throws Exception {
     UUID fakeId = UUID.randomUUID();
-    mockMvc.perform(put("/v1/users/{id}/reactivation", fakeId))
-        .andExpect(status().isNotFound());
+    mockMvc.perform(put("/v1/users/{id}/reactivation", fakeId)).andExpect(status().isNotFound());
   }
 }
