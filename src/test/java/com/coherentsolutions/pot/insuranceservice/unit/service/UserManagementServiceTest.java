@@ -140,7 +140,7 @@ public class UserManagementServiceTest {
   @DisplayName("Should throw ResponseStatusException when attempting to update non-existent user")
   void shouldThrowExceptionWhenUserNotFound() {
     // Given
-    when(userRepository.getByIdOrThrow(userId)).thenThrow(
+    when(userRepository.findByIdOrThrow(userId)).thenThrow(
         new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
     // When // Then

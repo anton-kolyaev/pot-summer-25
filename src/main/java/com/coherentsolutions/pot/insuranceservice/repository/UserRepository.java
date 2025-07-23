@@ -22,15 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
  */
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
   /**
-   * Finds a user by its ID or throws an {@link EntityNotFoundException}
-   * if the user does not exist.
-   */
-  default User findByIdOrThrow(UUID id) {
-    return findById(id)
-        .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
-  }
-
-  /**
    * Finds all users belonging to a specific company.
    */
   List<User> findByCompanyId(UUID companyId);
