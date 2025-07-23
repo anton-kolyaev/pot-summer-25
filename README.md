@@ -37,3 +37,9 @@ After running the tests, you’ll find the complete HTML coverage report here:
 ```text
 build/reports/jacoco/test/html/index.html
 ```
+
+## API Documentation:
+
+Once the app is running, visit:
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- OpenAPI JSON: http://localhost:8080/v3/api-docs
