@@ -76,7 +76,7 @@ public class UserManagementService {
    * user's function assignments with the incoming data.
    */
   public UserDto updateUser(UUID id, UserDto request) {
-    User user = userRepository.getByIdOrThrow(id);
+    User user = userRepository.findByIdOrThrow(id);
 
     if (user.getStatus() == UserStatus.INACTIVE) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot modify an inactive user");
@@ -97,9 +97,10 @@ public class UserManagementService {
       currentAssignments.removeIf(
           assignment -> !incomingFunctions.contains(assignment.getFunction()));
 
-      Set<UserFunction> currentFunctions = currentAssignments.stream()
-          .map(UserFunctionAssignment::getFunction)
-          .collect(Collectors.toSet());
+      Set<UserFunction> currentFunctions =
+          currentAssignments.stream()
+              .map(UserFunctionAssignment::getFunction)
+              .collect(Collectors.toSet());
 
       for (UserFunction function : incomingFunctions) {
         if (!currentFunctions.contains(function)) {
@@ -115,40 +116,37 @@ public class UserManagementService {
 
     User updated = userRepository.save(user);
     return userMapper.toDto(updated);
-
   }
 
   /**
-   * Deactivates the user with the specified ID by setting
-   * their status to {@link UserStatus#INACTIVE}.
+   * Sets the user status to inactive.
    */
   @Transactional
   public UserDto deactivateUser(UUID id) {
-    User user = userRepository.getByIdOrThrow(id);
-
-    if (user.getStatus() == UserStatus.INACTIVE) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already inactive");
-    }
-
-    user.setStatus(UserStatus.INACTIVE);
-    userRepository.save(user);
-
-    return userMapper.toDto(user);
+    return updateUserStatus(id, UserStatus.INACTIVE);
   }
 
   /**
-   * Reactivates the user with the specified ID
-   * by setting their status to {@link UserStatus#ACTIVE}.
+   * Sets the user status to active.
    */
   @Transactional
   public UserDto reactivateUser(UUID id) {
-    User user = userRepository.getByIdOrThrow(id);
+    return updateUserStatus(id, UserStatus.ACTIVE);
+  }
 
-    if (user.getStatus() == UserStatus.ACTIVE) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already active");
+  /**
+   * Updates the user status to the given target status if different from the current one. Throws an
+   * exception if the status is already set.
+   */
+  private UserDto updateUserStatus(UUID id, UserStatus targetStatus) {
+    User user = userRepository.findByIdOrThrow(id);
+
+    if (user.getStatus() == targetStatus) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "User is already " + targetStatus.name().toLowerCase());
     }
 
-    user.setStatus(UserStatus.ACTIVE);
+    user.setStatus(targetStatus);
     userRepository.save(user);
 
     return userMapper.toDto(user);

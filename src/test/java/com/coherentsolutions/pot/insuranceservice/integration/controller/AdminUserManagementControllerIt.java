@@ -132,7 +132,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId())).andExpect(status().isOk())
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
+          .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.ACTIVE.name()));
     } finally {
       userRepository.deleteById(user.getId());
@@ -162,7 +164,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId()))
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
           .andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());

@@ -93,7 +93,7 @@ public class UserManagementServiceTest {
     requestDto.setUsername("new_username");
     requestDto.setEmail("new@email.com");
 
-    when(userRepository.getByIdOrThrow(userId)).thenReturn(user);
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(userMapper.toDto(user)).thenReturn(requestDto);
 
@@ -106,7 +106,7 @@ public class UserManagementServiceTest {
     assertEquals("User", result.getLastName());
     assertEquals("new_username", result.getUsername());
     verify(userRepository).save(user);
-    verify(userRepository).getByIdOrThrow(userId);
+    verify(userRepository).findByIdOrThrow(userId);
     verify(userMapper).toDto(user);
   }
 
@@ -121,7 +121,7 @@ public class UserManagementServiceTest {
     requestDto.setPhoneData(phoneDtos);
     requestDto.setAddressData(addressDtos);
 
-    when(userRepository.getByIdOrThrow(userId)).thenReturn(user);
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
     when(userRepository.save(any(User.class))).thenReturn(user);
     when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
 
@@ -132,7 +132,7 @@ public class UserManagementServiceTest {
     assertEquals(phoneDtos, result.getPhoneData());
     assertEquals(addressDtos, result.getAddressData());
     verify(userRepository).save(user);
-    verify(userRepository).getByIdOrThrow(userId);
+    verify(userRepository).findByIdOrThrow(userId);
     verify(userMapper).toDto(user);
   }
 
@@ -159,7 +159,7 @@ public class UserManagementServiceTest {
     UserDto expectedDto = new UserDto();
     expectedDto.setStatus(UserStatus.INACTIVE);
 
-    when(userRepository.getByIdOrThrow(userId)).thenReturn(activeUser);
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(activeUser);
     when(userRepository.save(any(User.class))).thenReturn(activeUser);
     when(userMapper.toDto(activeUser)).thenReturn(expectedDto);
 
@@ -183,7 +183,7 @@ public class UserManagementServiceTest {
     UserDto expectedDto = new UserDto();
     expectedDto.setStatus(UserStatus.ACTIVE);
 
-    when(userRepository.getByIdOrThrow(userId)).thenReturn(inactiveUser);
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(inactiveUser);
     when(userRepository.save(any(User.class))).thenReturn(inactiveUser);
     when(userMapper.toDto(inactiveUser)).thenReturn(expectedDto);
 
@@ -204,7 +204,7 @@ public class UserManagementServiceTest {
     user.setId(userId);
     user.setStatus(UserStatus.INACTIVE);
 
-    when(userRepository.getByIdOrThrow(userId)).thenReturn(user);
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
 
     // When // Then
     ResponseStatusException ex = assertThrows(ResponseStatusException.class,
