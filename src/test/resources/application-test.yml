@@ -11,6 +11,7 @@ spring:
 
 # Auth0 Test Configuration
 auth0:
+  enabled: true # Enable Auth0 for tests
   domain: https://test-domain.auth0.com
   client-id: test-client-id
   client-secret: test-client-secret

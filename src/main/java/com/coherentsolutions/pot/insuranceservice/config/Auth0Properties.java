@@ -15,9 +15,10 @@ public record Auth0Properties(
     String clientSecret,
     String audience,
     int timeout,
+    boolean enabled
 ) {
   /**
-   * Default constructor with default timeout value.
+   * Compact constructor with default timeout value.
    */
   public Auth0Properties {
     if (timeout <= 0) {
