@@ -10,9 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -61,14 +58,6 @@ public class Company {
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "phone_data", columnDefinition = "jsonb")
   private List<Phone> phoneData;
-
-  @ManyToMany
-  @JoinTable(
-      name = "company_insurance_package",
-      joinColumns = @JoinColumn(name = "company_id"),
-      inverseJoinColumns = @JoinColumn(name = "insurance_package_id")
-  )
-  private List<InsurancePackage> insurancePackages;
 
   @Email
   private String email;

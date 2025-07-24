@@ -10,6 +10,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
@@ -41,6 +43,10 @@ public class InsurancePackage {
   @NotBlank
   @Column(name = "name", nullable = false)
   private String name;
+
+  @ManyToOne
+  @JoinColumn(name = "company_id")
+  private Company company;
 
   @NotNull
   @Column(name = "start_date", nullable = false)
