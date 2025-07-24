@@ -1,13 +1,12 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
-import com.coherentsolutions.pot.insuranceservice.enums.PlanType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -34,7 +33,8 @@ public class Plan {
   @Column(name = "name", length = 100, nullable = false)
   private String name;
 
-  @Enumerated(EnumType.STRING)
+  @OneToOne
+  @JoinColumn(name = "plan_type_id", nullable = false)
   private PlanType type;
 
   @Column(name = "contribution", nullable = false)

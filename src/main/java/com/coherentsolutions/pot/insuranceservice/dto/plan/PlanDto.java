@@ -1,7 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.dto.plan;
 
 
-import com.coherentsolutions.pot.insuranceservice.enums.PlanType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -24,7 +23,7 @@ public class PlanDto {
   private String name;
 
   @NotNull(message = "Type is required")
-  private PlanType type;
+  private String type;
 
   @NotNull(message = "Contribution is required")
   @Positive(message = "Contribution must be positive")
