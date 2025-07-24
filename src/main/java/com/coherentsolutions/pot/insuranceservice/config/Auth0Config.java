@@ -4,6 +4,7 @@ import com.auth0.client.mgmt.ManagementAPI;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 
 /**
  * Configuration class for Auth0 Management API integration.
@@ -25,7 +26,8 @@ public class Auth0Config {
   @ConditionalOnProperty(name = "auth0.enabled", havingValue = "true", matchIfMissing = false)
   public ManagementAPI managementAPI(Auth0Properties auth0Properties) {
     // Check if Auth0 is properly configured
-    if (!StringUtils.hasText(auth0Properties.domain()) || !StringUtils.hasText(auth0Properties.clientId())) {
+    if (!StringUtils.hasText(auth0Properties.domain()) 
+        || !StringUtils.hasText(auth0Properties.clientId())) {
       throw new IllegalStateException(
           "Auth0 configuration is incomplete. Please set AUTH0_DOMAIN and AUTH0_CLIENT_ID "
           + "environment variables.");
