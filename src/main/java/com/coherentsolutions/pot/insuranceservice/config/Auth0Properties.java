@@ -14,7 +14,8 @@ public record Auth0Properties(
     String clientId,
     String clientSecret,
     String audience,
-    int timeout
+    int timeout,
+    boolean enabled
 ) {
   /**
    * Default constructor with default timeout value.
