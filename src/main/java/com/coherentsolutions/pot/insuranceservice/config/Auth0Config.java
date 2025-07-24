@@ -25,10 +25,11 @@ public class Auth0Config {
   @ConditionalOnProperty(name = "auth0.enabled", havingValue = "true", matchIfMissing = false)
   public ManagementAPI managementAPI(Auth0Properties auth0Properties) {
     // Check if Auth0 is properly configured
-    if (auth0Properties.domain() == null || auth0Properties.domain().isEmpty() ||
-        auth0Properties.clientId() == null || auth0Properties.clientId().isEmpty()) {
+    if (auth0Properties.domain() == null || auth0Properties.domain().isEmpty()
+        || auth0Properties.clientId() == null || auth0Properties.clientId().isEmpty()) {
       throw new IllegalStateException(
-          "Auth0 configuration is incomplete. Please set AUTH0_DOMAIN and AUTH0_CLIENT_ID environment variables.");
+          "Auth0 configuration is incomplete. Please set AUTH0_DOMAIN and AUTH0_CLIENT_ID "
+          + "environment variables.");
     }
     
     return ManagementAPI.newBuilder(auth0Properties.domain(), auth0Properties.clientId())
