@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.dto.insurancepackage;
 
+import com.coherentsolutions.pot.insuranceservice.annotation.ValidateEndDateIsAfterStartDate;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@ValidateEndDateIsAfterStartDate
 @Data
 @Builder
 @NoArgsConstructor
