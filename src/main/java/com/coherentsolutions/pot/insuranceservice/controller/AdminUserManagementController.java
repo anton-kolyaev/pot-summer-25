@@ -54,7 +54,7 @@ public class AdminUserManagementController {
    */
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  public UserDto updateUser(@PathVariable("id") UUID id, @RequestBody UserDto request) {
+  public UserDto updateUser(@PathVariable("id") UUID id, @Valid @RequestBody UserDto request) {
     return userManagementService.updateUser(id, request);
   }
 
