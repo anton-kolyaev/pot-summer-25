@@ -29,7 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -74,14 +72,22 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should create and retrieve company successfully")
   void shouldCreateAndRetrieveCompanySuccessfully() throws Exception {
     // Given
-    CompanyDto createRequest = buildCompanyDto("Integration Test Company", "USA", 
-        "integration@test.com", "https://integration-test.com");
+    CompanyDto createRequest =
+        buildCompanyDto(
+            "Integration Test Company",
+            "USA",
+            "integration@test.com",
+            "https://integration-test.com");
 
     // When & Then - Create company
     CompanyDto createdCompany = createCompany(createRequest);
     assertNotNull(createdCompany.getId());
-    validateCompanyWithWebsite(createdCompany, "Integration Test Company", "USA", 
-        "integration@test.com", "https://integration-test.com");
+    validateCompanyWithWebsite(
+        createdCompany,
+        "Integration Test Company",
+        "USA",
+        "integration@test.com",
+        "https://integration-test.com");
     validateCompanyStatus(createdCompany, CompanyStatus.ACTIVE);
 
     UUID companyId = createdCompany.getId();
@@ -89,8 +95,12 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     // When & Then - Retrieve the created company
     CompanyDto retrievedCompany = getCompany(companyId);
     assertEquals(companyId, retrievedCompany.getId());
-    validateCompanyWithWebsite(retrievedCompany, "Integration Test Company", "USA", 
-        "integration@test.com", "https://integration-test.com");
+    validateCompanyWithWebsite(
+        retrievedCompany,
+        "Integration Test Company",
+        "USA",
+        "integration@test.com",
+        "https://integration-test.com");
     validateCompanyStatus(retrievedCompany, CompanyStatus.ACTIVE);
   }
 
@@ -98,17 +108,20 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should get companies with search filters")
   void shouldGetCompaniesWithSearchFilters() throws Exception {
     // Given - Create multiple companies
-    CompanyDto company1 = buildCompanyDto("Alpha Company", "USA", "alpha@company.com", 
-        CompanyStatus.ACTIVE);
-    CompanyDto company2 = buildCompanyDto("Beta Company", "CAN", "beta@company.com", 
-        CompanyStatus.ACTIVE);
+    CompanyDto company1 =
+        buildCompanyDto("Alpha Company", "USA", "alpha@company.com", CompanyStatus.ACTIVE);
+    CompanyDto company2 =
+        buildCompanyDto("Beta Company", "CAN", "beta@company.com", CompanyStatus.ACTIVE);
 
     // Create companies
     createCompany(company1);
     createCompany(company2);
 
     // When & Then - Search by name
-    String searchByNameResponse = mockMvc.perform(get("/v1/companies")
+    String searchByNameResponse =
+        mockMvc
+            .perform(
+                get("/v1/companies")
                     .param("name", "Alpha")
                     .param("page", "0")
                     .param("size", "10")
@@ -124,16 +137,18 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     assertTrue(searchByNameResult.get("content").isArray());
 
     // Map the content array to List<CompanyDto> using TypeReference
-    List<CompanyDto> searchByNameCompanies = objectMapper.readValue(
-            searchByNameResult.get("content").toString(),
-            new TypeReference<List<CompanyDto>>() {
-          }
-    );
+    List<CompanyDto> searchByNameCompanies =
+        objectMapper.readValue(
+            searchByNameResult.get("content").toString(), new TypeReference<List<CompanyDto>>() {
+            });
     assertFalse(searchByNameCompanies.isEmpty());
     assertEquals("Alpha Company", searchByNameCompanies.get(0).getName());
 
     // When & Then - Search by country code
-    String searchByCountryResponse = mockMvc.perform(get("/v1/companies")
+    String searchByCountryResponse =
+        mockMvc
+            .perform(
+                get("/v1/companies")
                     .param("countryCode", "CAN")
                     .param("page", "0")
                     .param("size", "10")
@@ -149,11 +164,11 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     assertTrue(searchByCountryResult.get("content").isArray());
 
     // Map the content array to List<CompanyDto> using TypeReference
-    List<CompanyDto> searchByCountryCompanies = objectMapper.readValue(
+    List<CompanyDto> searchByCountryCompanies =
+        objectMapper.readValue(
             searchByCountryResult.get("content").toString(),
             new TypeReference<List<CompanyDto>>() {
-          }
-    );
+            });
     assertFalse(searchByCountryCompanies.isEmpty());
     assertEquals("CAN", searchByCountryCompanies.get(0).getCountryCode());
   }
@@ -167,13 +182,18 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     UUID companyId = createdCompany.getId();
 
     // Given - Update request
-    CompanyDto updateRequest = buildCompanyDto("Updated Company", "CAN", "updated@company.com", 
-        "https://updated-company.com");
+    CompanyDto updateRequest =
+        buildCompanyDto(
+            "Updated Company", "CAN", "updated@company.com", "https://updated-company.com");
 
     // When & Then - Update the company
     CompanyDto updatedCompany = updateCompany(companyId, updateRequest);
     assertEquals(companyId, updatedCompany.getId());
-    validateCompanyWithWebsite(updatedCompany, "Updated Company", "CAN", "updated@company.com", 
+    validateCompanyWithWebsite(
+        updatedCompany,
+        "Updated Company",
+        "CAN",
+        "updated@company.com",
         "https://updated-company.com");
 
     // Verify the update persisted by retrieving the company
@@ -189,9 +209,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     UUID nonExistentId = UUID.randomUUID();
 
     // When & Then
-    mockMvc.perform(get("/v1/companies/{id}", nonExistentId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound());
+    mockMvc
+        .perform(get("/v1/companies/{id}", nonExistentId).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -202,10 +222,12 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     CompanyDto updateRequest = buildCompanyDto("Updated Company", "CAN", "updated@company.com");
 
     // When & Then
-    mockMvc.perform(put("/v1/companies/{id}", nonExistentId)
-                    .content(objectMapper.writeValueAsString(updateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound());
+    mockMvc
+        .perform(
+            put("/v1/companies/{id}", nonExistentId)
+                .content(objectMapper.writeValueAsString(updateRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -215,10 +237,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     String invalidJson = "{ invalid json }";
 
     // When & Then
-    mockMvc.perform(post("/v1/companies")
-                    .content(invalidJson)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(post("/v1/companies").content(invalidJson).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -228,98 +249,106 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     String invalidJson = "{ invalid json }";
 
     // When & Then
-    mockMvc.perform(put("/v1/companies/{id}", UUID.randomUUID())
-                    .content(invalidJson)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            put("/v1/companies/{id}", UUID.randomUUID())
+                .content(invalidJson)
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should return 400 when creating company with empty request body")
   void shouldReturn400WhenCreatingCompanyWithEmptyBody() throws Exception {
     // When & Then
-    mockMvc.perform(post("/v1/companies")
-                    .content("")
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(post("/v1/companies").content("").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should return 400 when updating company with empty request body")
   void shouldReturn400WhenUpdatingCompanyWithEmptyBody() throws Exception {
     // When & Then
-    mockMvc.perform(put("/v1/companies/{id}", UUID.randomUUID())
-                    .content("")
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            put("/v1/companies/{id}", UUID.randomUUID())
+                .content("")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should return 400 when creating company with null request body")
   void shouldReturn400WhenCreatingCompanyWithNullBody() throws Exception {
     // When & Then
-    mockMvc.perform(post("/v1/companies")
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(post("/v1/companies").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should return 400 when updating company with null request body")
   void shouldReturn400WhenUpdatingCompanyWithNullBody() throws Exception {
     // When & Then
-    mockMvc.perform(put("/v1/companies/{id}", UUID.randomUUID())
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            put("/v1/companies/{id}", UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should handle invalid UUID format in path parameter")
   void shouldHandleInvalidUuidFormatInPathParameter() throws Exception {
     // When & Then
-    mockMvc.perform(get("/v1/companies/{id}", "invalid-uuid")
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(get("/v1/companies/{id}", "invalid-uuid").contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
 
-    CompanyDto simpleDto = CompanyDto.builder()
-            .name("Test Company")
-            .countryCode("USA")
-            .build();
+    CompanyDto simpleDto = CompanyDto.builder().name("Test Company").countryCode("USA").build();
 
-    mockMvc.perform(put("/v1/companies/{id}", "invalid-uuid")
-                    .content(objectMapper.writeValueAsString(simpleDto))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            put("/v1/companies/{id}", "invalid-uuid")
+                .content(objectMapper.writeValueAsString(simpleDto))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should handle malformed pagination parameters")
   void shouldHandleMalformedPaginationParameters() throws Exception {
     // When & Then - Spring Boot handles malformed pagination gracefully
-    mockMvc.perform(get("/v1/companies")
-                    .param("page", "invalid")
-                    .param("size", "invalid")
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+    mockMvc
+        .perform(
+            get("/v1/companies")
+                .param("page", "invalid")
+                .param("size", "invalid")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 
   @Test
   @DisplayName("Should handle negative pagination parameters")
   void shouldHandleNegativePaginationParameters() throws Exception {
     // When & Then - Spring Boot handles negative pagination gracefully
-    mockMvc.perform(get("/v1/companies")
-                    .param("page", "-1")
-                    .param("size", "-10")
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+    mockMvc
+        .perform(
+            get("/v1/companies")
+                .param("page", "-1")
+                .param("size", "-10")
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk());
   }
 
   @Test
   @DisplayName("Should handle unsupported HTTP methods")
   void shouldHandleUnsupportedHttpMethods() throws Exception {
     // When & Then
-    mockMvc.perform(patch("/v1/companies/{id}", UUID.randomUUID())
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isMethodNotAllowed());
+    mockMvc
+        .perform(
+            patch("/v1/companies/{id}", UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isMethodNotAllowed());
   }
 
   @Test
@@ -329,13 +358,15 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     CompanyDto createRequest = buildCompanyDto("New Company", "USA", "new@company.com");
 
     // When & Then
-    mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest)))
-            .andExpect(status().isUnsupportedMediaType());
+    mockMvc
+        .perform(post("/v1/companies").content(objectMapper.writeValueAsString(createRequest)))
+        .andExpect(status().isUnsupportedMediaType());
 
-    mockMvc.perform(put("/v1/companies/{id}", UUID.randomUUID())
-                    .content(objectMapper.writeValueAsString(createRequest)))
-            .andExpect(status().isUnsupportedMediaType());
+    mockMvc
+        .perform(
+            put("/v1/companies/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(createRequest)))
+        .andExpect(status().isUnsupportedMediaType());
   }
 
   @Test
@@ -345,15 +376,19 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     CompanyDto createRequest = buildCompanyDto("New Company", "USA", "new@company.com");
 
     // When & Then
-    mockMvc.perform(post("/v1/companies")
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.TEXT_PLAIN))
-            .andExpect(status().isUnsupportedMediaType());
+    mockMvc
+        .perform(
+            post("/v1/companies")
+                .content(objectMapper.writeValueAsString(createRequest))
+                .contentType(MediaType.TEXT_PLAIN))
+        .andExpect(status().isUnsupportedMediaType());
 
-    mockMvc.perform(put("/v1/companies/{id}", UUID.randomUUID())
-                    .content(objectMapper.writeValueAsString(createRequest))
-                    .contentType(MediaType.TEXT_PLAIN))
-            .andExpect(status().isUnsupportedMediaType());
+    mockMvc
+        .perform(
+            put("/v1/companies/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(createRequest))
+                .contentType(MediaType.TEXT_PLAIN))
+        .andExpect(status().isUnsupportedMediaType());
   }
 
   @Test
@@ -375,8 +410,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should deactivate company successfully")
   void shouldDeactivateCompanySuccessfully() throws Exception {
     // Given - Create a company first
-    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", 
-        "deactivate@company.com");
+    CompanyDto createRequest =
+        buildCompanyDto("Company to Deactivate", "USA", "deactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -394,8 +429,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 when deactivating already deactivated company")
   void shouldReturn400WhenDeactivatingAlreadyDeactivatedCompany() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Deactivate", "USA", 
-        "deactivate@company.com");
+    CompanyDto createRequest =
+        buildCompanyDto("Company to Deactivate", "USA", "deactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -403,17 +438,17 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     deactivateCompany(companyId);
 
     // When & Then - Try to deactivate again
-    mockMvc.perform(delete("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(delete("/v1/companies/{id}", companyId).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should reactivate company with all users successfully")
   void shouldReactivateCompanyWithAllUsersSuccessfully() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", 
-        "reactivate@company.com");
+    CompanyDto createRequest =
+        buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -421,8 +456,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     deactivateCompany(companyId);
 
     // When & Then - Reactivate with ALL users option
-    CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
-            CompanyReactivationRequest.UserReactivationOption.ALL, null);
+    CompanyReactivationRequest reactivateRequest =
+        new CompanyReactivationRequest(CompanyReactivationRequest.UserReactivationOption.ALL, null);
 
     CompanyDto reactivatedCompany = reactivateCompany(companyId, reactivateRequest);
     assertEquals(companyId, reactivatedCompany.getId());
@@ -437,8 +472,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should reactivate company with selected users successfully")
   void shouldReactivateCompanyWithSelectedUsersSuccessfully() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", 
-        "reactivate@company.com");
+    CompanyDto createRequest =
+        buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -447,7 +482,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
 
     // When & Then - Reactivate with SELECTED users option
     List<UUID> selectedUserIds = List.of(UUID.randomUUID(), UUID.randomUUID());
-    CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
+    CompanyReactivationRequest reactivateRequest =
+        new CompanyReactivationRequest(
             CompanyReactivationRequest.UserReactivationOption.SELECTED, selectedUserIds);
 
     CompanyDto reactivatedCompany = reactivateCompany(companyId, reactivateRequest);
@@ -459,8 +495,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 when reactivating with SELECTED option but no user IDs")
   void shouldReturn400WhenReactivatingWithSelectedOptionButNoUserIds() throws Exception {
     // Given - Create and deactivate a company
-    CompanyDto createRequest = buildCompanyDto("Company to Reactivate", "USA", 
-        "reactivate@company.com");
+    CompanyDto createRequest =
+        buildCompanyDto("Company to Reactivate", "USA", "reactivate@company.com");
     CompanyDto createdCompany = createCompany(createRequest);
     UUID companyId = createdCompany.getId();
 
@@ -468,13 +504,16 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     deactivateCompany(companyId);
 
     // When & Then - Reactivate with SELECTED option but no user IDs
-    CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
+    CompanyReactivationRequest reactivateRequest =
+        new CompanyReactivationRequest(
             CompanyReactivationRequest.UserReactivationOption.SELECTED, null);
 
-    mockMvc.perform(post("/v1/companies/{id}/reactivate", companyId)
-                    .content(objectMapper.writeValueAsString(reactivateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            post("/v1/companies/{id}/reactivate", companyId)
+                .content(objectMapper.writeValueAsString(reactivateRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -486,13 +525,16 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     UUID companyId = createdCompany.getId();
 
     // When & Then - Try to reactivate already active company
-    CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
+    CompanyReactivationRequest reactivateRequest =
+        new CompanyReactivationRequest(
             CompanyReactivationRequest.UserReactivationOption.NONE, null);
 
-    mockMvc.perform(post("/v1/companies/{id}/reactivate", companyId)
-                    .content(objectMapper.writeValueAsString(reactivateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
+    mockMvc
+        .perform(
+            post("/v1/companies/{id}/reactivate", companyId)
+                .content(objectMapper.writeValueAsString(reactivateRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -502,9 +544,10 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     UUID nonExistentId = UUID.randomUUID();
 
     // When & Then
-    mockMvc.perform(delete("/v1/companies/{id}", nonExistentId)
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound());
+    mockMvc
+        .perform(
+            delete("/v1/companies/{id}", nonExistentId).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -512,40 +555,47 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   void shouldReturn404WhenReactivatingNonExistentCompany() throws Exception {
     // Given
     UUID nonExistentId = UUID.randomUUID();
-    CompanyReactivationRequest reactivateRequest = new CompanyReactivationRequest(
+    CompanyReactivationRequest reactivateRequest =
+        new CompanyReactivationRequest(
             CompanyReactivationRequest.UserReactivationOption.NONE, null);
 
     // When & Then
-    mockMvc.perform(post("/v1/companies/{id}/reactivate", nonExistentId)
-                    .content(objectMapper.writeValueAsString(reactivateRequest))
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound());
+    mockMvc
+        .perform(
+            post("/v1/companies/{id}/reactivate", nonExistentId)
+                .content(objectMapper.writeValueAsString(reactivateRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 
   @Test
   @DisplayName("Should return all users of a company by companyId")
   void shouldReturnAllUsersOfExistingCompany() throws Exception {
-    Company company = createTestCompany("Test Company", "USA", "test@example.com", 
-        "https://example.com");
+    Company company =
+        createTestCompany("Test Company", "USA", "test@example.com", "https://example.com");
     UUID companyId = company.getId();
 
-    User user1 = createTestUser("Alice", "Johnson", "alice.johnson", "alice@example.com", 
-        company);
-    User user2 = createTestUser("Bob", "Smith", "bob.smith", "bob@example.com", company, 
-        UserStatus.INACTIVE);
+    User user1 = createTestUser("Alice", "Johnson", "alice.johnson", "alice@example.com", company);
+    User user2 =
+        createTestUser(
+            "Bob", "Smith", "bob.smith", "bob@example.com", company, UserStatus.INACTIVE);
 
-    mockMvc.perform(get("/v1/companies/{id}/users", companyId)
-            .param("page", "0")
-            .param("size", "10")
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            get("/v1/companies/{id}/users", companyId)
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.content").isArray())
         .andExpect(jsonPath("$.content.length()").value(2))
         .andExpect(
             jsonPath("$.content[*].username", containsInAnyOrder("alice.johnson", "bob.smith")))
-        .andExpect(jsonPath("$.content[*].companyId",
-            containsInAnyOrder(companyId.toString(), companyId.toString())));
+        .andExpect(
+            jsonPath(
+                "$.content[*].companyId",
+                containsInAnyOrder(companyId.toString(), companyId.toString())));
   }
 
   @Test
@@ -553,10 +603,12 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   void shouldReturnEmptyPageIfNoUsersFoundForCompany() throws Exception {
     Company emptyCompany = createTestCompany("Empty Company", "USA", "empty@example.com");
 
-    mockMvc.perform(get("/v1/companies/{id}/users", emptyCompany.getId())
-            .param("page", "0")
-            .param("size", "10")
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            get("/v1/companies/{id}/users", emptyCompany.getId())
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.content").isArray())
@@ -568,20 +620,22 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return Bad Request when companyId has invalid format")
   void shouldReturnBadRequestForInvalidCompanyId() throws Exception {
     String invalidCompanyId = "invalid-company-id";
-    mockMvc.perform(get("/v1/companies/{id}/users", invalidCompanyId)
-            .param("page", "0")
-            .param("size", "10")
-            .contentType(MediaType.APPLICATION_JSON))
+    mockMvc
+        .perform(
+            get("/v1/companies/{id}/users", invalidCompanyId)
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
   // ========== PRIVATE HELPER METHODS ==========
 
-  /**
-   * Creates a company via POST request and returns the created company DTO.
-   */
   private CompanyDto createCompany(CompanyDto createRequest) throws Exception {
-    String responseJson = mockMvc.perform(post("/v1/companies")
+    String responseJson =
+        mockMvc
+            .perform(
+                post("/v1/companies")
                     .content(objectMapper.writeValueAsString(createRequest))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -592,25 +646,17 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return objectMapper.readValue(responseJson, CompanyDto.class);
   }
 
-  /**
-   * Creates a company via POST request with minimal required fields.
-   */
   private CompanyDto createCompany(String name, String countryCode, String email) throws Exception {
-    CompanyDto createRequest = CompanyDto.builder()
-            .name(name)
-            .countryCode(countryCode)
-            .email(email)
-            .build();
+    CompanyDto createRequest =
+        CompanyDto.builder().name(name).countryCode(countryCode).email(email).build();
 
     return createCompany(createRequest);
   }
 
-  /**
-   * Creates a company via POST request with all fields.
-   */
-  private CompanyDto createCompany(String name, String countryCode, String email, 
-      String website) throws Exception {
-    CompanyDto createRequest = CompanyDto.builder()
+  private CompanyDto createCompany(String name, String countryCode, String email, String website)
+      throws Exception {
+    CompanyDto createRequest =
+        CompanyDto.builder()
             .name(name)
             .countryCode(countryCode)
             .email(email)
@@ -620,12 +666,10 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return createCompany(createRequest);
   }
 
-  /**
-   * Retrieves a company by ID via GET request.
-   */
   private CompanyDto getCompany(UUID companyId) throws Exception {
-    String responseJson = mockMvc.perform(get("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
+    String responseJson =
+        mockMvc
+            .perform(get("/v1/companies/{id}", companyId).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -634,11 +678,11 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return objectMapper.readValue(responseJson, CompanyDto.class);
   }
 
-  /**
-   * Updates a company via PUT request and returns the updated company DTO.
-   */
   private CompanyDto updateCompany(UUID companyId, CompanyDto updateRequest) throws Exception {
-    String responseJson = mockMvc.perform(put("/v1/companies/{id}", companyId)
+    String responseJson =
+        mockMvc
+            .perform(
+                put("/v1/companies/{id}", companyId)
                     .content(objectMapper.writeValueAsString(updateRequest))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -649,12 +693,11 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return objectMapper.readValue(responseJson, CompanyDto.class);
   }
 
-  /**
-   * Deactivates a company via DELETE request and returns the deactivated company DTO.
-   */
   private CompanyDto deactivateCompany(UUID companyId) throws Exception {
-    String responseJson = mockMvc.perform(delete("/v1/companies/{id}", companyId)
-                    .contentType(MediaType.APPLICATION_JSON))
+    String responseJson =
+        mockMvc
+            .perform(
+                delete("/v1/companies/{id}", companyId).contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -663,12 +706,12 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return objectMapper.readValue(responseJson, CompanyDto.class);
   }
 
-  /**
-   * Reactivates a company via POST request and returns the reactivated company DTO.
-   */
-  private CompanyDto reactivateCompany(UUID companyId, 
-      CompanyReactivationRequest reactivateRequest) throws Exception {
-    String responseJson = mockMvc.perform(post("/v1/companies/{id}/reactivate", companyId)
+  private CompanyDto reactivateCompany(UUID companyId, CompanyReactivationRequest reactivateRequest)
+      throws Exception {
+    String responseJson =
+        mockMvc
+            .perform(
+                post("/v1/companies/{id}/reactivate", companyId)
                     .content(objectMapper.writeValueAsString(reactivateRequest))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -679,46 +722,30 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return objectMapper.readValue(responseJson, CompanyDto.class);
   }
 
-  /**
-   * Creates a CompanyDto with the specified fields.
-   */
   private CompanyDto buildCompanyDto(String name, String countryCode, String email) {
-    return CompanyDto.builder()
-            .name(name)
-            .countryCode(countryCode)
-            .email(email)
-            .build();
+    return CompanyDto.builder().name(name).countryCode(countryCode).email(email).build();
   }
 
-  /**
-   * Creates a CompanyDto with all fields.
-   */
-  private CompanyDto buildCompanyDto(String name, String countryCode, String email, 
-      String website) {
+  private CompanyDto buildCompanyDto(
+      String name, String countryCode, String email, String website) {
     return CompanyDto.builder()
-            .name(name)
-            .countryCode(countryCode)
-            .email(email)
-            .website(website)
-            .build();
+        .name(name)
+        .countryCode(countryCode)
+        .email(email)
+        .website(website)
+        .build();
   }
 
-  /**
-   * Creates a CompanyDto with status.
-   */
-  private CompanyDto buildCompanyDto(String name, String countryCode, String email, 
-      CompanyStatus status) {
+  private CompanyDto buildCompanyDto(
+      String name, String countryCode, String email, CompanyStatus status) {
     return CompanyDto.builder()
-            .name(name)
-            .countryCode(countryCode)
-            .email(email)
-            .status(status)
-            .build();
+        .name(name)
+        .countryCode(countryCode)
+        .email(email)
+        .status(status)
+        .build();
   }
 
-  /**
-   * Creates and saves a Company entity for testing.
-   */
   private Company createTestCompany(String name, String countryCode, String email) {
     Company company = new Company();
     company.setName(name);
@@ -728,11 +755,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return companyRepository.save(company);
   }
 
-  /**
-   * Creates and saves a Company entity with all fields.
-   */
-  private Company createTestCompany(String name, String countryCode, String email, 
-      String website) {
+  private Company createTestCompany(String name, String countryCode, String email, String website) {
     Company company = new Company();
     company.setName(name);
     company.setCountryCode(countryCode);
@@ -742,11 +765,8 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return companyRepository.save(company);
   }
 
-  /**
-   * Creates and saves a User entity for testing.
-   */
-  private User createTestUser(String firstName, String lastName, String username, String email, 
-      Company company) {
+  private User createTestUser(
+      String firstName, String lastName, String username, String email, Company company) {
     User user = new User();
     user.setFirstName(firstName);
     user.setLastName(lastName);
@@ -759,11 +779,13 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return userRepository.save(user);
   }
 
-  /**
-   * Creates and saves a User entity with custom status.
-   */
-  private User createTestUser(String firstName, String lastName, String username, String email, 
-      Company company, UserStatus status) {
+  private User createTestUser(
+      String firstName,
+      String lastName,
+      String username,
+      String email,
+      Company company,
+      UserStatus status) {
     User user = new User();
     user.setFirstName(firstName);
     user.setLastName(lastName);
@@ -776,38 +798,29 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     return userRepository.save(user);
   }
 
-  /**
-   * Generates a unique SSN for testing purposes.
-   */
   private String generateUniqueSsn() {
-    return String.format("%03d-%02d-%04d", 
-        (int) (Math.random() * 1000), 
-        (int) (Math.random() * 100), 
-        (int) (Math.random() * 10000));
+    return String.format(
+        "%03d-%02d-%04d",
+        (int) (Math.random() * 1000), (int) (Math.random() * 100), (int) (Math.random() * 10000));
   }
 
-  /**
-   * Validates that a company has the expected basic fields.
-   */
-  private void validateCompanyBasicFields(CompanyDto company, String expectedName, 
-      String expectedCountryCode, String expectedEmail) {
+  private void validateCompanyBasicFields(
+      CompanyDto company, String expectedName, String expectedCountryCode, String expectedEmail) {
     assertEquals(expectedName, company.getName());
     assertEquals(expectedCountryCode, company.getCountryCode());
     assertEquals(expectedEmail, company.getEmail());
   }
 
-  /**
-   * Validates that a company has the expected fields including website.
-   */
-  private void validateCompanyWithWebsite(CompanyDto company, String expectedName, 
-      String expectedCountryCode, String expectedEmail, String expectedWebsite) {
+  private void validateCompanyWithWebsite(
+      CompanyDto company,
+      String expectedName,
+      String expectedCountryCode,
+      String expectedEmail,
+      String expectedWebsite) {
     validateCompanyBasicFields(company, expectedName, expectedCountryCode, expectedEmail);
     assertEquals(expectedWebsite, company.getWebsite());
   }
 
-  /**
-   * Validates that a company has the expected status.
-   */
   private void validateCompanyStatus(CompanyDto company, CompanyStatus expectedStatus) {
     assertEquals(expectedStatus, company.getStatus());
   }
