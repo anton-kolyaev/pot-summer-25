@@ -13,9 +13,6 @@ import org.springframework.context.annotation.Primary;
 @TestConfiguration
 public class IntegrationTestConfiguration {
 
-  /**
-   * Creates and configures an ObjectMapper with JavaTimeModule registered.
-   */
   @Bean
   @Primary
   public ObjectMapper objectMapper() {
