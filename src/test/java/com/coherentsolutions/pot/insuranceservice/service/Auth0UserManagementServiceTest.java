@@ -202,8 +202,6 @@ class Auth0UserManagementServiceTest {
   void testServiceMethodsExist() {
     // Arrange
     String userId = "test-user";
-    String email = "test@example.com";
-    User user = new User();
     Auth0UserDto dto;
     UserFilter filter;
     dto = new Auth0UserDto();
@@ -211,7 +209,9 @@ class Auth0UserManagementServiceTest {
 
     // Act & Assert - Test that all method signatures exist
     assertNotNull(userId);
+    String email = "test@example.com";
     assertNotNull(email);
+    User user = new User();
     assertNotNull(user);
     assertNotNull(dto);
     assertNotNull(filter);
