@@ -29,6 +29,7 @@ class Auth0ConfigTest {
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
+        "test-api-token",
         "test-client-id",
         "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
@@ -49,6 +50,7 @@ class Auth0ConfigTest {
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         null,
+        "test-api-token",
         "test-client-id",
         "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
@@ -66,6 +68,7 @@ class Auth0ConfigTest {
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "",
+        "test-api-token",
         "test-client-id",
         "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
@@ -78,12 +81,13 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void testManagementAPIWithNullClientIdThrowsException() {
+  void testManagementAPIWithNullApiTokenThrowsException() {
     // Arrange
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         null,
+        "test-client-id",
         "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         10000,
@@ -95,12 +99,13 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void testManagementAPIWithEmptyClientIdThrowsException() {
+  void testManagementAPIWithEmptyApiTokenThrowsException() {
     // Arrange
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "",
+        "test-client-id",
         "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         10000,
