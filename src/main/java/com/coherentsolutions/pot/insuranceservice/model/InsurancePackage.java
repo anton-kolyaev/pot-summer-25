@@ -61,6 +61,10 @@ public class InsurancePackage {
   @Column(name = "payroll_frequency", nullable = false, length = 20)
   private PayrollFrequency payrollFrequency;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "manual_status", nullable = false)
+  private PackageStatus manualStatus;
+
   @CreatedBy
   @Column(name = "created_by")
   private UUID createdBy;
@@ -78,20 +82,19 @@ public class InsurancePackage {
   private Instant updatedAt;
 
   @Transient
-  public PackageStatus getStatus() {
-    if (startDate == null || endDate == null) {
+  public PackageStatus getEffectiveStatus() {
+    if (manualStatus == PackageStatus.DEACTIVATED) {
       return PackageStatus.DEACTIVATED;
     }
+
     LocalDate now = LocalDate.now();
     if (now.isBefore(startDate)) {
       return PackageStatus.INITIALIZED;
-    }
-    if (!now.isBefore(startDate) && !now.isAfter(endDate)) {
+    } else if (!now.isAfter(endDate)) {
       return PackageStatus.ACTIVE;
-    }
-    if (now.isAfter(endDate)) {
+    } else {
       return PackageStatus.EXPIRED;
     }
-    return PackageStatus.DEACTIVATED;
   }
+
 }
