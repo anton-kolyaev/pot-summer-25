@@ -11,7 +11,6 @@ import com.auth0.exception.Auth0Exception;
 import com.auth0.json.mgmt.users.User;
 import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void createUser_WithValidUser_ReturnsCreatedUser() throws Auth0Exception {
+  void testCreateUserWithValidUserReturnsCreatedUser() throws Auth0Exception {
     // Arrange
     User inputUser = new User();
     inputUser.setEmail("test@example.com");
@@ -63,7 +62,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void createUser_WithValidDto_ReturnsCreatedUserDto() throws Auth0Exception {
+  void testCreateUserWithValidDtoReturnsCreatedUserDto() throws Auth0Exception {
     // Arrange
     Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "password123", "Test User");
     
@@ -91,7 +90,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void getUserById_WithValidId_ReturnsUser() throws Auth0Exception {
+  void testGetUserByIdWithValidIdReturnsUser() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123";
     User expectedUser = new User();
@@ -109,7 +108,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void getUserDtoById_WithValidId_ReturnsUserDto() throws Auth0Exception {
+  void testGetUserDtoByIdWithValidIdReturnsUserDto() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123";
     User auth0User = new User();
@@ -131,7 +130,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void updateUser_WithValidData_ReturnsUpdatedUser() throws Auth0Exception {
+  void testUpdateUserWithValidDataReturnsUpdatedUser() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123";
     User inputUser = new User();
@@ -152,7 +151,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void updateUser_WithValidDto_ReturnsUpdatedUserDto() throws Auth0Exception {
+  void testUpdateUserWithValidDtoReturnsUpdatedUserDto() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123";
     Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "newpassword", "Updated Name");
@@ -181,7 +180,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void deleteUser_WithValidId_ExecutesSuccessfully() throws Auth0Exception {
+  void testDeleteUserWithValidIdExecutesSuccessfully() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123";
 
@@ -190,7 +189,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void getUsersByEmail_WithValidEmail_ReturnsMatchingUsers() throws Auth0Exception {
+  void testGetUsersByEmailWithValidEmailReturnsMatchingUsers() throws Auth0Exception {
     // Arrange
     String email = "test@example.com";
     User user = new User();
@@ -207,7 +206,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void getUserDtosByEmail_WithValidEmail_ReturnsMatchingUserDtos() throws Auth0Exception {
+  void testGetUserDtosByEmailWithValidEmailReturnsMatchingUserDtos() throws Auth0Exception {
     // Arrange
     String email = "test@example.com";
     User user = new User();
@@ -228,7 +227,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void createUser_WhenAuth0Exception_ThrowsException() throws Auth0Exception {
+  void testCreateUserWhenAuth0ExceptionThrowsException() throws Auth0Exception {
     // Arrange
     User inputUser = new User();
     inputUser.setEmail("test@example.com");
@@ -238,7 +237,7 @@ class Auth0UserManagementServiceTest {
   }
 
   @Test
-  void updateUser_WhenUserNotFound_ThrowsException() throws Auth0Exception {
+  void testUpdateUserWhenUserNotFoundThrowsException() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123";
     Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "password", "Test User");

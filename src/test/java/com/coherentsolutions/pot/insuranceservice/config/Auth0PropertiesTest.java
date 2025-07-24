@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class Auth0PropertiesTest {
 
   @Test
-  void constructor_WithValidData_CreatesProperties() {
+  void testConstructorWithValidDataCreatesProperties() {
     // Arrange & Act
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -35,7 +35,7 @@ class Auth0PropertiesTest {
   }
 
   @Test
-  void constructor_WithZeroTimeout_SetsDefaultTimeout() {
+  void testConstructorWithZeroTimeoutSetsDefaultTimeout() {
     // Arrange & Act
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -51,7 +51,7 @@ class Auth0PropertiesTest {
   }
 
   @Test
-  void constructor_WithNegativeTimeout_SetsDefaultTimeout() {
+  void testConstructorWithNegativeTimeoutSetsDefaultTimeout() {
     // Arrange & Act
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -67,7 +67,7 @@ class Auth0PropertiesTest {
   }
 
   @Test
-  void constructor_WithValidTimeout_KeepsTimeout() {
+  void testConstructorWithValidTimeoutKeepsTimeout() {
     // Arrange & Act
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -83,7 +83,7 @@ class Auth0PropertiesTest {
   }
 
   @Test
-  void constructor_WithNullValues_HandlesCorrectly() {
+  void testConstructorWithNullValuesHandlesCorrectly() {
     // Arrange & Act
     Auth0Properties properties = new Auth0Properties(
         null,
@@ -105,7 +105,7 @@ class Auth0PropertiesTest {
   }
 
   @Test
-  void constructor_WithEmptyStrings_HandlesCorrectly() {
+  void testConstructorWithEmptyStringsHandlesCorrectly() {
     // Arrange & Act
     Auth0Properties properties = new Auth0Properties(
         "",
@@ -127,7 +127,7 @@ class Auth0PropertiesTest {
   }
 
   @Test
-  void record_Immutability_WorksCorrectly() {
+  void testRecordImmutabilityWorksCorrectly() {
     // Arrange
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -148,7 +148,7 @@ class Auth0PropertiesTest {
   }
 
   @Test
-  void record_Equality_WorksCorrectly() {
+  void testRecordEqualityWorksCorrectly() {
     // Arrange
     Auth0Properties properties1 = new Auth0Properties(
         "test-domain.auth0.com",

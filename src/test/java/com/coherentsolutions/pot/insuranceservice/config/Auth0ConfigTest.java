@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 class Auth0ConfigTest {
 
   @Test
-  void auth0Config_ClassLoadsSuccessfully() {
+  void testAuth0ConfigClassLoadsSuccessfully() {
     // Arrange & Act
     Auth0Config config = new Auth0Config();
 
@@ -24,7 +24,7 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void managementAPI_WithValidProperties_ReturnsManagementAPI() {
+  void testManagementAPIWithValidPropertiesReturnsManagementAPI() {
     // Arrange
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
@@ -44,7 +44,7 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void managementAPI_WithNullDomain_ThrowsException() {
+  void testManagementAPIWithNullDomainThrowsException() {
     // Arrange
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
@@ -61,7 +61,7 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void managementAPI_WithEmptyDomain_ThrowsException() {
+  void testManagementAPIWithEmptyDomainThrowsException() {
     // Arrange
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
@@ -78,7 +78,7 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void managementAPI_WithNullClientId_ThrowsException() {
+  void testManagementAPIWithNullClientIdThrowsException() {
     // Arrange
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
@@ -95,7 +95,7 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void managementAPI_WithEmptyClientId_ThrowsException() {
+  void testManagementAPIWithEmptyClientIdThrowsException() {
     // Arrange
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
@@ -112,11 +112,12 @@ class Auth0ConfigTest {
   }
 
   @Test
-  void configClass_HasConfigurationAnnotation() {
+  void testConfigClassHasConfigurationAnnotation() {
     // Arrange & Act
     Auth0Config config = new Auth0Config();
 
     // Assert
-    assertNotNull(config.getClass().getAnnotation(org.springframework.context.annotation.Configuration.class));
+    assertNotNull(config.getClass()
+        .getAnnotation(org.springframework.context.annotation.Configuration.class));
   }
 } 

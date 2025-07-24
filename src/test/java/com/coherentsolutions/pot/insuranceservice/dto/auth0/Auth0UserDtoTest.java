@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 class Auth0UserDtoTest {
 
   @Test
-  void constructor_WithValidData_CreatesDto() {
+  void testConstructorWithValidDataCreatesDto() {
     // Arrange & Act
     Auth0UserDto dto = new Auth0UserDto("test@example.com", "password123", "Test User");
 
@@ -30,7 +30,7 @@ class Auth0UserDtoTest {
   }
 
   @Test
-  void defaultConstructor_CreatesEmptyDto() {
+  void testDefaultConstructorCreatesEmptyDto() {
     // Arrange & Act
     Auth0UserDto dto = new Auth0UserDto();
 
@@ -41,7 +41,7 @@ class Auth0UserDtoTest {
   }
 
   @Test
-  void settersAndGetters_WorkCorrectly() {
+  void testSettersAndGettersWorkCorrectly() {
     // Arrange
     Auth0UserDto dto = new Auth0UserDto();
 
@@ -75,7 +75,7 @@ class Auth0UserDtoTest {
   }
 
   @Test
-  void emailVerified_DefaultValueIsFalse() {
+  void testEmailVerifiedDefaultValueIsFalse() {
     // Arrange & Act
     Auth0UserDto dto = new Auth0UserDto();
 
@@ -84,7 +84,7 @@ class Auth0UserDtoTest {
   }
 
   @Test
-  void blocked_DefaultValueIsFalse() {
+  void testBlockedDefaultValueIsFalse() {
     // Arrange & Act
     Auth0UserDto dto = new Auth0UserDto();
 
@@ -93,7 +93,7 @@ class Auth0UserDtoTest {
   }
 
   @Test
-  void userMetadata_CanBeSetAndRetrieved() {
+  void testUserMetadataCanBeSetAndRetrieved() {
     // Arrange
     Auth0UserDto dto = new Auth0UserDto();
     Map<String, Object> metadata = new HashMap<>();
@@ -110,7 +110,7 @@ class Auth0UserDtoTest {
   }
 
   @Test
-  void appMetadata_CanBeSetAndRetrieved() {
+  void testAppMetadataCanBeSetAndRetrieved() {
     // Arrange
     Auth0UserDto dto = new Auth0UserDto();
     Map<String, Object> metadata = new HashMap<>();
