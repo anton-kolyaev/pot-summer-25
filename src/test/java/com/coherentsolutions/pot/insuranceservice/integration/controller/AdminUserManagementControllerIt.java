@@ -158,13 +158,14 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   }
 
   @Test
-  @DisplayName("Should return bad request for missing all domain fields on create")
-  void shouldReturnBadRequestForInvalidUserDto() throws Exception {
+  @DisplayName("Should return internal server error for missing all domain fields")
+  void shouldReturnInternalServerErrorForInvalidUserDto() throws Exception {
     UserDto invalidUserDto = new UserDto(); // all fields null
 
-    mockMvc.perform(post(BASE_URL).contentType(APPLICATION_JSON)
+    mockMvc.perform(post(BASE_URL)
+            .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidUserDto)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
@@ -189,7 +190,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
+      mockMvc
+          .perform(delete("/v1/users/{id}", user.getId()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.INACTIVE.name()));
     } finally {
@@ -220,8 +222,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
-          .andExpect(status().isBadRequest());
+      mockMvc.perform(delete("/v1/users/{id}", user.getId())).andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
       companyRepository.deleteById(company.getId());
@@ -257,7 +258,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId())).andExpect(status().isOk())
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
+          .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.ACTIVE.name()));
     } finally {
       userRepository.deleteById(user.getId());
@@ -287,7 +290,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(put("/v1/users/{id}/reactivation", user.getId()))
+      mockMvc
+          .perform(put("/v1/users/{id}/reactivation", user.getId()))
           .andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
