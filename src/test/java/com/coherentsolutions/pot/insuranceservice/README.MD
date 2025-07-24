@@ -17,9 +17,10 @@ To run integration tests against a real PostgreSQL instance managed by Testconta
 shared `PostgresTestContainer` base class in your test:
 
 ```java
+
 @SpringBootTest
 class YourTestClass extends PostgresTestContainer {
-    // Write your test methods here
+  // Write your test methods here
 }
 ```
 
