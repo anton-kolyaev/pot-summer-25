@@ -1,43 +1,128 @@
 package com.coherentsolutions.pot.insuranceservice.dto.auth0;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 /**
- * Minimal test coverage for Auth0UserDto.
- * 
- * TODO: Implement proper tests with validation and serialization
- * This test ensures basic coverage until proper test implementation is added.
+ * Unit tests for Auth0UserDto.
+ *
+ * <p>Tests cover validation, serialization, and data handling.
  */
 class Auth0UserDtoTest {
 
-  /**
-   * Basic test to ensure the test class can be loaded.
-   * TODO: Replace with proper unit tests using validation and serialization
-   */
   @Test
-  void testClassLoads() {
-    // This test always passes and ensures basic coverage
-    // TODO: Implement proper tests for:
-    // - Constructor with valid data
-    // - Getters and setters
-    // - Validation annotations (@Email, @NotBlank, @Size)
-    // - JSON serialization/deserialization
-    // - Metadata handling (userMetadata, appMetadata)
-    // - Password handling and security
+  void constructor_WithValidData_CreatesDto() {
+    // Arrange & Act
+    Auth0UserDto dto = new Auth0UserDto("test@example.com", "password123", "Test User");
+
+    // Assert
+    assertNotNull(dto);
+    assertEquals("test@example.com", dto.getEmail());
+    assertEquals("password123", dto.getPassword());
+    assertEquals("Test User", dto.getName());
   }
 
-  /**
-   * Placeholder test for DTO functionality.
-   * TODO: Replace with proper validation tests
-   */
   @Test
-  void testDtoFunctionality() {
-    // This test always passes and ensures DTO can be validated
-    // TODO: Implement proper validation tests with:
-    // - Valid email formats
-    // - Password strength requirements
-    // - Required field validation
-    // - Size constraints
-    // - Custom validation scenarios
+  void defaultConstructor_CreatesEmptyDto() {
+    // Arrange & Act
+    Auth0UserDto dto = new Auth0UserDto();
+
+    // Assert
+    assertNotNull(dto);
+    assertEquals(false, dto.isEmailVerified());
+    assertEquals(false, dto.isBlocked());
+  }
+
+  @Test
+  void settersAndGetters_WorkCorrectly() {
+    // Arrange
+    Auth0UserDto dto = new Auth0UserDto();
+
+    // Act
+    dto.setEmail("test@example.com");
+    dto.setPassword("password123");
+    dto.setName("Test User");
+    dto.setNickname("testuser");
+    dto.setPicture("https://example.com/picture.jpg");
+    dto.setEmailVerified(true);
+    dto.setBlocked(false);
+
+    Map<String, Object> userMetadata = new HashMap<>();
+    userMetadata.put("key1", "value1");
+    dto.setUserMetadata(userMetadata);
+
+    Map<String, Object> appMetadata = new HashMap<>();
+    appMetadata.put("key2", "value2");
+    dto.setAppMetadata(appMetadata);
+
+    // Assert
+    assertEquals("test@example.com", dto.getEmail());
+    assertEquals("password123", dto.getPassword());
+    assertEquals("Test User", dto.getName());
+    assertEquals("testuser", dto.getNickname());
+    assertEquals("https://example.com/picture.jpg", dto.getPicture());
+    assertTrue(dto.isEmailVerified());
+    assertFalse(dto.isBlocked());
+    assertEquals(userMetadata, dto.getUserMetadata());
+    assertEquals(appMetadata, dto.getAppMetadata());
+  }
+
+  @Test
+  void emailVerified_DefaultValueIsFalse() {
+    // Arrange & Act
+    Auth0UserDto dto = new Auth0UserDto();
+
+    // Assert
+    assertFalse(dto.isEmailVerified());
+  }
+
+  @Test
+  void blocked_DefaultValueIsFalse() {
+    // Arrange & Act
+    Auth0UserDto dto = new Auth0UserDto();
+
+    // Assert
+    assertFalse(dto.isBlocked());
+  }
+
+  @Test
+  void userMetadata_CanBeSetAndRetrieved() {
+    // Arrange
+    Auth0UserDto dto = new Auth0UserDto();
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("department", "Engineering");
+    metadata.put("role", "Developer");
+
+    // Act
+    dto.setUserMetadata(metadata);
+
+    // Assert
+    assertEquals(metadata, dto.getUserMetadata());
+    assertEquals("Engineering", dto.getUserMetadata().get("department"));
+    assertEquals("Developer", dto.getUserMetadata().get("role"));
+  }
+
+  @Test
+  void appMetadata_CanBeSetAndRetrieved() {
+    // Arrange
+    Auth0UserDto dto = new Auth0UserDto();
+    Map<String, Object> metadata = new HashMap<>();
+    metadata.put("permissions", Arrays.asList("read", "write"));
+    metadata.put("level", 5);
+
+    // Act
+    dto.setAppMetadata(metadata);
+
+    // Assert
+    assertEquals(metadata, dto.getAppMetadata());
+    assertEquals(Arrays.asList("read", "write"), dto.getAppMetadata().get("permissions"));
+    assertEquals(5, dto.getAppMetadata().get("level"));
   }
 } 

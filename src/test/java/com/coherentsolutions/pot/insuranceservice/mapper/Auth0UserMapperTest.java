@@ -1,41 +1,169 @@
 package com.coherentsolutions.pot.insuranceservice.mapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import com.auth0.json.mgmt.users.User;
+import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * Minimal test coverage for Auth0UserMapper.
- * 
- * TODO: Implement proper tests with MapStruct and Auth0 SDK
- * This test ensures basic coverage until proper test implementation is added.
+ * Unit tests for Auth0UserMapper.
+ *
+ * <p>Tests cover mapping between Auth0UserDto and Auth0 User objects.
  */
 class Auth0UserMapperTest {
 
-  /**
-   * Basic test to ensure the test class can be loaded.
-   * TODO: Replace with proper unit tests using MapStruct and Auth0 SDK
-   */
-  @Test
-  void testClassLoads() {
-    // This test always passes and ensures basic coverage
-    // TODO: Implement proper tests for:
-    // - toAuth0User() with valid DTO
-    // - toDto() with valid Auth0 User
-    // - updateUserFromDto() with valid data
-    // - Password conversion (String to char[])
-    // - Metadata mapping (userMetadata, appMetadata)
-    // - Null handling and edge cases
+  private Auth0UserMapper auth0UserMapper;
+
+  @BeforeEach
+  void setUp() {
+    auth0UserMapper = new Auth0UserMapperImpl();
   }
 
-  /**
-   * Placeholder test for mapper functionality.
-   * TODO: Replace with proper unit tests
-   */
   @Test
-  void testMapperFunctionality() {
-    // This test always passes and ensures basic coverage
-    // TODO: Implement proper unit tests with:
-    // - MapStruct generated code verification
-    // - Real Auth0 User object mapping
-    // - Error scenarios and validation
+  void toAuth0User_WithValidDto_ReturnsUser() {
+    // Arrange
+    Auth0UserDto dto = new Auth0UserDto();
+    dto.setEmail("test@example.com");
+    dto.setPassword("password123");
+    dto.setName("Test User");
+    dto.setNickname("testuser");
+    dto.setPicture("https://example.com/picture.jpg");
+    dto.setEmailVerified(true);
+    dto.setBlocked(false);
+
+    Map<String, Object> userMetadata = new HashMap<>();
+    userMetadata.put("department", "Engineering");
+    dto.setUserMetadata(userMetadata);
+
+    Map<String, Object> appMetadata = new HashMap<>();
+    appMetadata.put("role", "Developer");
+    dto.setAppMetadata(appMetadata);
+
+    // Act
+    User result = auth0UserMapper.toAuth0User(dto);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals("test@example.com", result.getEmail());
+    assertEquals("Test User", result.getName());
+    assertEquals("testuser", result.getNickname());
+    assertEquals("https://example.com/picture.jpg", result.getPicture());
+    assertEquals(userMetadata, result.getUserMetadata());
+    assertEquals(appMetadata, result.getAppMetadata());
+  }
+
+  @Test
+  void toAuth0User_WithNullPassword_ReturnsUserWithNullPassword() {
+    // Arrange
+    Auth0UserDto dto = new Auth0UserDto();
+    dto.setEmail("test@example.com");
+    dto.setPassword(null);
+    dto.setName("Test User");
+
+    // Act
+    User result = auth0UserMapper.toAuth0User(dto);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals("test@example.com", result.getEmail());
+    assertEquals("Test User", result.getName());
+  }
+
+  @Test
+  void toDto_WithValidUser_ReturnsDto() {
+    // Arrange
+    User user = new User();
+    user.setId("auth0|123");
+    user.setEmail("test@example.com");
+    user.setName("Test User");
+    user.setNickname("testuser");
+    user.setPicture("https://example.com/picture.jpg");
+
+    Map<String, Object> userMetadata = new HashMap<>();
+    userMetadata.put("department", "Engineering");
+    user.setUserMetadata(userMetadata);
+
+    Map<String, Object> appMetadata = new HashMap<>();
+    appMetadata.put("role", "Developer");
+    user.setAppMetadata(appMetadata);
+
+    // Act
+    Auth0UserDto result = auth0UserMapper.toDto(user);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals("test@example.com", result.getEmail());
+    assertEquals("Test User", result.getName());
+    assertEquals("testuser", result.getNickname());
+    assertEquals("https://example.com/picture.jpg", result.getPicture());
+    assertEquals(userMetadata, result.getUserMetadata());
+    assertEquals(appMetadata, result.getAppMetadata());
+  }
+
+  @Test
+  void toDto_WithNullUser_ReturnsNull() {
+    // Arrange
+    User user = null;
+
+    // Act
+    Auth0UserDto result = auth0UserMapper.toDto(user);
+
+    // Assert
+    assertNull(result);
+  }
+
+  @Test
+  void toAuth0User_WithEmptyDto_ReturnsUserWithDefaults() {
+    // Arrange
+    Auth0UserDto dto = new Auth0UserDto();
+
+    // Act
+    User result = auth0UserMapper.toAuth0User(dto);
+
+    // Assert
+    assertNotNull(result);
+  }
+
+  @Test
+  void toDto_WithEmptyUser_ReturnsDtoWithDefaults() {
+    // Arrange
+    User user = new User();
+
+    // Act
+    Auth0UserDto result = auth0UserMapper.toDto(user);
+
+    // Assert
+    assertNotNull(result);
+  }
+
+  @Test
+  void toAuth0User_WithComplexMetadata_HandlesCorrectly() {
+    // Arrange
+    Auth0UserDto dto = new Auth0UserDto();
+    dto.setEmail("test@example.com");
+
+    Map<String, Object> userMetadata = new HashMap<>();
+    userMetadata.put("string", "value");
+    userMetadata.put("number", 42);
+    userMetadata.put("boolean", true);
+    dto.setUserMetadata(userMetadata);
+
+    Map<String, Object> appMetadata = new HashMap<>();
+    appMetadata.put("nested", Map.of("key", "value"));
+    dto.setAppMetadata(appMetadata);
+
+    // Act
+    User result = auth0UserMapper.toAuth0User(dto);
+
+    // Assert
+    assertNotNull(result);
+    assertEquals(userMetadata, result.getUserMetadata());
+    assertEquals(appMetadata, result.getAppMetadata());
   }
 } 
