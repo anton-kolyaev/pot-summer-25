@@ -16,7 +16,7 @@ spring:
 
 # Auth0 Configuration
 auth0:
-  domain: ${AUTH0_DOMAIN:your-domain.auth0.com}
+  domain: ${AUTH0_DOMAIN:} # your-domain.auth0.com
   client-id: ${AUTH0_CLIENT_ID:your-client-id}
   client-secret: ${AUTH0_CLIENT_SECRET:your-client-secret}
   audience: ${AUTH0_AUDIENCE:https://your-domain.auth0.com/api/v2/}
