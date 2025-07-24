@@ -54,7 +54,7 @@ public class UserDto {
   @Valid
   private List<Address> addressData;
 
-  @Size(min = 1, message = "At least one address is required")
+  @Size(min = 1, message = "At least one phone is required")
   @Valid
   private List<Phone> phoneData;
   private Set<UserFunction> functions;
