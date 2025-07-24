@@ -91,15 +91,24 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     company.setWebsite("https://example.com");
     company = companyRepository.save(company);
 
-    UserDto userDto = UserDto.builder().firstName(TEST_FIRST_NAME).lastName(TEST_LAST_NAME)
-        .username(TEST_USERNAME).email(TEST_EMAIL).dateOfBirth(TEST_DOB)
-        .addressData(List.of(TEST_ADDRESS)).phoneData(List.of(TEST_PHONE))
-        .companyId(company.getId()).status(UserStatus.ACTIVE).dateOfBirth(LocalDate.of(1992, 3, 14))
-        .ssn(TEST_SSN).build();
+    UserDto userDto = UserDto.builder()
+        .firstName(TEST_FIRST_NAME)
+        .lastName(TEST_LAST_NAME)
+        .username(TEST_USERNAME)
+        .email(TEST_EMAIL).dateOfBirth(TEST_DOB)
+        .addressData(List.of(TEST_ADDRESS))
+        .phoneData(List.of(TEST_PHONE))
+        .companyId(company.getId())
+        .status(UserStatus.ACTIVE)
+        .dateOfBirth(LocalDate.of(1992, 3, 14))
+        .ssn(TEST_SSN)
+        .build();
 
     try {
-      mockMvc.perform(post(BASE_URL).contentType(APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(userDto))).andExpect(status().isCreated())
+      mockMvc.perform(post(BASE_URL)
+              .contentType(APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(userDto)))
+          .andExpect(status().isCreated())
           .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
           .andExpect(jsonPath("$.username").value(TEST_USERNAME))
           .andExpect(jsonPath("$.companyId").value(company.getId().toString()));
@@ -131,8 +140,12 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(get(BASE_URL).param("page", "0").param("size", "10").param("status", "ACTIVE")
-              .param("companyId", company.getId().toString()).contentType(APPLICATION_JSON))
+      mockMvc.perform(get(BASE_URL)
+              .param("page", "0")
+              .param("size", "10")
+              .param("status", "ACTIVE")
+              .param("companyId", company.getId().toString())
+              .contentType(APPLICATION_JSON))
           .andExpect(status().isOk())
           .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
           .andExpect(jsonPath("$.content").isArray())
@@ -145,7 +158,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   }
 
   @Test
-  @DisplayName("Should return bad request for missing all domain fields")
+  @DisplayName("Should return bad request for missing all domain fields on create")
   void shouldReturnBadRequestForInvalidUserDto() throws Exception {
     UserDto invalidUserDto = new UserDto(); // all fields null
 
@@ -176,7 +189,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId())).andExpect(status().isOk())
+      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
+          .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.INACTIVE.name()));
     } finally {
       userRepository.deleteById(user.getId());
@@ -206,7 +220,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId())).andExpect(status().isBadRequest());
+      mockMvc.perform(delete("/v1/users/{id}", user.getId()))
+          .andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
       companyRepository.deleteById(company.getId());
