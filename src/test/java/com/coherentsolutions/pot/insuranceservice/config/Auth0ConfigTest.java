@@ -1,39 +1,122 @@
 package com.coherentsolutions.pot.insuranceservice.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.auth0.client.mgmt.ManagementAPI;
 import org.junit.jupiter.api.Test;
 
 /**
- * Minimal test coverage for Auth0Config.
- * 
- * TODO: Implement proper tests with Auth0 SDK
- * This test ensures basic coverage until proper test implementation is added.
+ * Unit tests for Auth0Config.
+ *
+ * <p>Tests cover configuration and conditional bean creation.
  */
 class Auth0ConfigTest {
 
-  /**
-   * Basic test to ensure the test class can be loaded.
-   * TODO: Replace with proper unit tests using Auth0 SDK
-   */
   @Test
-  void testClassLoads() {
-    // This test always passes and ensures basic coverage
-    // TODO: Implement proper tests for:
-    // - ManagementAPI bean creation
-    // - Conditional bean creation based on properties
-    // - Configuration validation
-    // - Error scenarios with invalid configuration
+  void auth0Config_ClassLoadsSuccessfully() {
+    // Arrange & Act
+    Auth0Config config = new Auth0Config();
+
+    // Assert
+    assertNotNull(config);
   }
 
-  /**
-   * Placeholder test for configuration functionality.
-   * TODO: Replace with proper unit tests
-   */
   @Test
-  void testConfigurationFunctionality() {
-    // This test always passes and ensures basic coverage
-    // TODO: Implement proper unit tests with:
-    // - Auth0 ManagementAPI bean verification
-    // - Property validation scenarios
-    // - Conditional bean creation testing
+  void managementAPI_WithValidProperties_ReturnsManagementAPI() {
+    // Arrange
+    Auth0Config config = new Auth0Config();
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    // Act
+    ManagementAPI result = config.managementAPI(properties);
+
+    // Assert
+    assertNotNull(result);
+  }
+
+  @Test
+  void managementAPI_WithNullDomain_ThrowsException() {
+    // Arrange
+    Auth0Config config = new Auth0Config();
+    Auth0Properties properties = new Auth0Properties(
+        null,
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    // Act & Assert
+    assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
+  }
+
+  @Test
+  void managementAPI_WithEmptyDomain_ThrowsException() {
+    // Arrange
+    Auth0Config config = new Auth0Config();
+    Auth0Properties properties = new Auth0Properties(
+        "",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    // Act & Assert
+    assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
+  }
+
+  @Test
+  void managementAPI_WithNullClientId_ThrowsException() {
+    // Arrange
+    Auth0Config config = new Auth0Config();
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        null,
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    // Act & Assert
+    assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
+  }
+
+  @Test
+  void managementAPI_WithEmptyClientId_ThrowsException() {
+    // Arrange
+    Auth0Config config = new Auth0Config();
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        "",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    // Act & Assert
+    assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
+  }
+
+  @Test
+  void configClass_HasConfigurationAnnotation() {
+    // Arrange & Act
+    Auth0Config config = new Auth0Config();
+
+    // Assert
+    assertNotNull(config.getClass().getAnnotation(org.springframework.context.annotation.Configuration.class));
   }
 } 

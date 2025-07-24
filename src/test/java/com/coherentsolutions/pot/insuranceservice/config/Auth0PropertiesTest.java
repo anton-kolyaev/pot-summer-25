@@ -1,39 +1,175 @@
 package com.coherentsolutions.pot.insuranceservice.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 
 /**
- * Minimal test coverage for Auth0Properties.
- * 
- * TODO: Implement proper tests with configuration properties
- * This test ensures basic coverage until proper test implementation is added.
+ * Unit tests for Auth0Properties.
+ *
+ * <p>Tests cover record creation and default values.
  */
 class Auth0PropertiesTest {
 
-  /**
-   * Basic test to ensure the test class can be loaded.
-   * TODO: Replace with proper unit tests using configuration properties
-   */
   @Test
-  void testClassLoads() {
-    // This test always passes and ensures basic coverage
-    // TODO: Implement proper tests for:
-    // - Record constructor with valid data
-    // - Default timeout value handling
-    // - Property binding from application.yml
-    // - Environment variable overrides
+  void constructor_WithValidData_CreatesProperties() {
+    // Arrange & Act
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        15000,
+        true
+    );
+
+    // Assert
+    assertNotNull(properties);
+    assertEquals("test-domain.auth0.com", properties.domain());
+    assertEquals("test-client-id", properties.clientId());
+    assertEquals("test-client-secret", properties.clientSecret());
+    assertEquals("https://test-domain.auth0.com/api/v2/", properties.audience());
+    assertEquals(15000, properties.timeout());
+    assertEquals(true, properties.enabled());
   }
 
-  /**
-   * Placeholder test for properties functionality.
-   * TODO: Replace with proper unit tests
-   */
   @Test
-  void testPropertiesFunctionality() {
-    // This test always passes and ensures basic coverage
-    // TODO: Implement proper unit tests with:
-    // - Configuration properties binding
-    // - Default value handling
-    // - Validation scenarios
+  void constructor_WithZeroTimeout_SetsDefaultTimeout() {
+    // Arrange & Act
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        0,
+        true
+    );
+
+    // Assert
+    assertEquals(10000, properties.timeout());
+  }
+
+  @Test
+  void constructor_WithNegativeTimeout_SetsDefaultTimeout() {
+    // Arrange & Act
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        -1000,
+        true
+    );
+
+    // Assert
+    assertEquals(10000, properties.timeout());
+  }
+
+  @Test
+  void constructor_WithValidTimeout_KeepsTimeout() {
+    // Arrange & Act
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        5000,
+        true
+    );
+
+    // Assert
+    assertEquals(5000, properties.timeout());
+  }
+
+  @Test
+  void constructor_WithNullValues_HandlesCorrectly() {
+    // Arrange & Act
+    Auth0Properties properties = new Auth0Properties(
+        null,
+        null,
+        null,
+        null,
+        10000,
+        false
+    );
+
+    // Assert
+    assertNotNull(properties);
+    assertEquals(null, properties.domain());
+    assertEquals(null, properties.clientId());
+    assertEquals(null, properties.clientSecret());
+    assertEquals(null, properties.audience());
+    assertEquals(10000, properties.timeout());
+    assertEquals(false, properties.enabled());
+  }
+
+  @Test
+  void constructor_WithEmptyStrings_HandlesCorrectly() {
+    // Arrange & Act
+    Auth0Properties properties = new Auth0Properties(
+        "",
+        "",
+        "",
+        "",
+        10000,
+        false
+    );
+
+    // Assert
+    assertNotNull(properties);
+    assertEquals("", properties.domain());
+    assertEquals("", properties.clientId());
+    assertEquals("", properties.clientSecret());
+    assertEquals("", properties.audience());
+    assertEquals(10000, properties.timeout());
+    assertEquals(false, properties.enabled());
+  }
+
+  @Test
+  void record_Immutability_WorksCorrectly() {
+    // Arrange
+    Auth0Properties properties = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    // Act & Assert - Record should be immutable, so we can only read values
+    assertEquals("test-domain.auth0.com", properties.domain());
+    assertEquals("test-client-id", properties.clientId());
+    assertEquals("test-client-secret", properties.clientSecret());
+    assertEquals("https://test-domain.auth0.com/api/v2/", properties.audience());
+    assertEquals(10000, properties.timeout());
+    assertEquals(true, properties.enabled());
+  }
+
+  @Test
+  void record_Equality_WorksCorrectly() {
+    // Arrange
+    Auth0Properties properties1 = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    Auth0Properties properties2 = new Auth0Properties(
+        "test-domain.auth0.com",
+        "test-client-id",
+        "test-client-secret",
+        "https://test-domain.auth0.com/api/v2/",
+        10000,
+        true
+    );
+
+    // Act & Assert
+    assertEquals(properties1, properties2);
+    assertEquals(properties1.hashCode(), properties2.hashCode());
   }
 } 
