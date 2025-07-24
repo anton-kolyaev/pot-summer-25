@@ -5,8 +5,11 @@ import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -37,19 +40,21 @@ public class UserDto {
   private String username;
 
   @NotBlank(message = "Email is required")
+  @Email(message = "Email should be valid")
   private String email;
 
+  @Past(message = "Date of birth must be in the past")
   @NotNull(message = "Date of Birth is required")
   private LocalDate dateOfBirth;
 
   @NotBlank(message = "Social security number is required")
   private String ssn;
 
-  @NotNull(message = "Address is required")
+  @Size(min = 1, message = "At least one address is required")
   @Valid
   private List<Address> addressData;
 
-  @NotNull(message = "Phone is required")
+  @Size(min = 1, message = "At least one address is required")
   @Valid
   private List<Phone> phoneData;
   private Set<UserFunction> functions;
