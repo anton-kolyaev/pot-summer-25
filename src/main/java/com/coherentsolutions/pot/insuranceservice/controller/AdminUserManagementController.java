@@ -18,11 +18,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * REST controller for managing users by admin.
- *
- * <p>Provides endpoints to create users, update users, and query users with filters.
+ * Provides endpoints to create users, update users, and query users with
+ * filters.
  */
 @RestController
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class AdminUserManagementController {
    */
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  public UserDto updateUser(@PathVariable("id") UUID id, @RequestBody UserDto request) {
+  public UserDto updateUser(@PathVariable("id") UUID id, @Valid @RequestBody UserDto request) {
     return userManagementService.updateUser(id, request);
   }
 
@@ -73,4 +74,12 @@ public class AdminUserManagementController {
     return userManagementService.reactivateUser(id);
   }
 
+  /**
+   * Retrieves user details by ID. If the user does not exist, throws {@link
+   * ResponseStatusException} with 404 NOT FOUND.
+   */
+  @GetMapping("/{id}")
+  public UserDto viewUsersDetails(@PathVariable("id") UUID id) {
+    return userManagementService.getUsersDetails(id);
+  }
 }
