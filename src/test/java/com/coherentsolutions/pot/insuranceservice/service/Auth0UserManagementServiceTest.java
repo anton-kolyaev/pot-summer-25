@@ -191,7 +191,8 @@ class Auth0UserManagementServiceTest {
   @Test
   void testServiceConstructorWithValidParameters() {
     // Arrange & Act
-    Auth0UserManagementService service = new Auth0UserManagementService(managementAPI, auth0UserMapper);
+    Auth0UserManagementService service = new Auth0UserManagementService(
+        managementAPI, auth0UserMapper);
 
     // Assert
     assertNotNull(service);
@@ -203,8 +204,8 @@ class Auth0UserManagementServiceTest {
     String userId = "test-user";
     String email = "test@example.com";
     User user = new User();
-    Auth0UserDto dto = new Auth0UserDto();
-    UserFilter filter = new UserFilter();
+    final Auth0UserDto dto = new Auth0UserDto();
+    final UserFilter filter = new UserFilter();
 
     // Act & Assert - Test that all method signatures exist
     assertNotNull(userId);
