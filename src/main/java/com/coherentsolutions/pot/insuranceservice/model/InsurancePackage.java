@@ -45,7 +45,7 @@ public class InsurancePackage {
   private String name;
 
   @ManyToOne
-  @JoinColumn(name = "company_id")
+  @JoinColumn(name = "company_id", nullable = false)
   private Company company;
 
   @NotNull
