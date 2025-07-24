@@ -38,7 +38,8 @@ class Auth0UserManagementServiceTest {
   @Test
   void testServiceClassLoadsSuccessfully() {
     // Arrange & Act
-    Auth0UserManagementService service = new Auth0UserManagementService(managementAPI, auth0UserMapper);
+    Auth0UserManagementService service = new Auth0UserManagementService(
+        managementAPI, auth0UserMapper);
 
     // Assert
     assertNotNull(service);
