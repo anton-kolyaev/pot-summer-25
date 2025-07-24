@@ -18,7 +18,7 @@ public record Auth0Properties(
     boolean enabled
 ) {
   /**
-   * Default constructor with default timeout value.
+   * Compact constructor with default timeout value.
    */
   public Auth0Properties {
     if (timeout <= 0) {

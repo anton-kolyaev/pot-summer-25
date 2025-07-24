@@ -9,6 +9,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
  * in the Auth0 authorization server via backend APIs.
  */
 @Service
+@ConditionalOnProperty(name = "auth0.enabled", havingValue = "true", matchIfMissing = false)
 public class Auth0UserManagementService {
 
   private final ManagementAPI managementAPI;
