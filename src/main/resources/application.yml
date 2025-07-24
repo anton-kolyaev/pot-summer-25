@@ -13,6 +13,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
+
+# Auth0 Configuration
+auth0:
+  domain: ${AUTH0_DOMAIN:your-domain.auth0.com}
+  client-id: ${AUTH0_CLIENT_ID:your-client-id}
+  client-secret: ${AUTH0_CLIENT_SECRET:your-client-secret}
+  audience: ${AUTH0_AUDIENCE:https://your-domain.auth0.com/api/v2/}
+  timeout: ${AUTH0_TIMEOUT:10000}
+
 management:
   endpoints:
     web:
