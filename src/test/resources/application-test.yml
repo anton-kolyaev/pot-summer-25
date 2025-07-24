@@ -13,6 +13,7 @@ spring:
 auth0:
   enabled: true # Enable Auth0 for tests
   domain: test-domain.auth0.com
+  api-token: test-api-token
   client-id: test-client-id
   client-secret: test-client-secret
   audience: https://test-domain.auth0.com/api/v2/
