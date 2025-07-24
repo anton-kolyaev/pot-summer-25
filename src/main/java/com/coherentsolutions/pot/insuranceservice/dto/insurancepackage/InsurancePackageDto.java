@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insuranceservice.dto.insurancepackage;
 
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -22,8 +21,4 @@ public class InsurancePackageDto {
   private LocalDate endDate;
   private PayrollFrequency payrollFrequency;
   private PackageStatus status;
-  private UUID createdBy;
-  private UUID updatedBy;
-  private Instant createdAt;
-  private Instant updatedAt;
 }
