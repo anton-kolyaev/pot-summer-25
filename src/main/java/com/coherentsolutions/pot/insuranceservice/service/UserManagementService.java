@@ -23,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Service class for managing {@link User} entities including retrieval with filtering, creation,
+ * Service class for managing {@link User} entities including retrieval with
+ * filtering, creation,
  * and updates.
  */
 @Service
@@ -34,7 +35,8 @@ public class UserManagementService {
   private final UserMapper userMapper;
 
   /**
-   * Retrieves a paginated list of users filtered by criteria specified in {@link UserFilter}.
+   * Retrieves a paginated list of users filtered by criteria specified in
+   * {@link UserFilter}.
    */
   public Page<UserDto> getUsersWithFilters(UserFilter filter, Pageable pageable) {
     Page<User> users = userRepository.findAll(UserSpecification.withFilters(filter), pageable);
@@ -42,7 +44,17 @@ public class UserManagementService {
   }
 
   /**
-   * Creates a new user entity from the given {@link UserDto} and persists it. Also ensures
+   * Retrieves user details by ID. If the user does not exist, throws {@link
+   * ResponseStatusException} with 404 NOT FOUND.
+   */
+  public UserDto getUsersDetails(UUID id) {
+    User user = userRepository.findByIdOrThrow(id);
+    return userMapper.toDto(user);
+  }
+
+  /**
+   * Creates a new user entity from the given {@link UserDto} and persists it.
+   * Also ensures
    * bidirectional linkage between user and their function assignments.
    */
   public UserDto createUser(UserDto dto) {
@@ -59,7 +71,8 @@ public class UserManagementService {
   }
 
   /**
-   * Updates an existing user identified by id with data from {@link UserDto}. Synchronizes the
+   * Updates an existing user identified by id with data from {@link UserDto}.
+   * Synchronizes the
    * user's function assignments with the incoming data.
    */
   public UserDto updateUser(UUID id, UserDto request) {

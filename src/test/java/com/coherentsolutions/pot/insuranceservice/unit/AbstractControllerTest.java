@@ -20,11 +20,6 @@ public abstract class AbstractControllerTest {
   protected static MockMvc mockMvc;
   protected static ObjectMapper objectMapper;
 
-  /**
-   * Initializes shared MockMvc and ObjectMapper for controller tests.
-   *
-   * @param controller the controller under test
-   */
   protected static void initializeCommonObjects(Object controller) {
     mockMvc = MockMvcBuilders.standaloneSetup(controller)
         .setControllerAdvice(new GlobalExceptionHandler())
@@ -48,29 +43,14 @@ public abstract class AbstractControllerTest {
     }
   }
 
-  /**
-   * Returns the shared MockMvc instance.
-   *
-   * @return the MockMvc instance
-   */
   protected MockMvc getMockMvc() {
     return mockMvc;
   }
 
-  /**
-   * Returns the shared ObjectMapper instance.
-   *
-   * @return the ObjectMapper instance
-   */
   protected ObjectMapper getObjectMapper() {
     return objectMapper;
   }
 
-  /**
-   * Creates a test CompanyDto with random UUID.
-   *
-   * @return a CompanyDto object
-   */
   protected CompanyDto createTestCompanyDto() {
     return CompanyDto.builder()
         .id(UUID.randomUUID())
@@ -84,12 +64,6 @@ public abstract class AbstractControllerTest {
         .build();
   }
 
-  /**
-   * Creates a test CompanyDto with a specific UUID.
-   *
-   * @param id the UUID to use for the company
-   * @return a CompanyDto object
-   */
   protected CompanyDto createTestCompanyDto(UUID id) {
     return CompanyDto.builder()
         .id(id)
@@ -103,11 +77,6 @@ public abstract class AbstractControllerTest {
         .build();
   }
 
-  /**
-   * Generates a random UUID to be used as a test company ID.
-   *
-   * @return a random UUID
-   */
   protected UUID createTestCompanyId() {
     return UUID.randomUUID();
   }

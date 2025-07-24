@@ -167,9 +167,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc
-          .perform(delete("/v1/users/{id}", user.getId()))
-          .andExpect(status().isOk())
+      mockMvc.perform(delete("/v1/users/{id}", user.getId())).andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.INACTIVE.name()));
     } finally {
       userRepository.deleteById(user.getId());
