@@ -26,7 +26,7 @@ class Auth0UserMapperTest {
   }
 
   @Test
-  void toAuth0User_WithValidDto_ReturnsUser() {
+  void testToAuth0UserWithValidDtoReturnsUser() {
     // Arrange
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
@@ -59,7 +59,7 @@ class Auth0UserMapperTest {
   }
 
   @Test
-  void toAuth0User_WithNullPassword_ReturnsUserWithNullPassword() {
+  void testToAuth0UserWithNullPasswordReturnsUserWithNullPassword() {
     // Arrange
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
@@ -76,7 +76,7 @@ class Auth0UserMapperTest {
   }
 
   @Test
-  void toDto_WithValidUser_ReturnsDto() {
+  void testToDtoWithValidUserReturnsDto() {
     // Arrange
     User user = new User();
     user.setId("auth0|123");
@@ -107,7 +107,7 @@ class Auth0UserMapperTest {
   }
 
   @Test
-  void toDto_WithNullUser_ReturnsNull() {
+  void testToDtoWithNullUserReturnsNull() {
     // Arrange
     User user = null;
 
@@ -119,7 +119,7 @@ class Auth0UserMapperTest {
   }
 
   @Test
-  void toAuth0User_WithEmptyDto_ReturnsUserWithDefaults() {
+  void testToAuth0UserWithEmptyDtoReturnsUserWithDefaults() {
     // Arrange
     Auth0UserDto dto = new Auth0UserDto();
 
@@ -131,7 +131,7 @@ class Auth0UserMapperTest {
   }
 
   @Test
-  void toDto_WithEmptyUser_ReturnsDtoWithDefaults() {
+  void testToDtoWithEmptyUserReturnsDtoWithDefaults() {
     // Arrange
     User user = new User();
 
@@ -143,7 +143,7 @@ class Auth0UserMapperTest {
   }
 
   @Test
-  void toAuth0User_WithComplexMetadata_HandlesCorrectly() {
+  void testToAuth0UserWithComplexMetadataHandlesCorrectly() {
     // Arrange
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
