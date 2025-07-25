@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.repository;
 
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,19 +14,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Repository interface for accessing and managing {@link User} entities. Extends
- * {@link JpaRepository} for basic CRUD operations and {@link JpaSpecificationExecutor} for
+ * Repository interface for accessing and managing {@link User} entities.
+ * Extends
+ * {@link JpaRepository} for basic CRUD operations and
+ * {@link JpaSpecificationExecutor} for
  * filtering capabilities.
  */
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
-
   /**
    * Finds all users belonging to a specific company.
    */
   List<User> findByCompanyId(UUID companyId);
 
   /**
-   * Retrieves a {@link User} by its ID or throws {@link ResponseStatusException} with
+   * Retrieves a {@link User} by its ID or throws {@link ResponseStatusException}
+   * with
    * 404 NOT FOUND if the user does not exist.
    */
   default User findByIdOrThrow(UUID id) {

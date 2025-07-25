@@ -14,12 +14,15 @@ import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
+import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
+import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,47 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   private static final String TEST_FIRST_NAME = "Jane";
   private static final String TEST_LAST_NAME = "Doe";
   private static final String TEST_SSN = "999-88-7777";
+  private static final LocalDate TEST_DOB = LocalDate.of(1992, 3, 14);
+
+  private static final Address TEST_ADDRESS = new Address();
+  private static final Phone TEST_PHONE = new Phone();
+
+  static {
+    TEST_ADDRESS.setCity("Vilnius");
+    TEST_ADDRESS.setCountry("Lithuania");
+    TEST_ADDRESS.setState("NB");
+    TEST_ADDRESS.setStreet("123 Example Street");
+    TEST_ADDRESS.setBuilding("123");
+  }
+
+  static {
+    TEST_PHONE.setCode("+1");
+    TEST_PHONE.setNumber("00000000");
+  }
+
+  private Company createAndSaveTestCompany() {
+    Company company = new Company();
+    company.setName("Test Company");
+    company.setEmail("company@example.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://example.com");
+    company.setStatus(CompanyStatus.ACTIVE);
+    return companyRepository.save(company);
+  }
+
+  private User createAndSaveTestUser(Company company) {
+    User user = new User();
+    user.setFirstName(TEST_FIRST_NAME);
+    user.setLastName(TEST_LAST_NAME);
+    user.setUsername(TEST_USERNAME);
+    user.setEmail(TEST_EMAIL);
+    user.setDateOfBirth(TEST_DOB);
+    user.setSsn(TEST_SSN);
+    user.setCompany(company);
+    user.setStatus(UserStatus.ACTIVE);
+    return userRepository.save(user);
+  }
+
   @Autowired
   private MockMvc mockMvc;
   @Autowired
@@ -74,7 +118,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
         .firstName(TEST_FIRST_NAME)
         .lastName(TEST_LAST_NAME)
         .username(TEST_USERNAME)
-        .email(TEST_EMAIL)
+        .email(TEST_EMAIL).dateOfBirth(TEST_DOB)
+        .addressData(List.of(TEST_ADDRESS))
+        .phoneData(List.of(TEST_PHONE))
         .companyId(company.getId())
         .status(UserStatus.ACTIVE)
         .dateOfBirth(LocalDate.of(1992, 3, 14))
@@ -135,14 +181,60 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   }
 
   @Test
-  @DisplayName("Should return internal server error for missing all domain fields")
-  void shouldReturnInternalServerErrorForInvalidUserDto() throws Exception {
+  @DisplayName("Should return bad request for missing all domain fields")
+  void shouldReturnBadRequestForInvalidUserDto() throws Exception {
     UserDto invalidUserDto = new UserDto(); // all fields null
-
-    mockMvc.perform(post(BASE_URL)
-            .contentType(APPLICATION_JSON)
+    mockMvc.perform(post(BASE_URL).contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidUserDto)))
-        .andExpect(status().isInternalServerError());
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Should update user successfully with valid data")
+  void shouldUpdateUserSuccessfully() throws Exception {
+    Company company = createAndSaveTestCompany();
+
+    User user = createAndSaveTestUser(company);
+
+    UserDto updateDto = UserDto.builder()
+        .id(user.getId())
+        .firstName("Updated" + TEST_FIRST_NAME)
+        .lastName("Updated" + TEST_LAST_NAME)
+        .username("updated." + TEST_USERNAME)
+        .email("updated_" + TEST_EMAIL)
+        .dateOfBirth(TEST_DOB.minusYears(1))
+        .ssn("123-45-9999")
+        .addressData(List.of(TEST_ADDRESS))
+        .phoneData(List.of(TEST_PHONE))
+        .status(UserStatus.ACTIVE)
+        .companyId(company.getId())
+        .build();
+
+    try {
+      mockMvc.perform(put(BASE_URL + "/" + user.getId())
+              .contentType(APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(updateDto)))
+          .andExpect(status().isAccepted())
+          .andExpect(jsonPath("$.username").value("updated." + TEST_USERNAME))
+          .andExpect(jsonPath("$.firstName").value("Updated" + TEST_FIRST_NAME))
+          .andExpect(jsonPath("$.lastName").value("Updated" + TEST_LAST_NAME))
+          .andExpect(jsonPath("$.email").value("updated_" + TEST_EMAIL));
+    } finally {
+      userRepository.deleteById(user.getId());
+      companyRepository.deleteById(company.getId());
+    }
+  }
+
+  @Test
+  @DisplayName("Should return BadRequest when updating with invalid UserDto")
+  void shouldReturnBadRequestForInvalidUpdateUserDto() throws Exception {
+    UUID userId = UUID.randomUUID();
+    UserDto invalidDto = new UserDto(); // all fields null
+
+    mockMvc.perform(put(BASE_URL + "/" + userId)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(invalidDto)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
@@ -371,4 +463,37 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
         get("/v1/companies/{id}/users", invalidCompanyId).param("page", "0").param("size", "10")
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
   }
+
+  @Test
+  @DisplayName("Should return user details when user exists")
+  void shouldReturnUserDetailsById() throws Exception {
+    Company company = createAndSaveTestCompany();
+    User user = createAndSaveTestUser(company);
+
+    try {
+      mockMvc.perform(get(BASE_URL + "/" + user.getId())
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+          .andExpect(jsonPath("$.id").value(user.getId().toString()))
+          .andExpect(jsonPath("$.username").value(TEST_USERNAME))
+          .andExpect(jsonPath("$.firstName").value(TEST_FIRST_NAME))
+          .andExpect(jsonPath("$.lastName").value(TEST_LAST_NAME))
+          .andExpect(jsonPath("$.email").value(TEST_EMAIL));
+    } finally {
+      userRepository.deleteById(user.getId());
+      companyRepository.deleteById(company.getId());
+    }
+  }
+
+  @Test
+  @DisplayName("Should return 404 when user does not exist")
+  void shouldReturn404WhenUserNotFound() throws Exception {
+    UUID nonExistentUserId = UUID.randomUUID();
+
+    mockMvc.perform(get(BASE_URL + "/" + nonExistentUserId)
+            .contentType(APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
 }
