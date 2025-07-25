@@ -33,6 +33,5 @@ public class InsurancePackageDto {
   @NotNull
   private PayrollFrequency payrollFrequency;
 
-  @NotNull
   private PackageStatus status;
 }

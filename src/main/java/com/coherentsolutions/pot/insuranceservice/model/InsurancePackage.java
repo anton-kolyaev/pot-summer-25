@@ -37,27 +37,35 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class InsurancePackage {
 
   @NotNull
-  @Column(name = "is_active", nullable = false)
-  boolean isActive;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false)
+  PackageStatus status;
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
+
   @NotBlank
   @Column(name = "name", nullable = false)
   private String name;
+
   @ManyToOne
   @JoinColumn(name = "company_id", nullable = false)
   private Company company;
+
   @NotNull
   @Column(name = "start_date", nullable = false)
   private LocalDate startDate;
+
   @NotNull
   @Column(name = "end_date", nullable = false)
   private LocalDate endDate;
+
   @NotNull
   @Enumerated(EnumType.STRING)
   @Column(name = "payroll_frequency", nullable = false, length = 20)
   private PayrollFrequency payrollFrequency;
+
   @CreatedBy
   @Column(name = "created_by")
   private UUID createdBy;
@@ -73,20 +81,5 @@ public class InsurancePackage {
   @LastModifiedDate
   @Column(name = "updated_at")
   private Instant updatedAt;
-
-  @Transient
-  public PackageStatus getEffectiveStatus() {
-    if (!isActive) {
-      return PackageStatus.DEACTIVATED;
-    }
-    LocalDate now = LocalDate.now();
-    if (now.isBefore(startDate)) {
-      return PackageStatus.INITIALIZED;
-    } else if (!now.isAfter(endDate)) {
-      return PackageStatus.ACTIVE;
-    } else {
-      return PackageStatus.EXPIRED;
-    }
-  }
 
 }

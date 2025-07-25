@@ -5,7 +5,8 @@ create TABLE insurance_packages (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     payroll_frequency VARCHAR(20) NOT NULL,
-    is_active BOOLEAN NOT NULL,
+    status VARCHAR(20) NOT NULL
+      CHECK (status IN ('INITIALIZED', 'EXPIRED', 'ACTIVE', 'DEACTIVATED')),
     created_by UUID,
     updated_by UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
