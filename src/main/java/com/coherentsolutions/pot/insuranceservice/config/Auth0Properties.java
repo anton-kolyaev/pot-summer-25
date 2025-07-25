@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "auth0")
 public record Auth0Properties(
     String domain,
+    String apiToken,
     String clientId,
     String clientSecret,
     String audience,
@@ -18,7 +19,7 @@ public record Auth0Properties(
     boolean enabled
 ) {
   /**
-   * Default constructor with default timeout value.
+   * Compact constructor with default timeout value.
    */
   public Auth0Properties {
     if (timeout <= 0) {
