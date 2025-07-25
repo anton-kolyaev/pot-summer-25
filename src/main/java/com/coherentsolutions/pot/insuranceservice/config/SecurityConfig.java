@@ -10,20 +10,15 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
-
-    @Bean
+    
+  @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            JwtAuthenticationConverter jwtAuthConverter
-    ) throws Exception {
-        http
+      HttpSecurity http,
+      JwtAuthenticationConverter jwtAuthConverter
+  ) throws Exception {
+    http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/actuator/health"
-                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())
@@ -31,7 +26,7 @@ public class SecurityConfig {
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthConverter)
                         )
-                );
-        return http.build();
-    }
+        );
+    return http.build();
+  }
 }

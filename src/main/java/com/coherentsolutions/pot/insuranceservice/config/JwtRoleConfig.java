@@ -7,14 +7,16 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 
 @Configuration
 public class JwtRoleConfig {
-    @Bean
+  private static final String ROLES_CLAIM = "https://insurance-service/roles";
+  
+  @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-        converter.setAuthoritiesClaimName("roles");
-        converter.setAuthorityPrefix("ROLE_");
+    JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+    converter.setAuthoritiesClaimName(ROLES_CLAIM);
+    converter.setAuthorityPrefix("ROLE_");
 
-        JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
-        authConverter.setJwtGrantedAuthoritiesConverter(converter);
-        return authConverter;
-    }
+    JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
+    authConverter.setJwtGrantedAuthoritiesConverter(converter);
+    return authConverter;
+  }
 }
