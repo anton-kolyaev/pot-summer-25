@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/plans")
-public class PlanManagementController {
+public class AdminPlanManagementController {
 
   private final PlanManagementService planManagementService;
 
