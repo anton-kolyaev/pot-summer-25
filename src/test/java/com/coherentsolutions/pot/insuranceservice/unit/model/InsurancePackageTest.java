@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 public class InsurancePackageTest {
 
 
-  private InsurancePackage buildPackage(PackageStatus manualStatus, LocalDate start,
+  private InsurancePackage buildPackage(boolean isActive, LocalDate start,
       LocalDate end) {
     InsurancePackage insurancePackage = new InsurancePackage();
-    insurancePackage.setManualStatus(manualStatus);
+    insurancePackage.setActive(isActive);
     insurancePackage.setStartDate(start);
     insurancePackage.setEndDate(end);
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
@@ -26,7 +26,7 @@ public class InsurancePackageTest {
   @Test
   void returnsDeactivatedWhenManualStatusIsDeactivated() {
     InsurancePackage pkg = buildPackage(
-        PackageStatus.DEACTIVATED,
+        false,
         LocalDate.now().minusDays(10),
         LocalDate.now().plusDays(10)
     );
@@ -37,7 +37,7 @@ public class InsurancePackageTest {
   @Test
   void returnsInitializedWhenNowIsBeforeStartDate() {
     InsurancePackage pkg = buildPackage(
-        PackageStatus.INITIALIZED,
+        true,
         LocalDate.now().plusDays(5),
         LocalDate.now().plusDays(10)
     );
@@ -48,7 +48,7 @@ public class InsurancePackageTest {
   @Test
   void returnsActiveWhenNowIsBetweenStartAndEndDate() {
     InsurancePackage pkg = buildPackage(
-        PackageStatus.INITIALIZED,
+        true,
         LocalDate.now().minusDays(5),
         LocalDate.now().plusDays(5)
     );
@@ -59,7 +59,7 @@ public class InsurancePackageTest {
   @Test
   void returnsExpiredWhenNowIsAfterEndDate() {
     InsurancePackage pkg = buildPackage(
-        PackageStatus.INITIALIZED,
+        true,
         LocalDate.now().minusDays(10),
         LocalDate.now().minusDays(1)
     );
