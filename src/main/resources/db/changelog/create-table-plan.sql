@@ -8,7 +8,5 @@ CREATE TABLE IF NOT EXISTS plans (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_plan_type FOREIGN KEY (plan_type_id) REFERENCES plan_types(id),
-    CONSTRAINT fk_plan_created_by FOREIGN KEY (created_by) REFERENCES users(id),
-    CONSTRAINT fk_plan_updated_by FOREIGN KEY (updated_by) REFERENCES users(id)
+    CONSTRAINT fk_plan_type FOREIGN KEY (plan_type_id) REFERENCES plan_types(id)
 );
