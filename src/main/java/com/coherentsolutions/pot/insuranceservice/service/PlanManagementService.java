@@ -22,14 +22,11 @@ public class PlanManagementService {
 
   @Transactional
   public PlanDto createPlan(PlanDto planDto) {
-    Plan plan = new Plan();
-
-    plan.setName(planDto.getName());
-    plan.setContribution(planDto.getContribution());
+    Plan plan = planMapper.toEntity(planDto);
 
     PlanType planType = planTypeRepository.findById(planDto.getType())
         .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid plan type ID"));
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid plan type"));
 
     plan.setType(planType);
 

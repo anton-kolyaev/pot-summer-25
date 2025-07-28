@@ -12,5 +12,5 @@ public interface PlanMapper {
   PlanDto toDto(Plan plan);
 
   @Mapping(target = "type", ignore = true)
-  PlanDto toEntity(PlanDto planDto);
+  Plan toEntity(PlanDto planDto);
 }

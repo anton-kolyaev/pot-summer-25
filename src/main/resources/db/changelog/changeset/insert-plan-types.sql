@@ -1,6 +1,6 @@
-INSERT INTO plan_types (code, name)
+INSERT INTO plan_types (id, code, name)
 VALUES
-    ('DENTAL', 'Dental Insurance'),
-    ('MEDICAL', 'Medical Insurance'),
-    ('VISION', 'Vision Insurance'),
-    ('LIFE', 'Life Insurance');
+    (1,'DENTAL', 'Dental Insurance'),
+    (2,'MEDICAL', 'Medical Insurance'),
+    (3,'VISION', 'Vision Insurance'),
+    (4,'LIFE', 'Life Insurance');

@@ -53,12 +53,12 @@ public class PlanManagementServiceTest {
   void setUp() {
     planDto = PlanDto.builder()
         .name("Vision Plan")
-        .type("VISION")
+        .type(3)
         .contribution(new BigDecimal("123.45"))
         .build();
 
     planType = new PlanType();
-    planType.setId(1);
+    planType.setId(3);
     planType.setCode("VISION");
 
     plan = new Plan();
@@ -71,17 +71,18 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should create a plan when plan type exists")
   void shouldCreatePlanSuccessfully() {
-    when(planTypeRepository.findByCode("VISION")).thenReturn(Optional.of(planType));
+    when(planTypeRepository.findById(3)).thenReturn(Optional.of(planType));
+    when(planMapper.toEntity(planDto)).thenReturn(plan);
     when(planRepository.save(Mockito.any(Plan.class))).thenReturn(plan);
     when(planMapper.toDto(Mockito.any(Plan.class))).thenReturn(planDto);
 
     PlanDto result = planManagementService.createPlan(planDto);
 
     assertNotNull(result);
-    assertEquals("VISION", result.getType());
+    assertEquals(3, result.getType());
     assertEquals(new BigDecimal("123.45"), result.getContribution());
 
-    verify(planTypeRepository).findByCode("VISION");
+    verify(planTypeRepository).findById(3);
     verify(planRepository).save(Mockito.any(Plan.class));
     verify(planMapper).toDto(Mockito.any(Plan.class));
   }
@@ -89,7 +90,7 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should throw BAD_REQUEST when plan type does not exist")
   void shouldThrowWhenPlanTypeNotFound() {
-    when(planTypeRepository.findByCode("VISION")).thenReturn(Optional.empty());
+    when(planTypeRepository.findById(3)).thenReturn(Optional.empty());
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
         () -> planManagementService.createPlan(planDto));
@@ -97,7 +98,7 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     assertEquals("Invalid plan type", exception.getReason());
 
-    verify(planTypeRepository).findByCode("VISION");
+    verify(planTypeRepository).findById(3);
     verify(planRepository, never()).save(any());
     verify(planMapper, never()).toDto(any());
   }

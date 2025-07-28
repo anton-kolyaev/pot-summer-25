@@ -49,21 +49,24 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Autowired
   private PlanRepository planRepository;
 
+  private Integer dentalTypeId;
+
   @BeforeEach
   void setUp() {
-    planTypeRepository.findByCode("DENTAL")
+    dentalTypeId = planTypeRepository.findByCode("DENTAL")
+        .map(PlanType::getId)
         .orElseGet(() -> {
           PlanType dental = new PlanType();
           dental.setCode("DENTAL");
           dental.setName("Dental Plan");
-          return planTypeRepository.save(dental);
+          return planTypeRepository.save(dental).getId();
         });
   }
 
-  private PlanDto buildPlanDto(String name, String type, BigDecimal contribution) {
+  private PlanDto buildPlanDto(String name, Integer typeId, BigDecimal contribution) {
     return PlanDto.builder()
         .name(name)
-        .type(type)
+        .type(typeId)
         .contribution(contribution)
         .build();
   }
@@ -75,7 +78,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should create plan successfully")
   void shouldCreatePlanSuccessfully() throws Exception {
-    PlanDto createRequest = buildPlanDto("Basic Dental Plan", "DENTAL", new BigDecimal("199.99"));
+    PlanDto createRequest = buildPlanDto("Basic Dental Plan", dentalTypeId, new BigDecimal("199.99"));
 
     String response = mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -89,15 +92,14 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
     assertNotNull(created.getId());
     assertEquals("Basic Dental Plan", created.getName());
-    assertEquals("DENTAL", created.getType());
+    assertEquals(dentalTypeId, created.getType());
     assertEquals(new BigDecimal("199.99"), created.getContribution());
   }
 
   @Test
   @DisplayName("Should return 400 for invalid plan type")
   void shouldReturnBadRequestForInvalidPlanType() throws Exception {
-    PlanDto createRequest = buildPlanDto("Invalid Type Plan", "FAKE_TYPE",
-        new BigDecimal("123.45"));
+    PlanDto createRequest = buildPlanDto("Invalid Type Plan", 9999, new BigDecimal("123.45"));
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -108,8 +110,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return 400 for negative contribution")
   void shouldReturnBadRequestForNegativeContribution() throws Exception {
-    PlanDto createRequest = buildPlanDto("Negative Contribution Plan", "DENTAL",
-        new BigDecimal("-10.00"));
+    PlanDto createRequest = buildPlanDto("Negative Contribution Plan", dentalTypeId, new BigDecimal("-10.00"));
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -121,7 +122,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 for missing name")
   void shouldReturnBadRequestForMissingName() throws Exception {
     PlanDto createRequest = PlanDto.builder()
-        .type("DENTAL")
+        .type(dentalTypeId)
         .contribution(new BigDecimal("150.00"))
         .build();
 
@@ -153,7 +154,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return 415 for missing content type")
   void shouldReturnUnsupportedMediaTypeForMissingContentType() throws Exception {
-    PlanDto createRequest = buildPlanDto("No Content Type", "DENTAL", new BigDecimal("99.99"));
+    PlanDto createRequest = buildPlanDto("No Content Type", dentalTypeId, new BigDecimal("99.99"));
 
     mockMvc.perform(post(ENDPOINT)
             .content(toJson(createRequest)))
