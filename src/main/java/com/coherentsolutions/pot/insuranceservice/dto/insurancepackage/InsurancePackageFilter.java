@@ -12,11 +12,12 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 public class InsurancePackageFilter {
-    private UUID companyId;
-    private String name;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private PayrollFrequency payrollFrequency;
-    private PackageStatus status;
 
-  }
+  private UUID companyId;
+  private String name;
+  private LocalDate startDate;
+  private LocalDate endDate;
+  private PayrollFrequency payrollFrequency;
+  private PackageStatus status;
+
+}
