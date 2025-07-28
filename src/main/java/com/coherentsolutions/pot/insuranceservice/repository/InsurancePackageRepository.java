@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Repository
 public interface InsurancePackageRepository extends JpaRepository<InsurancePackage, UUID>,
     JpaSpecificationExecutor<InsurancePackage> {
+
   List<InsurancePackage> findAllByCompanyId(UUID companyId);
 
   default InsurancePackage findByIdOrThrow(UUID id) {
