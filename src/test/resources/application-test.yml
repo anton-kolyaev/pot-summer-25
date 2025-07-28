@@ -9,9 +9,9 @@ spring:
       hibernate:
         format_sql: true
 
-# Auth0 Test Configuration
+# Auth0 Test Configuration - Disabled for tests
 auth0:
-  enabled: true # Enable Auth0 for tests
+  enabled: false # Disable Auth0 for tests to avoid configuration issues
   domain: ${AUTH0_TEST_DOMAIN:test-domain.auth0.com}
   api-token: ${AUTH0_TEST_API_TOKEN:test-api-token}
   client-id: ${AUTH0_TEST_CLIENT_ID:test-client-id}
