@@ -36,7 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
-<<<<<<< Updated upstream
 ### Environment Files ###
 .env
 .env.local
@@ -49,4 +48,8 @@ out/
 .env
 .env.local
 .env.*.local
->>>>>>> Stashed changes
+
+### Auth0 Credential Files ###
+auth0-credentials.txt
+setup-auth0-env.sh
+auth0-secrets.txt
