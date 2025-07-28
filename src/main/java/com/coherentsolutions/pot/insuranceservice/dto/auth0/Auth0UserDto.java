@@ -14,6 +14,9 @@ import java.util.Map;
  */
 public class Auth0UserDto {
 
+  @JsonProperty("user_id")
+  private String userId;
+
   @NotBlank(message = "Email is required")
   @Email(message = "Email must be valid")
   private String email;
@@ -55,6 +58,14 @@ public class Auth0UserDto {
   }
 
   // Getters and Setters
+  public String getUserId() {
+    return userId;
+  }
+
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
+
   public String getEmail() {
     return email;
   }

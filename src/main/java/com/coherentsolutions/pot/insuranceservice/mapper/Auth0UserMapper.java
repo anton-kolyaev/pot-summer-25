@@ -36,6 +36,7 @@ public interface Auth0UserMapper {
    * @return the DTO
    */
   @Mapping(target = "password", ignore = true) // Don't map password from Auth0 response
+  @Mapping(target = "userId", expression = "java(user.getId())")
   Auth0UserDto toDto(User user);
 
   /**
