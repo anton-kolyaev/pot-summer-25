@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,17 +30,22 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Import(IntegrationTestConfiguration.class)
+@TestPropertySource(properties = "spring.test.database.replace=none")
 @Transactional
-@DisplayName("Integration Test for PlanManagementController")
+@DisplayName("Integration Test for AdminPlanManagementController")
 public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
   private static final String ENDPOINT = "/v1/plans";
+
   @Autowired
   private MockMvc mockMvc;
+
   @Autowired
   private ObjectMapper objectMapper;
+
   @Autowired
   private PlanTypeRepository planTypeRepository;
+
   @Autowired
   private PlanRepository planRepository;
 
