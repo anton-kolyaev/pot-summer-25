@@ -42,6 +42,9 @@ public class Auth0UserDto {
 
   private boolean blocked = false;
 
+  // Auth0 connection field - required for user creation
+  private String connection = "Username-Password-Authentication";
+
   // Constructors
   public Auth0UserDto() {}
 
@@ -122,5 +125,13 @@ public class Auth0UserDto {
 
   public void setBlocked(boolean blocked) {
     this.blocked = blocked;
+  }
+
+  public String getConnection() {
+    return connection;
+  }
+
+  public void setConnection(String connection) {
+    this.connection = connection;
   }
 } 

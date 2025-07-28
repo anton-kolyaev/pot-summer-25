@@ -24,6 +24,7 @@ public interface Auth0UserMapper {
   @Mapping(target = "userMetadata", source = "userMetadata")
   @Mapping(target = "appMetadata", source = "appMetadata")
   @Mapping(target = "emailVerified", source = "emailVerified")
+  @Mapping(target = "connection", source = "connection")
   @Mapping(target = "password", 
            expression = "java(dto.getPassword() != null ? dto.getPassword().toCharArray() : null)")
   User toAuth0User(Auth0UserDto dto);
@@ -46,6 +47,7 @@ public interface Auth0UserMapper {
   @Mapping(target = "userMetadata", source = "userMetadata")
   @Mapping(target = "appMetadata", source = "appMetadata")
   @Mapping(target = "emailVerified", source = "emailVerified")
+  @Mapping(target = "connection", source = "connection")
   @Mapping(target = "password", 
            expression = "java(dto.getPassword() != null ? dto.getPassword().toCharArray() : null)")
   void updateUserFromDto(Auth0UserDto dto, @MappingTarget User user);
