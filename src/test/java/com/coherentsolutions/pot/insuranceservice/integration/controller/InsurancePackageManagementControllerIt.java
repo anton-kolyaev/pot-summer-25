@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @Import(IntegrationTestConfiguration.class)
 @AutoConfigureMockMvc
 @DisplayName("Integration test for AdminInsurancePackageManagementController")
-public class AdminInsurancePackageManagementControllerIt extends PostgresTestContainer {
+public class InsurancePackageManagementControllerIt extends PostgresTestContainer {
 
   @Autowired
   private MockMvc mockMvc;
