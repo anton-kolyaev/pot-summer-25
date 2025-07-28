@@ -16,7 +16,7 @@ spring:
 
 # Auth0 Configuration
 auth0:
-  enabled: ${AUTH0_ENABLED:false} # Set to true to enable Auth0 integration
+  enabled: ${AUTH0_ENABLED:true} # Set to true to enable Auth0 integration
   domain: ${AUTH0_DOMAIN:} # your-domain.auth0.com
   api-token: ${AUTH0_API_TOKEN:} # your-api-token
   client-id: ${AUTH0_CLIENT_ID:} # your-client-id
