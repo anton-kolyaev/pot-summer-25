@@ -7,3 +7,11 @@ databaseChangeLog:
       file: db/changelog/create-table-company.sql
   - include:
       file: db/changelog/create-table-user-functions.sql
+  - include:
+      file: db/changelog/create-table-insurance-packages.sql
+  - include:
+      file: db/changelog/create-table-plan-types.sql
+  - include:
+      file: db/changelog/create-table-plan.sql
+
+

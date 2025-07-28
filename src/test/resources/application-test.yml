@@ -18,3 +18,4 @@ auth0:
   client-secret: ${AUTH0_TEST_CLIENT_SECRET:test-client-secret}
   audience: ${AUTH0_TEST_AUDIENCE:https://test-domain.auth0.com/api/v2/}
   timeout: ${AUTH0_TEST_TIMEOUT:5000}
+
