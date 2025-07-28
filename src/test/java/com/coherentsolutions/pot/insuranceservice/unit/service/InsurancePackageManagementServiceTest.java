@@ -42,11 +42,11 @@ public class InsurancePackageManagementServiceTest {
 
   @Test
   @DisplayName("Should create insurance package and return it's dto")
-  void shouldCreateInsurancePackageSuccessfully(){
+  void shouldCreateInsurancePackageSuccessfully() {
     InsurancePackageDto insurancePackageDto = InsurancePackageDto.builder()
         .name("Standard Health Package")
-        .startDate(LocalDate.of(2025,8,1))
-        .endDate(LocalDate.of(2025,12,31))
+        .startDate(LocalDate.of(2025, 8, 1))
+        .endDate(LocalDate.of(2025, 12, 31))
         .payrollFrequency(PayrollFrequency.MONTHLY)
         .build();
 
@@ -61,13 +61,15 @@ public class InsurancePackageManagementServiceTest {
     Company company = new Company();
     company.setId(companyId);
 
-
-    when(insurancePackageMapper.toInsurancePackage(insurancePackageDto)).thenReturn(insurancePackage);
+    when(insurancePackageMapper.toInsurancePackage(insurancePackageDto)).thenReturn(
+        insurancePackage);
     when(companyRepository.findByIdOrThrow(companyId)).thenReturn(company);
     when(insurancePackageRepository.save(insurancePackage)).thenReturn(insurancePackage);
-    when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(insurancePackageDto);
+    when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(
+        insurancePackageDto);
 
-    InsurancePackageDto result = insurancePackageManagementService.createInsurancePackage(companyId,insurancePackageDto);
+    InsurancePackageDto result = insurancePackageManagementService.createInsurancePackage(companyId,
+        insurancePackageDto);
 
     assertNotNull(result);
     assertEquals(insurancePackageDto, result);

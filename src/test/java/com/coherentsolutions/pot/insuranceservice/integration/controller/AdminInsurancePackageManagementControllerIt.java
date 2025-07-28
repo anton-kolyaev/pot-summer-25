@@ -14,6 +14,7 @@ import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +26,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -65,7 +65,7 @@ public class AdminInsurancePackageManagementControllerIt extends PostgresTestCon
     UUID companyId = company.getId();
 
     try {
-     mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
+      mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
               .contentType(String.valueOf(APPLICATION_JSON))
               .content(objectMapper.writeValueAsString(insurancePackageDto)))
           .andExpect(status().isCreated())
@@ -136,7 +136,8 @@ public class AdminInsurancePackageManagementControllerIt extends PostgresTestCon
               .content(objectMapper.writeValueAsString(insurancePackageDto)))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
-          .andExpect(jsonPath("$.error.details.validationErrors.endDate[0]").value("End date must be after start date"));
+          .andExpect(jsonPath("$.error.details.validationErrors.endDate[0]").value(
+              "End date must be after start date"));
     } finally {
       companyRepository.deleteById(companyId);
     }
