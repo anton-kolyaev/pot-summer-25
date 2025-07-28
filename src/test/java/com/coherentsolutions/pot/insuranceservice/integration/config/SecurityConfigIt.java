@@ -1,5 +1,10 @@
 package com.coherentsolutions.pot.insuranceservice.integration.config;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityConfig;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import org.junit.jupiter.api.DisplayName;
@@ -13,49 +18,45 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
 class SecurityConfigIt extends PostgresTestContainer {
 
-    @Autowired
+  @Autowired
     MockMvc mockMvc;
 
-    @ParameterizedTest
-    @ValueSource(strings = {"/swagger-ui/index.html", "/v3/api-docs"})
-    @DisplayName("permitAll endpoints are reachable without JWT")
+  @ParameterizedTest
+  @ValueSource(strings = {"/swagger-ui/index.html", "/v3/api-docs"})
+  @DisplayName("permitAll endpoints are reachable without JWT")
     void publicEndpointsAreOpen(String url) throws Exception {
-        mockMvc.perform(get(url))
+    mockMvc.perform(get(url))
                 .andExpect(status().isOk());
-    }
+  }
 
-    @Test
-    @DisplayName("Protected endpoint without token returns 401")
+  @Test
+  @DisplayName("Protected endpoint without token returns 401")
     void protectedEndpointWithoutToken() throws Exception {
-        mockMvc.perform(get("/v1/companies"))
+    mockMvc.perform(get("/v1/companies"))
                 .andExpect(status().isUnauthorized());
-    }
+  }
 
-    @Test
-    @DisplayName("Protected endpoint with JWT returns 200")
+  @Test
+  @DisplayName("Protected endpoint with JWT returns 200")
     void protectedEndpointWithJwt() throws Exception {
-        mockMvc.perform(get("/v1/companies")
+    mockMvc.perform(get("/v1/companies")
                         .with(jwt().jwt(j -> j.claim("sub", "tester"))))
                 .andExpect(status().isOk());
-    }
-    @Test
-    @DisplayName("Spring Security must not create an HTTP session")
+  }
+  
+  @Test
+  @DisplayName("Spring Security must not create an HTTP session")
     void sessionIsNotCreated() throws Exception {
-        mockMvc.perform(get("/v1/companies").with(jwt().jwt(j -> j.claim("sub", "tester"))))
+    mockMvc.perform(get("/v1/companies").with(jwt().jwt(j -> j.claim("sub", "tester"))))
                 .andExpect(cookie().doesNotExist("JSESSIONID"))
                 .andExpect(result ->
                         org.junit.jupiter.api.Assertions.assertNull(
-                                result.getRequest().getSession(false), "No HttpSession should exist"));
-    }
+                                result.getRequest().getSession(false), "HttpSession should not exist"));
+  }
 }

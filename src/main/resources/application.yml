@@ -32,7 +32,6 @@ spring:
         jwt:
           issuer-uri: ${AUTH0_DOMAIN:}
           audiences: ${AUTH0_AUDIENCE:}
-
 # Auth0 Configuration
 auth0:
   enabled: ${AUTH0_ENABLED:false} # Set to true to enable Auth0 integration
@@ -41,7 +40,6 @@ auth0:
   client-secret: ${AUTH0_CLIENT_SECRET:} # your-client-secret
   audience: ${AUTH0_AUDIENCE:} # https://your-domain.auth0.com/api/v2/
   timeout: ${AUTH0_TIMEOUT:10000} # Default timeout in milliseconds
-
 management:
   endpoints:
     web:
