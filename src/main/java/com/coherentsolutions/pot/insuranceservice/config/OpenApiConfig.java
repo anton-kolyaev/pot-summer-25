@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
   
   @Bean
-  public OpenAPI customOpenApi(@Value("${AUTH0_DOMAIN}") String domain) {
+  public OpenAPI customOpenApi(@Value("${AUTH0_DOMAIN:}") String domain) {
     SecurityScheme oauthScheme = new SecurityScheme()
             .type(SecurityScheme.Type.OAUTH2)
             .flows(new OAuthFlows().authorizationCode(

@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:dotenv:.env
   application:
     name: Insurance Service
   main:
@@ -18,18 +20,18 @@ spring:
       client:
         registration:
           auth0:
-            client-id: ${AUTH0_CLIENT_ID}
-            client-secret: ${AUTH0_CLIENT_SECRET}
+            client-id: ${AUTH0_CLIENT_ID:}
+            client-secret: ${AUTH0_CLIENT_SECRET:}
             scope: openid
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           auth0:
-            issuer-uri: https://${AUTH0_DOMAIN}/
+            issuer-uri: ${AUTH0_DOMAIN:}
       resourceserver:
         jwt:
-          issuer-uri: https://${AUTH0_DOMAIN}/
-          audiences: ${AUTH0_AUDIENCE}
+          issuer-uri: ${AUTH0_DOMAIN:}
+          audiences: ${AUTH0_AUDIENCE:}
 management:
   endpoints:
     web:
@@ -38,7 +40,7 @@ management:
 springdoc:
   swagger-ui:
     oauth:
-      client-id: ${AUTH0_CLIENT_ID}
+      client-id: ${AUTH0_CLIENT_ID:}
       use-pkce-with-authorization-code-grant: true
       additional-query-string-params:
-        audience: ${AUTH0_AUDIENCE}
+        audience: ${AUTH0_AUDIENCE:}
