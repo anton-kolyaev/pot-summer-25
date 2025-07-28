@@ -9,7 +9,6 @@ import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
-import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -45,10 +44,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
   @Autowired
   private PlanTypeRepository planTypeRepository;
-
-  @Autowired
-  private PlanRepository planRepository;
-
+  
   private Integer dentalTypeId;
 
   @BeforeEach
@@ -78,7 +74,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should create plan successfully")
   void shouldCreatePlanSuccessfully() throws Exception {
-    PlanDto createRequest = buildPlanDto("Basic Dental Plan", dentalTypeId, new BigDecimal("199.99"));
+    PlanDto createRequest = buildPlanDto("Basic Dental Plan", dentalTypeId,
+        new BigDecimal("199.99"));
 
     String response = mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +107,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return 400 for negative contribution")
   void shouldReturnBadRequestForNegativeContribution() throws Exception {
-    PlanDto createRequest = buildPlanDto("Negative Contribution Plan", dentalTypeId, new BigDecimal("-10.00"));
+    PlanDto createRequest = buildPlanDto("Negative Contribution Plan", dentalTypeId,
+        new BigDecimal("-10.00"));
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
