@@ -36,6 +36,7 @@ out/
 ### VS Code ###
 .vscode/
 
+<<<<<<< Updated upstream
 ### Environment Files ###
 .env
 .env.local
@@ -43,3 +44,9 @@ out/
 .env.test
 .env.production
 *.env
+=======
+### Environment Variables ###
+.env
+.env.local
+.env.*.local
+>>>>>>> Stashed changes
