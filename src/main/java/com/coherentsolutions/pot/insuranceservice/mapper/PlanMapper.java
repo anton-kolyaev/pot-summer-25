@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PlanMapper {
 
-  @Mapping(source = "type.code", target = "type")
+  @Mapping(source = "type.id", target = "type")
   PlanDto toDto(Plan plan);
 
   @Mapping(target = "type", ignore = true)

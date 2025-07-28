@@ -27,9 +27,9 @@ public class PlanManagementService {
     plan.setName(planDto.getName());
     plan.setContribution(planDto.getContribution());
 
-    PlanType planType = planTypeRepository.findByCode(planDto.getType())
+    PlanType planType = planTypeRepository.findById(planDto.getType())
         .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid plan type"));
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid plan type ID"));
 
     plan.setType(planType);
 
