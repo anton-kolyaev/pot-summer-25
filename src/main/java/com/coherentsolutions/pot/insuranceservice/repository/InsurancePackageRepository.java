@@ -4,9 +4,16 @@ import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 
 @Repository
 public interface InsurancePackageRepository extends JpaRepository<InsurancePackage, UUID> {
   List<InsurancePackage> findAllByCompanyId(UUID companyId);
+
+  default InsurancePackage findByIdOrThrow(UUID id) {
+    return findById(id).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Insurance package not found"));
+  }
 }
