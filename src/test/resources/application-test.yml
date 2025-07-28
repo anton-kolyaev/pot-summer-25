@@ -34,3 +34,12 @@ springdoc:
       use-pkce-with-authorization-code-grant: true
       additional-query-string-params:
         audience: ${AUTH0_AUDIENCE:https://test-domain.auth0.com/api/v2/}
+
+
+# Auth0 Test Configuration
+auth0:
+  domain: https://test-domain.auth0.com
+  client-id: test-client-id
+  client-secret: test-client-secret
+  audience: https://test-domain.auth0.com/api/v2/
+  timeout: 5000
