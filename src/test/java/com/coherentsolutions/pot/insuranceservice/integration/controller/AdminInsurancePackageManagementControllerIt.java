@@ -76,7 +76,7 @@ public class AdminInsurancePackageManagementControllerIt extends PostgresTestCon
 
     } finally {
 
-      List<InsurancePackage> packages = insurancePackageRepository.findByCompanyId(companyId);
+      List<InsurancePackage> packages = insurancePackageRepository.findAllByCompanyId(companyId);
       insurancePackageRepository.deleteAll(packages);
       companyRepository.deleteById(companyId);
     }

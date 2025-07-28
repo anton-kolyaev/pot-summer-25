@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InsurancePackageRepository extends JpaRepository<InsurancePackage, UUID> {
-  List<InsurancePackage> findByCompanyId(UUID companyId);
+  List<InsurancePackage> findAllByCompanyId(UUID companyId);
 }
