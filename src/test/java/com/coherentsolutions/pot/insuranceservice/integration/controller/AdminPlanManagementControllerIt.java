@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Import(IntegrationTestConfiguration.class)
-@TestPropertySource(properties = "spring.test.database.replace=none")
 @Transactional
 @DisplayName("Integration Test for AdminPlanManagementController")
 public class AdminPlanManagementControllerIt extends PostgresTestContainer {
