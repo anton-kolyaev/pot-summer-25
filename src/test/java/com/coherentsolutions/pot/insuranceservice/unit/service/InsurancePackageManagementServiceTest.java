@@ -236,9 +236,11 @@ public class InsurancePackageManagementServiceTest {
 
     when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(insurancePackage);
     when(insurancePackageRepository.save(insurancePackage)).thenReturn(insurancePackage);
-    when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(insurancePackageDto);
+    when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(
+        insurancePackageDto);
 
-    InsurancePackageDto result = insurancePackageManagementService.deactivateInsurancePackage(packageId);
+    InsurancePackageDto result = insurancePackageManagementService.deactivateInsurancePackage(
+        packageId);
 
     assertNotNull(result);
     assertEquals(PackageStatus.DEACTIVATED, result.getStatus());
@@ -276,7 +278,8 @@ public class InsurancePackageManagementServiceTest {
     UUID packageId = UUID.randomUUID();
 
     when(insurancePackageRepository.findByIdOrThrow(packageId))
-        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Insurance package not found"));
+        .thenThrow(
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Insurance package not found"));
 
     assertThrows(ResponseStatusException.class, () ->
         insurancePackageManagementService.deactivateInsurancePackage(packageId)

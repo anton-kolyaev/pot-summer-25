@@ -15,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -53,11 +51,12 @@ public class InsurancePackageManagementService {
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
 
-  public InsurancePackageDto deactivateInsurancePackage(UUID id){
+  public InsurancePackageDto deactivateInsurancePackage(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
 
-    if(insurancePackage.getStatus() == PackageStatus.DEACTIVATED){
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insurance package is already deactivated");
+    if (insurancePackage.getStatus() == PackageStatus.DEACTIVATED) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Insurance package is already deactivated");
     }
     insurancePackage.setStatus(PackageStatus.DEACTIVATED);
     insurancePackageRepository.save(insurancePackage);

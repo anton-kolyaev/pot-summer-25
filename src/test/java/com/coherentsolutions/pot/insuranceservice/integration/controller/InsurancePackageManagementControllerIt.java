@@ -353,8 +353,9 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID companyId = UUID.randomUUID();
     UUID nonExistentPackageId = UUID.randomUUID();
 
-    mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
-            .contentType(APPLICATION_JSON))
+    mockMvc.perform(
+            delete("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+                .contentType(APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
