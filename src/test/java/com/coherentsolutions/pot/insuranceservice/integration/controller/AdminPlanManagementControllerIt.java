@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
@@ -12,6 +13,7 @@ import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
   @Autowired
   private PlanTypeRepository planTypeRepository;
-  
+
   private Integer dentalTypeId;
 
   @BeforeEach
@@ -156,5 +157,89 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     mockMvc.perform(post(ENDPOINT)
             .content(toJson(createRequest)))
         .andExpect(status().isUnsupportedMediaType());
+  }
+
+  @Test
+  @DisplayName("Should update plan successfully")
+  void shouldUpdatePlanSuccessfully() throws Exception {
+
+    PlanDto createRequest = buildPlanDto("Original Plan", dentalTypeId, new BigDecimal("150.00"));
+
+    String createResponse = mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(createRequest)))
+        .andExpect(status().isCreated())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    PlanDto created = objectMapper.readValue(createResponse, PlanDto.class);
+
+    PlanDto updateRequest = buildPlanDto("Updated Plan", dentalTypeId, new BigDecimal("299.99"));
+
+    String updateResponse = mockMvc.perform(put(ENDPOINT + "/" + created.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(updateRequest)))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    PlanDto updated = objectMapper.readValue(updateResponse, PlanDto.class);
+
+    assertNotNull(updated.getId());
+    assertEquals("Updated Plan", updated.getName());
+    assertEquals(dentalTypeId, updated.getType());
+    assertEquals(new BigDecimal("299.99"), updated.getContribution());
+  }
+
+  @Test
+  @DisplayName("Should return 404 when updating non-existent plan")
+  void shouldReturnNotFoundForNonExistentPlan() throws Exception {
+    UUID nonExistentId = UUID.randomUUID();
+
+    PlanDto updateRequest = buildPlanDto("Ghost Plan", dentalTypeId, new BigDecimal("123.45"));
+
+    mockMvc.perform(put(ENDPOINT + "/" + nonExistentId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(updateRequest)))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Should return 400 for invalid plan type on update")
+  void shouldReturnBadRequestForInvalidPlanTypeOnUpdate() throws Exception {
+
+    PlanDto createRequest = buildPlanDto("Temporary Plan", dentalTypeId, new BigDecimal("150.00"));
+
+    String createResponse = mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(createRequest)))
+        .andExpect(status().isCreated())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    PlanDto created = objectMapper.readValue(createResponse, PlanDto.class);
+
+    created.setType(9999);
+
+    mockMvc.perform(put(ENDPOINT + "/" + created.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(created)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Should return 400 for missing fields on update")
+  void shouldReturnBadRequestForMissingFieldsOnUpdate() throws Exception {
+    UUID id = UUID.randomUUID();
+
+    PlanDto invalidDto = new PlanDto();
+
+    mockMvc.perform(put(ENDPOINT + "/" + id)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(invalidDto)))
+        .andExpect(status().isBadRequest());
   }
 }
