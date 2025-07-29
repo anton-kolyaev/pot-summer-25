@@ -67,7 +67,7 @@ public class Auth0UserManagementController {
       Auth0UserDto createdUser = auth0UserManagementService.createUser(userDto);
       return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     } catch (Auth0Exception e) {
-      throw new RuntimeException("Failed to create user: " + e.getMessage(), e);
+      throw new RuntimeException("Auth0 user creation failed: " + e.getMessage(), e);
     }
   }
 
@@ -97,7 +97,7 @@ public class Auth0UserManagementController {
       }
       return ResponseEntity.ok(user);
     } catch (Auth0Exception e) {
-      throw new RuntimeException("Failed to retrieve user: " + e.getMessage(), e);
+      throw new RuntimeException("Auth0 user retrieval failed: " + e.getMessage(), e);
     }
   }
 
@@ -127,7 +127,7 @@ public class Auth0UserManagementController {
       List<Auth0UserDto> users = auth0UserManagementService.getUserDtos(null);
       return ResponseEntity.ok(users);
     } catch (Auth0Exception e) {
-      throw new RuntimeException("Failed to retrieve users: " + e.getMessage(), e);
+      throw new RuntimeException("Auth0 user list retrieval failed: " + e.getMessage(), e);
     }
   }
 
@@ -162,7 +162,7 @@ public class Auth0UserManagementController {
       if (e.getMessage().contains("User not found")) {
         return ResponseEntity.notFound().build();
       }
-      throw new RuntimeException("Failed to update user: " + e.getMessage(), e);
+      throw new RuntimeException("Auth0 user update failed: " + e.getMessage(), e);
     }
   }
 
@@ -191,7 +191,7 @@ public class Auth0UserManagementController {
       if (e.getMessage().contains("User not found")) {
         return ResponseEntity.notFound().build();
       }
-      throw new RuntimeException("Failed to delete user: " + e.getMessage(), e);
+      throw new RuntimeException("Auth0 user deletion failed: " + e.getMessage(), e);
     }
   }
 } 

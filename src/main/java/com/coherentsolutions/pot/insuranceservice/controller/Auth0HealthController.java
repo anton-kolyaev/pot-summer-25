@@ -104,12 +104,14 @@ public class Auth0HealthController {
       
       response.put("status", "CONNECTED");
       response.put("message", "Successfully connected to Auth0 Management API");
+      response.put("test_method", "grants_endpoint");
       response.put("timestamp", System.currentTimeMillis());
       
       return ResponseEntity.ok(response);
     } catch (Auth0Exception e) {
       response.put("status", "CONNECTION_FAILED");
       response.put("message", "Failed to connect to Auth0: " + e.getMessage());
+      response.put("error_code", e.getStatusCode());
       response.put("timestamp", System.currentTimeMillis());
       
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -146,12 +148,15 @@ public class Auth0HealthController {
       response.put("configuration", Map.of(
           "domain_configured", hasDomain,
           "api_token_configured", hasApiToken,
-          "fully_configured", fullyConfigured
+          "fully_configured", fullyConfigured,
+          "timeout", auth0Properties.timeout(),
+          "audience", auth0Properties.audience()
       ));
       
       if (!fullyConfigured) {
         response.put("status", "INCOMPLETE_CONFIG");
-        response.put("message", "Auth0 configuration is incomplete");
+        response.put("message", "Auth0 configuration is incomplete - check domain and api_token properties");
+        response.put("timestamp", System.currentTimeMillis());
         return ResponseEntity.ok(response);
       }
       
@@ -159,17 +164,20 @@ public class Auth0HealthController {
       try {
         managementAPI.grants().list(null, null).execute();
         response.put("connectivity", Map.of(
-            "status", "CONNECTED"
+            "status", "CONNECTED",
+            "test_method", "grants_endpoint"
         ));
         response.put("status", "HEALTHY");
         response.put("message", "Auth0 is properly configured and connected");
       } catch (Auth0Exception e) {
         response.put("connectivity", Map.of(
             "status", "CONNECTION_FAILED",
-            "error", e.getMessage()
+            "error", e.getMessage(),
+            "error_code", e.getStatusCode(),
+            "test_method", "grants_endpoint"
         ));
         response.put("status", "CONNECTIVITY_ERROR");
-        response.put("message", "Auth0 is configured but connection failed");
+        response.put("message", "Auth0 is configured but connection failed - check API token and network connectivity");
       }
       
       response.put("timestamp", System.currentTimeMillis());
@@ -177,7 +185,7 @@ public class Auth0HealthController {
       
     } catch (Exception e) {
       response.put("status", "ERROR");
-      response.put("message", "Health check failed: " + e.getMessage());
+      response.put("message", "Health check failed with unexpected error: " + e.getMessage());
       response.put("timestamp", System.currentTimeMillis());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
