@@ -11,12 +11,10 @@ import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
-import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,8 +74,6 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
     } finally {
 
-      List<InsurancePackage> packages = insurancePackageRepository.findAllByCompanyId(companyId);
-      insurancePackageRepository.deleteAll(packages);
       companyRepository.deleteById(companyId);
     }
 
