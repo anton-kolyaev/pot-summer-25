@@ -3,9 +3,6 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
-import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageFilter;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -13,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
+import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageFilter;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
@@ -24,7 +22,6 @@ import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRep
 import com.coherentsolutions.pot.insuranceservice.service.InsurancePackageManagementService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,10 +50,10 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
   @Autowired
   private CompanyRepository companyRepository;
-  
+
   @Autowired
   private InsurancePackageManagementService insurancePackageManagementService;
-  
+
   @Autowired
   private ObjectMapper objectMapper;
 
@@ -105,48 +102,7 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
       assertEquals(1, result.getContent().size());
       assertEquals("Standard Health Package", result.getContent().get(0).getName());
 
-       } finally {
-      List<InsurancePackage> packages = insurancePackageRepository.findAllByCompanyId(companyId);
-      insurancePackageRepository.deleteAll(packages);
-      companyRepository.deleteById(companyId);
-    }
-  }
-  
-
-  @Test
-  @DisplayName("Should retrieve Insurance Package by its ID")
-  void shouldRetrieveInsurancePackageById() throws Exception {
-    Company company = new Company();
-    company.setName("Retrieve Company");
-    company.setEmail("retrieve@company.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://retrieve.com");
-    company = companyRepository.save(company);
-
-    InsurancePackage insurancePackage = new InsurancePackage();
-    insurancePackage.setName("Gold Health Plan");
-    insurancePackage.setStartDate(LocalDate.of(2025, 9, 1));
-    insurancePackage.setEndDate(LocalDate.of(2025, 12, 31));
-    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
-    insurancePackage.setStatus(PackageStatus.INITIALIZED);
-    insurancePackage.setCompany(company);
-    insurancePackage = insurancePackageRepository.save(insurancePackage);
-
-    UUID companyId = company.getId();
-    UUID packageId = insurancePackage.getId();
-
-    try {
-      mockMvc.perform(get("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
-              .contentType(APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id").value(packageId.toString()))
-          .andExpect(jsonPath("$.name").value("Gold Health Plan"))
-          .andExpect(jsonPath("$.startDate").value("2025-09-01"))
-          .andExpect(jsonPath("$.endDate").value("2025-12-31"))
-          .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"));
     } finally {
-      List<InsurancePackage> packages = insurancePackageRepository.findAllByCompanyId(companyId);
-      insurancePackageRepository.deleteAll(packages);
       companyRepository.deleteById(companyId);
     }
   }
@@ -184,12 +140,46 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
       assertNotNull(result);
       assertEquals(0, result.getContent().size());
     } finally {
-      List<InsurancePackage> packages = insurancePackageRepository.findAllByCompanyId(companyId);
-      insurancePackageRepository.deleteAll(packages);
       companyRepository.deleteById(companyId);
     }
   }
-}
+
+
+  @Test
+  @DisplayName("Should retrieve Insurance Package by its ID")
+  void shouldRetrieveInsurancePackageById() throws Exception {
+    Company company = new Company();
+    company.setName("Retrieve Company");
+    company.setEmail("retrieve@company.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://retrieve.com");
+    company = companyRepository.save(company);
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Gold Health Plan");
+    insurancePackage.setStartDate(LocalDate.of(2025, 9, 1));
+    insurancePackage.setEndDate(LocalDate.of(2025, 12, 31));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setStatus(PackageStatus.INITIALIZED);
+    insurancePackage.setCompany(company);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    try {
+      mockMvc.perform(get("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.id").value(packageId.toString()))
+          .andExpect(jsonPath("$.name").value("Gold Health Plan"))
+          .andExpect(jsonPath("$.startDate").value("2025-09-01"))
+          .andExpect(jsonPath("$.endDate").value("2025-12-31"))
+          .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"));
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
 
   @Test
   @DisplayName("Should return 404 when insurance package is not found by ID")
@@ -270,7 +260,6 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
       companyRepository.deleteById(companyId);
     }
   }
-
 
   @Test
   @DisplayName("Should fail to create Insurance Package when endDate is before startDate")

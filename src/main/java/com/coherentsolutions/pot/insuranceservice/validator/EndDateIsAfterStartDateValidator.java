@@ -3,7 +3,6 @@ package com.coherentsolutions.pot.insuranceservice.validator;
 import com.coherentsolutions.pot.insuranceservice.annotation.ValidateEndDateIsAfterStartDate;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import java.lang.reflect.Method;
 import java.beans.PropertyDescriptor;
 import java.time.LocalDate;
 
