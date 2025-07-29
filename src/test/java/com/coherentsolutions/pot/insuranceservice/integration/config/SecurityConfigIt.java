@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.integration.config;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
@@ -25,38 +26,38 @@ import org.springframework.test.web.servlet.MockMvc;
 class SecurityConfigIt extends PostgresTestContainer {
 
   @Autowired
-    MockMvc mockMvc;
+  MockMvc mockMvc;
 
   @ParameterizedTest
   @ValueSource(strings = {"/swagger-ui/index.html", "/v3/api-docs"})
   @DisplayName("permitAll endpoints are reachable without JWT")
-    void publicEndpointsAreOpen(String url) throws Exception {
+  void publicEndpointsAreOpen(String url) throws Exception {
     mockMvc.perform(get(url))
-                .andExpect(status().isOk());
+        .andExpect(status().isOk());
   }
 
   @Test
   @DisplayName("Protected endpoint without token returns 401")
-    void protectedEndpointWithoutToken() throws Exception {
+  void protectedEndpointWithoutToken() throws Exception {
     mockMvc.perform(get("/v1/companies"))
-                .andExpect(status().isUnauthorized());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
   @DisplayName("Protected endpoint with JWT returns 200")
-    void protectedEndpointWithJwt() throws Exception {
+  void protectedEndpointWithJwt() throws Exception {
     mockMvc.perform(get("/v1/companies")
-                        .with(jwt().jwt(j -> j.claim("sub", "tester"))))
-                .andExpect(status().isOk());
+    .with(jwt().jwt(j -> j.claim("sub", "tester"))))
+        .andExpect(status().isOk());
   }
   
   @Test
   @DisplayName("Spring Security must not create an HTTP session")
-    void sessionIsNotCreated() throws Exception {
+  void sessionIsNotCreated() throws Exception {
     mockMvc.perform(get("/v1/companies").with(jwt().jwt(j -> j.claim("sub", "tester"))))
-                .andExpect(cookie().doesNotExist("JSESSIONID"))
-                .andExpect(result ->
-                        org.junit.jupiter.api.Assertions.assertNull(
-                                result.getRequest().getSession(false), "HttpSession should not exist"));
+        .andExpect(cookie().doesNotExist("JSESSIONID"))
+        .andExpect(result ->
+        assertNull(
+        result.getRequest().getSession(false), "HttpSession should not exist"));
   }
 }
