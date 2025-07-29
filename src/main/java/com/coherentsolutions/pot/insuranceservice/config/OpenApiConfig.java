@@ -18,22 +18,22 @@ public class OpenApiConfig {
   @Bean
   public OpenAPI customOpenApi(@Value("${AUTH0_DOMAIN:}") String domain) {
     SecurityScheme oauthScheme = new SecurityScheme()
-            .type(SecurityScheme.Type.OAUTH2)
-            .flows(new OAuthFlows().authorizationCode(
-                    new OAuthFlow()
-                            .authorizationUrl("https://" + domain + "/authorize")
-                            .tokenUrl("https://" + domain + "/oauth/token")
-                            .scopes(new Scopes()
-                                    .addString("openid",  "OpenID"))
-            ));
+        .type(SecurityScheme.Type.OAUTH2)
+        .flows(new OAuthFlows().authorizationCode(
+            new OAuthFlow()
+        .authorizationUrl("https://" + domain + "/authorize")
+        .tokenUrl("https://" + domain + "/oauth/token")
+        .scopes(new Scopes()
+        .addString("openid",  "OpenID"))
+    ));
     return new OpenAPI()
-            .components(new Components()
-                    .addSecuritySchemes("oauth2", oauthScheme))
-            .addSecurityItem(new SecurityRequirement()
-                    .addList("oauth2"))
-            .info(new Info()
-                    .title("Insurance Service API")
-                    .version("1.0")
-                    .description("API documentation for Insurance Service project"));
+        .components(new Components()
+            .addSecuritySchemes("oauth2", oauthScheme))
+        .addSecurityItem(new SecurityRequirement()
+            .addList("oauth2"))
+        .info(new Info()
+            .title("Insurance Service API")
+            .version("1.0")
+            .description("API documentation for Insurance Service project"));
   }
 }

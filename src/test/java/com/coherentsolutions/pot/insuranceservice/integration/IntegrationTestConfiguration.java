@@ -22,4 +22,4 @@ public class IntegrationTestConfiguration {
     objectMapper.registerModule(new JavaTimeModule());
     return objectMapper;
   }
-} 
+}

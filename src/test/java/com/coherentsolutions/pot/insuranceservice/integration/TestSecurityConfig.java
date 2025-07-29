@@ -10,8 +10,8 @@ public class TestSecurityConfig {
   @Bean
     public JwtDecoder jwtDecoder() {
     return tokenValue -> Jwt.withTokenValue(tokenValue)
-                .header("alg", "none")
-                .claim("sub", "test-user")
-                .build();
+    .header("alg", "none")
+    .claim("sub", "test-user")
+    .build();
   }
 }

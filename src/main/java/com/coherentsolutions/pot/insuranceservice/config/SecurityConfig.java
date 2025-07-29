@@ -17,19 +17,19 @@ public class SecurityConfig {
       JwtAuthenticationConverter jwtAuthConverter
   ) throws Exception {
     http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm ->
-                sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(
-                                        "/swagger-ui/**",
-                                        "/v3/api-docs/**"
-                                ).permitAll()
-                        .anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(jwtAuthConverter)
-                        )
+        .csrf(AbstractHttpConfigurer::disable)
+        .sessionManagement(sm ->
+        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+        .requestMatchers(
+        "/swagger-ui/**",
+        "/v3/api-docs/**"
+    ).permitAll()
+        .anyRequest().authenticated())
+        .oauth2ResourceServer(oauth2 -> oauth2
+        .jwt(jwt -> jwt
+        .jwtAuthenticationConverter(jwtAuthConverter)
+    )
         );
     return http.build();
   }

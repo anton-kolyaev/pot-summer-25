@@ -12,7 +12,6 @@ public class MockMvcTestConfig {
   @Bean
     public MockMvcBuilderCustomizer defaultAuthHeader() {
     return builder -> builder.defaultRequest(
-                get("/").with(jwt().jwt(jwt -> jwt.claim("sub", "test-user")))
-        );
+        get("/").with(jwt().jwt(jwt -> jwt.claim("sub", "test-user"))));
   }
 }
