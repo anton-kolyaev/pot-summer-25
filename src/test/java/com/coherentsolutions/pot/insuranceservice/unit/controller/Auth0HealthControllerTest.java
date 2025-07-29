@@ -12,13 +12,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.auth0.client.mgmt.GrantsEntity;
 import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.exception.Auth0Exception;
+import com.auth0.net.Request;
 import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import com.coherentsolutions.pot.insuranceservice.controller.Auth0HealthController;
 import com.coherentsolutions.pot.insuranceservice.unit.AbstractControllerTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import com.auth0.net.Request;
 
 class Auth0HealthControllerTest extends AbstractControllerTest {
 
