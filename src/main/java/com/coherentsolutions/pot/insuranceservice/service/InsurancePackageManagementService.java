@@ -10,6 +10,7 @@ import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRep
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,11 @@ public class InsurancePackageManagementService {
   private final InsurancePackageRepository insurancePackageRepository;
   private final InsurancePackageMapper insurancePackageMapper;
   private final CompanyRepository companyRepository;
+  
+  public InsurancePackageDto getInsurancePackageById(@PathVariable UUID id) {
+    InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
+    return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
+  }
 
   public InsurancePackageDto createInsurancePackage(
       UUID companyId,
@@ -28,7 +34,10 @@ public class InsurancePackageManagementService {
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.INITIALIZED);
     insurancePackageRepository.save(insurancePackage);
+    
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
 
 }
+
+
