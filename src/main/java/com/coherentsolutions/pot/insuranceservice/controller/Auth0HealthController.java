@@ -1,8 +1,8 @@
 package com.coherentsolutions.pot.insuranceservice.controller;
 
+import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
-import com.coherentsolutions.pot.insuranceservice.service.Auth0UserManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,12 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class Auth0HealthController {
 
   private final Auth0Properties auth0Properties;
-  private final Auth0UserManagementService auth0UserManagementService;
+  private final ManagementAPI managementAPI;
 
-  public Auth0HealthController(Auth0Properties auth0Properties, 
-                             Auth0UserManagementService auth0UserManagementService) {
+  public Auth0HealthController(Auth0Properties auth0Properties, ManagementAPI managementAPI) {
     this.auth0Properties = auth0Properties;
-    this.auth0UserManagementService = auth0UserManagementService;
+    this.managementAPI = managementAPI;
   }
 
   /**
@@ -55,34 +54,25 @@ public class Auth0HealthController {
     Map<String, Object> response = new HashMap<>();
     
     try {
-      // Check if Auth0 is enabled
-      boolean enabled = auth0Properties.enabled();
-      response.put("enabled", enabled);
+      // Check configuration completeness
+      boolean hasDomain = auth0Properties.domain() != null && !auth0Properties.domain().isEmpty();
+      boolean hasApiToken = auth0Properties.apiToken() != null && !auth0Properties.apiToken().isEmpty();
       
-      if (enabled) {
-        // Check configuration completeness
-        boolean hasDomain = auth0Properties.domain() != null && !auth0Properties.domain().isEmpty();
-        boolean hasApiToken = auth0Properties.apiToken() != null && !auth0Properties.apiToken().isEmpty();
-        
-        response.put("domain_configured", hasDomain);
-        response.put("api_token_configured", hasApiToken);
-        response.put("timeout", auth0Properties.timeout());
-        response.put("audience", auth0Properties.audience());
-        
-        // Overall configuration status
-        boolean fullyConfigured = hasDomain && hasApiToken;
-        response.put("fully_configured", fullyConfigured);
-        
-        if (fullyConfigured) {
-          response.put("status", "CONFIGURED");
-          response.put("message", "Auth0 is properly configured");
-        } else {
-          response.put("status", "INCOMPLETE");
-          response.put("message", "Auth0 configuration is incomplete");
-        }
+      response.put("domain_configured", hasDomain);
+      response.put("api_token_configured", hasApiToken);
+      response.put("timeout", auth0Properties.timeout());
+      response.put("audience", auth0Properties.audience());
+      
+      // Overall configuration status
+      boolean fullyConfigured = hasDomain && hasApiToken;
+      response.put("fully_configured", fullyConfigured);
+      
+      if (fullyConfigured) {
+        response.put("status", "CONFIGURED");
+        response.put("message", "Auth0 is properly configured");
       } else {
-        response.put("status", "DISABLED");
-        response.put("message", "Auth0 is disabled");
+        response.put("status", "INCOMPLETE");
+        response.put("message", "Auth0 configuration is incomplete");
       }
       
       return ResponseEntity.ok(response);
@@ -94,13 +84,13 @@ public class Auth0HealthController {
   }
 
   /**
-   * Tests Auth0 API connectivity by attempting to list users.
+   * Tests Auth0 API connectivity using a lightweight API call.
    *
    * @return connectivity test results
    */
   @GetMapping("/connectivity")
   @Operation(summary = "Test Auth0 connectivity", 
-             description = "Tests connectivity to Auth0 Management API")
+             description = "Tests connectivity to Auth0 Management API using grants endpoint")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "Connectivity test successful"),
       @ApiResponse(responseCode = "500", description = "Connectivity test failed")
@@ -109,12 +99,11 @@ public class Auth0HealthController {
     Map<String, Object> response = new HashMap<>();
     
     try {
-      // This validates API token and connectivity
-      var users = auth0UserManagementService.getUserDtos(null);
+      // Test connectivity using grants endpoint as suggested in the review comment for faster response
+      managementAPI.grants().list(null, null).execute();
       
       response.put("status", "CONNECTED");
       response.put("message", "Successfully connected to Auth0 Management API");
-      response.put("user_count", users.size());
       response.put("timestamp", System.currentTimeMillis());
       
       return ResponseEntity.ok(response);
@@ -149,16 +138,6 @@ public class Auth0HealthController {
     Map<String, Object> response = new HashMap<>();
     
     try {
-      // Check configuration
-      boolean enabled = auth0Properties.enabled();
-      response.put("enabled", enabled);
-      
-      if (!enabled) {
-        response.put("status", "DISABLED");
-        response.put("message", "Auth0 is disabled");
-        return ResponseEntity.ok(response);
-      }
-      
       // Check configuration completeness
       boolean hasDomain = auth0Properties.domain() != null && !auth0Properties.domain().isEmpty();
       boolean hasApiToken = auth0Properties.apiToken() != null && !auth0Properties.apiToken().isEmpty();
@@ -178,10 +157,9 @@ public class Auth0HealthController {
       
       // Test connectivity
       try {
-        var users = auth0UserManagementService.getUserDtos(null);
+        managementAPI.grants().list(null, null).execute();
         response.put("connectivity", Map.of(
-            "status", "CONNECTED",
-            "user_count", users.size()
+            "status", "CONNECTED"
         ));
         response.put("status", "HEALTHY");
         response.put("message", "Auth0 is properly configured and connected");
