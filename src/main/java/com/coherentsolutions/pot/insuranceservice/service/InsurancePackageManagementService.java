@@ -34,6 +34,7 @@ public class InsurancePackageManagementService {
     return insurancePackages.map(insurancePackageMapper::toInsurancePackageDto);
   }
 
+
   public InsurancePackageDto getInsurancePackageById(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
