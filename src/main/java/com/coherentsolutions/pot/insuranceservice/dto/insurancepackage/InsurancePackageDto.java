@@ -12,7 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@ValidateEndDateIsAfterStartDate
+@ValidateEndDateIsAfterStartDate(startDate = "startDate", endDate = "endDate")
 @Data
 @Builder
 @NoArgsConstructor

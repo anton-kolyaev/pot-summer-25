@@ -11,6 +11,9 @@ import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.Insurance
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.mapper.InsurancePackageMapper;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
+import com.coherentsolutions.pot.insuranceservice.model.Company;
+import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
+import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.service.InsurancePackageManagementService;
 import java.time.LocalDate;
@@ -24,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Insurance Packages Management Service Tests")
 public class InsurancePackageManagementServiceTest {
@@ -33,6 +37,9 @@ public class InsurancePackageManagementServiceTest {
 
   @Mock
   private InsurancePackageMapper insurancePackageMapper;
+  
+  @Mock
+  private CompanyRepository companyRepository;
 
   @InjectMocks
   private InsurancePackageManagementService insurancePackageManagementService;
@@ -56,18 +63,18 @@ public class InsurancePackageManagementServiceTest {
         .endDate(LocalDate.of(2025, 12, 31))
         .payrollFrequency(PayrollFrequency.MONTHLY)
         .build();
-
+    
     when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(insurancePackage);
     when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(
         insurancePackageDto);
 
     InsurancePackageDto result = insurancePackageManagementService.getInsurancePackageById(
         packageId);
-
+    
     assertNotNull(result);
     assertEquals(insurancePackageDto, result);
-
-    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+    
+     verify(insurancePackageRepository).findByIdOrThrow(packageId);
     verify(insurancePackageMapper).toInsurancePackageDto(insurancePackage);
   }
 
@@ -85,5 +92,45 @@ public class InsurancePackageManagementServiceTest {
         insurancePackageManagementService.getInsurancePackageById(packageId));
 
     verify(insurancePackageRepository).findByIdOrThrow(packageId);
+  }
+
+  @Test
+  @DisplayName("Should create insurance package and return it's dto")
+  void shouldCreateInsurancePackageSuccessfully() {
+    InsurancePackageDto insurancePackageDto = InsurancePackageDto.builder()
+        .name("Standard Health Package")
+        .startDate(LocalDate.of(2025, 8, 1))
+        .endDate(LocalDate.of(2025, 12, 31))
+        .payrollFrequency(PayrollFrequency.MONTHLY)
+        .build();
+    
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName(insurancePackageDto.getName());
+    insurancePackage.setStartDate(insurancePackageDto.getStartDate());
+    insurancePackage.setEndDate(insurancePackageDto.getEndDate());
+    insurancePackage.setPayrollFrequency(insurancePackageDto.getPayrollFrequency());
+
+    UUID companyId = UUID.randomUUID();
+
+    Company company = new Company();
+    company.setId(companyId);
+
+    when(insurancePackageMapper.toInsurancePackage(insurancePackageDto)).thenReturn(
+        insurancePackage);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(company);
+    when(insurancePackageRepository.save(insurancePackage)).thenReturn(insurancePackage);
+    when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(
+        insurancePackageDto);
+
+    InsurancePackageDto result = insurancePackageManagementService.createInsurancePackage(companyId,
+        insurancePackageDto);
+    
+    assertNotNull(result);
+    assertEquals(insurancePackageDto, result);
+        
+    verify(insurancePackageMapper).toInsurancePackage(insurancePackageDto);
+    verify(insurancePackageRepository).save(insurancePackage);
+    verify(insurancePackageMapper).toInsurancePackageDto(insurancePackage);
+    verify(companyRepository).findByIdOrThrow(companyId);
   }
 }

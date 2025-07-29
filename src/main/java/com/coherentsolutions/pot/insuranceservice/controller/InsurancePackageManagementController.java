@@ -25,6 +25,13 @@ public class InsurancePackageManagementController {
   @GetMapping("{id}")
   public InsurancePackageDto getInsurancePackage(@PathVariable UUID id) {
     return insurancePackageManagementService.getInsurancePackageById(id);
+
+  @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
+  public InsurancePackageDto createInsurancePackage(
+      @PathVariable UUID companyId,
+      @Valid @RequestBody InsurancePackageDto insurancePackageDto) {
+    return insurancePackageManagementService.createInsurancePackage(companyId, insurancePackageDto);
   }
 
 }
