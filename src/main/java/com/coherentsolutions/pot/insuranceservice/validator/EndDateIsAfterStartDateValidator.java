@@ -3,7 +3,6 @@ package com.coherentsolutions.pot.insuranceservice.validator;
 import com.coherentsolutions.pot.insuranceservice.annotation.ValidateEndDateIsAfterStartDate;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import java.lang.reflect.Method;
 import java.beans.PropertyDescriptor;
 import java.time.LocalDate;
 
@@ -27,7 +26,6 @@ public class EndDateIsAfterStartDateValidator
 
       LocalDate endDate = (LocalDate) new PropertyDescriptor(endDateField, obj.getClass())
           .getReadMethod().invoke(obj);
-
 
       if (startDate == null || endDate == null || !endDate.isAfter(startDate)) {
         context.disableDefaultConstraintViolation();

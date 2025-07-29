@@ -22,6 +22,8 @@ public class InsurancePackageManagementService {
   
   public InsurancePackageDto getInsurancePackageById(@PathVariable UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
+    return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
+  }
 
   public InsurancePackageDto createInsurancePackage(
       UUID companyId,
@@ -37,3 +39,5 @@ public class InsurancePackageManagementService {
   }
 
 }
+
+

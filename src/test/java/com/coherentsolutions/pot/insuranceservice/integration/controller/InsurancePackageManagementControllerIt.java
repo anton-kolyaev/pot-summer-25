@@ -3,15 +3,12 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
+import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
@@ -19,12 +16,9 @@ import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
-import java.time.LocalDate;
-import java.util.List;
-import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
-import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,6 +44,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
   @Autowired
   private CompanyRepository companyRepository;
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Test
   @DisplayName("Should retrieve Insurance Package by its ID")
@@ -89,8 +85,21 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     }
   }
 
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Test
+  @DisplayName("Should return 404 when insurance package is not found by ID")
+  void shouldReturnNotFoundWhenInsurancePackageDoesNotExist() throws Exception {
+    UUID companyId = UUID.randomUUID();
+    UUID nonExistentPackageId = UUID.randomUUID();
+
+    try {
+      mockMvc.perform(
+              get("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+                  .contentType(APPLICATION_JSON))
+          .andExpect(status().isNotFound());
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
 
   @Test
   @DisplayName("Should create and retrieve Insurance Package successfully")
@@ -156,22 +165,7 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     }
   }
 
-  @Test
-  @DisplayName("Should return 404 when insurance package is not found by ID")
-  void shouldReturnNotFoundWhenInsurancePackageDoesNotExist() throws Exception {
-    UUID companyId = UUID.randomUUID();
-    UUID nonExistentPackageId = UUID.randomUUID();
 
-    try {
-      mockMvc.perform(
-              get("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
-                  .contentType(APPLICATION_JSON))
-          .andExpect(status().isNotFound());
-      } finally {
-      companyRepository.deleteById(companyId);
-    }
-  }
-      
   @Test
   @DisplayName("Should fail to create Insurance Package when endDate is before startDate")
   void shouldFailWhenEndDateBeforeStartDate() throws Exception {

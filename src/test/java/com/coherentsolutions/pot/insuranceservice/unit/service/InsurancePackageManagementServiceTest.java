@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.mapper.InsurancePackageMapper;
-import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
@@ -37,7 +36,7 @@ public class InsurancePackageManagementServiceTest {
 
   @Mock
   private InsurancePackageMapper insurancePackageMapper;
-  
+
   @Mock
   private CompanyRepository companyRepository;
 
@@ -63,18 +62,18 @@ public class InsurancePackageManagementServiceTest {
         .endDate(LocalDate.of(2025, 12, 31))
         .payrollFrequency(PayrollFrequency.MONTHLY)
         .build();
-    
+
     when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(insurancePackage);
     when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(
         insurancePackageDto);
 
     InsurancePackageDto result = insurancePackageManagementService.getInsurancePackageById(
         packageId);
-    
+
     assertNotNull(result);
     assertEquals(insurancePackageDto, result);
-    
-     verify(insurancePackageRepository).findByIdOrThrow(packageId);
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
     verify(insurancePackageMapper).toInsurancePackageDto(insurancePackage);
   }
 
@@ -103,7 +102,7 @@ public class InsurancePackageManagementServiceTest {
         .endDate(LocalDate.of(2025, 12, 31))
         .payrollFrequency(PayrollFrequency.MONTHLY)
         .build();
-    
+
     InsurancePackage insurancePackage = new InsurancePackage();
     insurancePackage.setName(insurancePackageDto.getName());
     insurancePackage.setStartDate(insurancePackageDto.getStartDate());
@@ -124,10 +123,10 @@ public class InsurancePackageManagementServiceTest {
 
     InsurancePackageDto result = insurancePackageManagementService.createInsurancePackage(companyId,
         insurancePackageDto);
-    
+
     assertNotNull(result);
     assertEquals(insurancePackageDto, result);
-        
+
     verify(insurancePackageMapper).toInsurancePackage(insurancePackageDto);
     verify(insurancePackageRepository).save(insurancePackage);
     verify(insurancePackageMapper).toInsurancePackageDto(insurancePackage);
