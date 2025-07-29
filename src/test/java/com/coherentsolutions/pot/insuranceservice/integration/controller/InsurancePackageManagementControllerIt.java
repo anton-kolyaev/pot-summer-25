@@ -70,7 +70,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
           .andExpect(jsonPath("$.name").value("Standard Health Package"))
           .andExpect(jsonPath("$.startDate").value("2025-08-01"))
           .andExpect(jsonPath("$.endDate").value("2025-12-31"))
-          .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"));
+          .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"))
+          .andExpect(jsonPath("$.status").value("INITIALIZED"));
 
     } finally {
 
