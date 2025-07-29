@@ -22,7 +22,7 @@ public class PlanDto {
   private String name;
 
   @NotNull(message = "Type is required")
-  private String type;
+  private Integer type;
 
   @NotNull(message = "Contribution is required")
   @Positive(message = "Contribution must be positive")
