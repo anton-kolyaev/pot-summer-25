@@ -7,7 +7,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 
 @Configuration
 public class JwtRoleConfig {
-  private static final String ROLES_CLAIM = "https://insurance-service/roles";
+  private static final String ROLES_CLAIM = "role";
   
   @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
