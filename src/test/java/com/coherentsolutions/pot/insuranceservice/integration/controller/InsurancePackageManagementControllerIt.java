@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -281,6 +282,80 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     } finally {
       companyRepository.deleteById(companyId);
     }
+  }
+
+  @Test
+  @DisplayName("Should deactivate Insurance Package successfully")
+  void shouldDeactivateInsurancePackageSuccessfully() throws Exception {
+    Company company = new Company();
+    company.setName("Deactivate Co");
+    company.setEmail("deactivate@company.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://deactivate.com");
+    company = companyRepository.save(company);
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Deactivation Test Plan");
+    insurancePackage.setStartDate(LocalDate.now());
+    insurancePackage.setEndDate(LocalDate.now().plusMonths(3));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.ACTIVE);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID packageId = insurancePackage.getId();
+    UUID companyId = company.getId();
+
+    try {
+      mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.status").value("DEACTIVATED"));
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
+
+  @Test
+  @DisplayName("Should fail to deactivate already deactivated Insurance Package")
+  void shouldFailToDeactivateAlreadyDeactivatedPackage() throws Exception {
+    Company company = new Company();
+    company.setName("Deactivated Co");
+    company.setEmail("deactivated@company.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://deactivated.com");
+    company = companyRepository.save(company);
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Already Deactivated Plan");
+    insurancePackage.setStartDate(LocalDate.now());
+    insurancePackage.setEndDate(LocalDate.now().plusMonths(3));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID packageId = insurancePackage.getId();
+    UUID companyId = company.getId();
+
+    try {
+      mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isBadRequest());
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
+
+  @Test
+  @DisplayName("Should return 404 when trying to deactivate non-existent Insurance Package")
+  void shouldReturnNotFoundWhenDeactivatingNonExistentPackage() throws Exception {
+    UUID companyId = UUID.randomUUID();
+    UUID nonExistentPackageId = UUID.randomUUID();
+
+    mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+            .contentType(APPLICATION_JSON))
+        .andExpect(status().isNotFound());
   }
 
 }

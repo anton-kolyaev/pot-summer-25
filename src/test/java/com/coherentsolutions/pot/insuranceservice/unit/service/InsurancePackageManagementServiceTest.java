@@ -220,4 +220,69 @@ public class InsurancePackageManagementServiceTest {
     verify(insurancePackageMapper).toInsurancePackageDto(insurancePackage);
     verify(companyRepository).findByIdOrThrow(companyId);
   }
+
+  @Test
+  @DisplayName("Should deactivate active insurance package successfully")
+  void shouldDeactivateInsurancePackageSuccessfully() {
+    UUID packageId = UUID.randomUUID();
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setId(packageId);
+    insurancePackage.setStatus(PackageStatus.ACTIVE);
+
+    InsurancePackageDto insurancePackageDto = InsurancePackageDto.builder()
+        .id(packageId)
+        .status(PackageStatus.DEACTIVATED)
+        .build();
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(insurancePackage);
+    when(insurancePackageRepository.save(insurancePackage)).thenReturn(insurancePackage);
+    when(insurancePackageMapper.toInsurancePackageDto(insurancePackage)).thenReturn(insurancePackageDto);
+
+    InsurancePackageDto result = insurancePackageManagementService.deactivateInsurancePackage(packageId);
+
+    assertNotNull(result);
+    assertEquals(PackageStatus.DEACTIVATED, result.getStatus());
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+    verify(insurancePackageRepository).save(insurancePackage);
+    verify(insurancePackageMapper).toInsurancePackageDto(insurancePackage);
+  }
+
+  @Test
+  @DisplayName("Should throw BAD_REQUEST when deactivating already deactivated package")
+  void shouldFailToDeactivateAlreadyDeactivatedPackage() {
+
+    UUID packageId = UUID.randomUUID();
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setId(packageId);
+    insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(insurancePackage);
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () ->
+        insurancePackageManagementService.deactivateInsurancePackage(packageId)
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Insurance package is already deactivated", exception.getReason());
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+    verifyNoInteractions(insurancePackageMapper);
+    verify(insurancePackageRepository, org.mockito.Mockito.never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should throw NOT_FOUND when deactivating non-existent package")
+  void shouldThrowNotFoundWhenPackageDoesNotExist() {
+    UUID packageId = UUID.randomUUID();
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Insurance package not found"));
+
+    assertThrows(ResponseStatusException.class, () ->
+        insurancePackageManagementService.deactivateInsurancePackage(packageId)
+    );
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+    verifyNoInteractions(insurancePackageMapper);
+  }
 }
