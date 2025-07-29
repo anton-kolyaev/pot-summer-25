@@ -20,4 +20,8 @@ public @interface ValidateEndDateIsAfterStartDate {
   Class<?>[] groups() default {};
 
   Class<? extends Payload>[] payload() default {};
+
+  String startDate();
+
+  String endDate();
 }
