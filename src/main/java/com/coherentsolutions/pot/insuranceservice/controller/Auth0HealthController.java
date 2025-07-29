@@ -111,7 +111,7 @@ public class Auth0HealthController {
     } catch (Auth0Exception e) {
       response.put("status", "CONNECTION_FAILED");
       response.put("message", "Failed to connect to Auth0: " + e.getMessage());
-      response.put("error_code", e.getStatusCode());
+      response.put("error_details", e.getMessage());
       response.put("timestamp", System.currentTimeMillis());
       
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -173,7 +173,7 @@ public class Auth0HealthController {
         response.put("connectivity", Map.of(
             "status", "CONNECTION_FAILED",
             "error", e.getMessage(),
-            "error_code", e.getStatusCode(),
+            "error_details", e.getMessage(),
             "test_method", "grants_endpoint"
         ));
         response.put("status", "CONNECTIVITY_ERROR");
