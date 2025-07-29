@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
+import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageFilter;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
@@ -18,7 +19,6 @@ import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,8 +44,96 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
   @Autowired
   private CompanyRepository companyRepository;
+
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Test
+  @DisplayName("Should get insurance packages with filters successfully")
+  void shouldGetInsurancePackagesWithFilters() throws Exception {
+
+    Company company = new Company();
+    company.setName("Test Company");
+    company.setEmail("test@example.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://test.com");
+    company = companyRepository.save(company);
+    UUID companyId = company.getId();
+
+    InsurancePackage package1 = new InsurancePackage();
+    package1.setName("Standard Health Package");
+    package1.setStartDate(LocalDate.of(2025, 8, 1));
+    package1.setEndDate(LocalDate.of(2025, 12, 31));
+    package1.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    package1.setCompany(company);
+    package1.setStatus(PackageStatus.ACTIVE);
+    insurancePackageRepository.save(package1);
+
+    InsurancePackage package2 = new InsurancePackage();
+    package2.setName("Premium Health Package");
+    package2.setStartDate(LocalDate.of(2025, 9, 1));
+    package2.setEndDate(LocalDate.of(2026, 1, 31));
+    package2.setPayrollFrequency(PayrollFrequency.WEEKLY);
+    package2.setCompany(company);
+    package2.setStatus(PackageStatus.ACTIVE);
+    insurancePackageRepository.save(package2);
+
+    InsurancePackageFilter filter = new InsurancePackageFilter();
+    filter.setName("standard");
+    filter.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    filter.setCompanyId(company.getId());
+
+    try {
+      mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+              .param("name", "standard")
+              .param("payrollFrequency", "MONTHLY")
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.content.length()").value(1))
+          .andExpect(jsonPath("$.content[0].name").value("Standard Health Package"));
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
+
+  @Test
+  @DisplayName("Should return empty page if filter doesn't match any packages")
+  void shouldReturnEmptyResultWhenNoMatch() throws Exception {
+    Company company = new Company();
+    company.setName("Empty Filter Co");
+    company.setEmail("empty@example.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://empty.com");
+    company = companyRepository.save(company);
+
+    InsurancePackage pkg = new InsurancePackage();
+    pkg.setName("Invisible Plan");
+    pkg.setStartDate(LocalDate.now());
+    pkg.setEndDate(LocalDate.now().plusMonths(6));
+    pkg.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    pkg.setCompany(company);
+    pkg.setStatus(PackageStatus.ACTIVE);
+    insurancePackageRepository.save(pkg);
+
+    UUID companyId = company.getId();
+    InsurancePackageFilter filter = new InsurancePackageFilter();
+    filter.setName("nonexistent");
+    filter.setPayrollFrequency(PayrollFrequency.WEEKLY);
+    filter.setCompanyId(companyId);
+
+    try {
+      mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+              .param("name", "nonexistent")
+              .param("payrollFrequency", "WEEKLY")
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.content").isArray())
+          .andExpect(jsonPath("$.content.length()").value(0));
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
+
 
   @Test
   @DisplayName("Should retrieve Insurance Package by its ID")
@@ -79,8 +167,6 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
           .andExpect(jsonPath("$.endDate").value("2025-12-31"))
           .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"));
     } finally {
-      List<InsurancePackage> packages = insurancePackageRepository.findAllByCompanyId(companyId);
-      insurancePackageRepository.deleteAll(packages);
       companyRepository.deleteById(companyId);
     }
   }
@@ -164,7 +250,6 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
       companyRepository.deleteById(companyId);
     }
   }
-
 
   @Test
   @DisplayName("Should fail to create Insurance Package when endDate is before startDate")
