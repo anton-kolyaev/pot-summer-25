@@ -1,8 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,7 +17,6 @@ import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
-import com.coherentsolutions.pot.insuranceservice.service.InsurancePackageManagementService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -29,9 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -52,14 +46,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
   private CompanyRepository companyRepository;
 
   @Autowired
-  private InsurancePackageManagementService insurancePackageManagementService;
-
-  @Autowired
   private ObjectMapper objectMapper;
 
   @Test
   @DisplayName("Should get insurance packages with filters successfully")
-  void shouldGetInsurancePackagesWithFilters() {
+  void shouldGetInsurancePackagesWithFilters() throws Exception {
 
     Company company = new Company();
     company.setName("Test Company");
@@ -92,16 +83,14 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     filter.setPayrollFrequency(PayrollFrequency.MONTHLY);
     filter.setCompanyId(company.getId());
 
-    Pageable pageable = PageRequest.of(0, 10);
-
     try {
-      Page<InsurancePackageDto> result = insurancePackageManagementService.getInsurancePackagesWithFilters(
-          filter, pageable);
-
-      assertNotNull(result);
-      assertEquals(1, result.getContent().size());
-      assertEquals("Standard Health Package", result.getContent().get(0).getName());
-
+      mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+              .param("name", "standard")
+              .param("payrollFrequency", "MONTHLY")
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.content.length()").value(1))
+          .andExpect(jsonPath("$.content[0].name").value("Standard Health Package"));
     } finally {
       companyRepository.deleteById(companyId);
     }
@@ -109,7 +98,7 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
   @Test
   @DisplayName("Should return empty page if filter doesn't match any packages")
-  void shouldReturnEmptyResultWhenNoMatch() {
+  void shouldReturnEmptyResultWhenNoMatch() throws Exception {
     Company company = new Company();
     company.setName("Empty Filter Co");
     company.setEmail("empty@example.com");
@@ -132,13 +121,14 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     filter.setPayrollFrequency(PayrollFrequency.WEEKLY);
     filter.setCompanyId(companyId);
 
-    Pageable pageable = PageRequest.of(0, 10);
-
     try {
-      Page<InsurancePackageDto> result = insurancePackageManagementService.getInsurancePackagesWithFilters(
-          filter, pageable);
-      assertNotNull(result);
-      assertEquals(0, result.getContent().size());
+      mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+              .param("name", "nonexistent")
+              .param("payrollFrequency", "WEEKLY")
+              .contentType(APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.content").isArray())
+          .andExpect(jsonPath("$.content.length()").value(0));
     } finally {
       companyRepository.deleteById(companyId);
     }
