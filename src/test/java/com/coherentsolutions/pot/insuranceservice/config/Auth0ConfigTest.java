@@ -30,9 +30,7 @@ class Auth0ConfigTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
-        "https://test-domain.auth0.com/api/v2/",
+        "test-audience",
         10000,
         true
     );
@@ -51,9 +49,7 @@ class Auth0ConfigTest {
     Auth0Properties properties = new Auth0Properties(
         null,
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
-        "https://test-domain.auth0.com/api/v2/",
+        "test-audience",
         10000,
         true
     );
@@ -69,9 +65,7 @@ class Auth0ConfigTest {
     Auth0Properties properties = new Auth0Properties(
         "",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
-        "https://test-domain.auth0.com/api/v2/",
+        "test-audience",
         10000,
         true
     );
@@ -87,9 +81,7 @@ class Auth0ConfigTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         null,
-        "test-client-id",
-        "test-client-secret",
-        "https://test-domain.auth0.com/api/v2/",
+        "test-audience",
         10000,
         true
     );
@@ -105,9 +97,7 @@ class Auth0ConfigTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "",
-        "test-client-id",
-        "test-client-secret",
-        "https://test-domain.auth0.com/api/v2/",
+        "test-audience",
         10000,
         true
     );
