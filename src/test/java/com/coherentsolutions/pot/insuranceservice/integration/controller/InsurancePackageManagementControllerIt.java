@@ -5,6 +5,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -357,6 +359,145 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
             delete("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Should update insurance package")
+  void shouldUpdateInsurancePackageWithCorrectDates() throws Exception {
+    Company company = new Company();
+    company.setName("Update Dates Co");
+    company.setEmail("update@company.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://update.com");
+    company = companyRepository.save(company);
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Original Plan");
+    insurancePackage.setStartDate(LocalDate.of(2025, 1, 1));
+    insurancePackage.setEndDate(LocalDate.of(2025, 6, 1));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    LocalDate newStartDate = LocalDate.now().plusDays(1);
+    LocalDate newEndDate = LocalDate.now().plusMonths(2);
+
+    InsurancePackageDto updatedDto = InsurancePackageDto.builder()
+        .name("Updated Plan")
+        .startDate(newStartDate)
+        .endDate(newEndDate)
+        .payrollFrequency(PayrollFrequency.WEEKLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    try {
+      mockMvc.perform(
+              put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                  .contentType(APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(updatedDto)))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.name").value("Updated Plan"))
+          .andExpect(jsonPath("$.startDate").value(newStartDate.toString()))
+          .andExpect(jsonPath("$.endDate").value(newEndDate.toString()))
+          .andExpect(jsonPath("$.payrollFrequency").value("WEEKLY"))
+          .andExpect(jsonPath("$.status").value("INITIALIZED"));
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
+
+  @Test
+  @DisplayName("Should fail update validation when end date is before start date")
+  void shouldFailWhenUpdateEndDateBeforeStartDate() throws Exception {
+    Company company = new Company();
+    company.setName("Invalid Dates Co");
+    company.setEmail("invalid@company.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://invalid.com");
+    company = companyRepository.save(company);
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Invalid Plan");
+    insurancePackage.setStartDate(LocalDate.of(2025, 1, 1));
+    insurancePackage.setEndDate(LocalDate.of(2025, 6, 1));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    LocalDate invalidStartDate = LocalDate.now().plusDays(10);
+    LocalDate invalidEndDate = LocalDate.now().plusDays(5);
+
+    InsurancePackageDto invalidDto = InsurancePackageDto.builder()
+        .name("Invalid Plan")
+        .startDate(invalidStartDate)
+        .endDate(invalidEndDate)
+        .payrollFrequency(PayrollFrequency.WEEKLY)
+        .build();
+
+    try {
+      mockMvc.perform(
+              put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                  .contentType(APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(invalidDto)))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
+          .andExpect(jsonPath("$.error.details.validationErrors.endDate[0]").value(
+              "End date must be after start date"));
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
+  }
+
+  @Test
+  @DisplayName("Should return 400 when updating active insurance package")
+  void shouldFailWhenUpdatingActivePackage() throws Exception {
+    Company company = new Company();
+    company.setName("Active Plan Co");
+    company.setEmail("active@company.com");
+    company.setCountryCode("USA");
+    company.setWebsite("https://active.com");
+    company = companyRepository.save(company);
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Active Plan");
+    insurancePackage.setStartDate(LocalDate.now().minusDays(10));
+    insurancePackage.setEndDate(LocalDate.now().plusDays(10));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.ACTIVE);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    InsurancePackageDto updatedDto = InsurancePackageDto.builder()
+        .name("Attempted Update")
+        .startDate(LocalDate.now().plusDays(1))
+        .endDate(LocalDate.now().plusMonths(1))
+        .payrollFrequency(PayrollFrequency.WEEKLY)
+        .status(PackageStatus.ACTIVE)
+        .build();
+
+    try {
+      mockMvc.perform(
+              put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                  .contentType(APPLICATION_JSON)
+                  .content(objectMapper.writeValueAsString(updatedDto)))
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
+          .andExpect(jsonPath("$.error.message").value(
+              "400 BAD_REQUEST \"Cannot update active insurance package\""));
+    } finally {
+      companyRepository.deleteById(companyId);
+    }
   }
 
 }
