@@ -18,8 +18,6 @@ class Auth0PropertiesTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         15000,
         true
@@ -29,8 +27,6 @@ class Auth0PropertiesTest {
     assertNotNull(properties);
     assertEquals("test-domain.auth0.com", properties.domain());
     assertEquals("test-api-token", properties.apiToken());
-    assertEquals("test-client-id", properties.clientId());
-    assertEquals("test-client-secret", properties.clientSecret());
     assertEquals("https://test-domain.auth0.com/api/v2/", properties.audience());
     assertEquals(15000, properties.timeout());
     assertEquals(true, properties.enabled());
@@ -42,8 +38,6 @@ class Auth0PropertiesTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         0,
         true
@@ -59,8 +53,6 @@ class Auth0PropertiesTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         -1000,
         true
@@ -76,8 +68,6 @@ class Auth0PropertiesTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         5000,
         true
@@ -94,8 +84,6 @@ class Auth0PropertiesTest {
         null,
         null,
         null,
-        null,
-        null,
         10000,
         false
     );
@@ -104,8 +92,6 @@ class Auth0PropertiesTest {
     assertNotNull(properties);
     assertEquals(null, properties.domain());
     assertEquals(null, properties.apiToken());
-    assertEquals(null, properties.clientId());
-    assertEquals(null, properties.clientSecret());
     assertEquals(null, properties.audience());
     assertEquals(10000, properties.timeout());
     assertEquals(false, properties.enabled());
@@ -118,8 +104,6 @@ class Auth0PropertiesTest {
         "",
         "",
         "",
-        "",
-        "",
         10000,
         false
     );
@@ -128,8 +112,6 @@ class Auth0PropertiesTest {
     assertNotNull(properties);
     assertEquals("", properties.domain());
     assertEquals("", properties.apiToken());
-    assertEquals("", properties.clientId());
-    assertEquals("", properties.clientSecret());
     assertEquals("", properties.audience());
     assertEquals(10000, properties.timeout());
     assertEquals(false, properties.enabled());
@@ -141,8 +123,6 @@ class Auth0PropertiesTest {
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         10000,
         true
@@ -151,8 +131,6 @@ class Auth0PropertiesTest {
     // Act & Assert - Record should be immutable, so we can only read values
     assertEquals("test-domain.auth0.com", properties.domain());
     assertEquals("test-api-token", properties.apiToken());
-    assertEquals("test-client-id", properties.clientId());
-    assertEquals("test-client-secret", properties.clientSecret());
     assertEquals("https://test-domain.auth0.com/api/v2/", properties.audience());
     assertEquals(10000, properties.timeout());
     assertEquals(true, properties.enabled());
@@ -164,8 +142,6 @@ class Auth0PropertiesTest {
     Auth0Properties properties1 = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         10000,
         true
@@ -174,8 +150,6 @@ class Auth0PropertiesTest {
     Auth0Properties properties2 = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
-        "test-client-id",
-        "test-client-secret",
         "https://test-domain.auth0.com/api/v2/",
         10000,
         true

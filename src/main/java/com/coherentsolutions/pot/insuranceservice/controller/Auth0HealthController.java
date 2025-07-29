@@ -63,11 +63,9 @@ public class Auth0HealthController {
         // Check configuration completeness
         boolean hasDomain = auth0Properties.domain() != null && !auth0Properties.domain().isEmpty();
         boolean hasApiToken = auth0Properties.apiToken() != null && !auth0Properties.apiToken().isEmpty();
-        boolean hasClientId = auth0Properties.clientId() != null && !auth0Properties.clientId().isEmpty();
         
         response.put("domain_configured", hasDomain);
         response.put("api_token_configured", hasApiToken);
-        response.put("client_id_configured", hasClientId);
         response.put("timeout", auth0Properties.timeout());
         response.put("audience", auth0Properties.audience());
         
@@ -111,7 +109,7 @@ public class Auth0HealthController {
     Map<String, Object> response = new HashMap<>();
     
     try {
-      // Test connectivity by attempting to list users (limit to 1 for performance)
+      // This validates API token and connectivity
       var users = auth0UserManagementService.getUserDtos(null);
       
       response.put("status", "CONNECTED");

@@ -172,7 +172,6 @@ class Auth0HealthControllerTest {
     when(auth0Properties.enabled()).thenReturn(true);
     when(auth0Properties.domain()).thenReturn("test.auth0.com");
     when(auth0Properties.apiToken()).thenReturn("test-token");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
     when(auth0Properties.timeout()).thenReturn(5000);
     when(auth0Properties.audience()).thenReturn("test-audience");
 
@@ -186,7 +185,6 @@ class Auth0HealthControllerTest {
     assertEquals(true, body.get("enabled"));
     assertEquals(true, body.get("domain_configured"));
     assertEquals(true, body.get("api_token_configured"));
-    assertEquals(true, body.get("client_id_configured"));
     assertEquals(5000, body.get("timeout"));
     assertEquals("test-audience", body.get("audience"));
     assertEquals(true, body.get("fully_configured"));
@@ -200,7 +198,6 @@ class Auth0HealthControllerTest {
     when(auth0Properties.enabled()).thenReturn(true);
     when(auth0Properties.domain()).thenReturn("test.auth0.com");
     when(auth0Properties.apiToken()).thenReturn(null);
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
     when(auth0Properties.timeout()).thenReturn(5000);
     when(auth0Properties.audience()).thenReturn("test-audience");
 
@@ -214,7 +211,6 @@ class Auth0HealthControllerTest {
     assertEquals(true, body.get("enabled"));
     assertEquals(true, body.get("domain_configured"));
     assertEquals(false, body.get("api_token_configured"));
-    assertEquals(true, body.get("client_id_configured"));
     assertEquals(false, body.get("fully_configured"));
     assertEquals("INCOMPLETE", body.get("status"));
     assertEquals("Auth0 configuration is incomplete", body.get("message"));

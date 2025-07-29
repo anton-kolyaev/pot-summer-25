@@ -12,8 +12,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record Auth0Properties(
     String domain,
     String apiToken,
-    String clientId,
-    String clientSecret,
     String audience,
     int timeout,
     boolean enabled
