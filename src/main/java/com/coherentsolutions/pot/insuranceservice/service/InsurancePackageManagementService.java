@@ -9,6 +9,7 @@ import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageSpecification;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,7 +32,6 @@ public class InsurancePackageManagementService {
         InsurancePackageSpecification.withFilters(filter), pageable);
     return insurancePackages.map(insurancePackageMapper::toInsurancePackageDto);
   }
-
 
   public InsurancePackageDto getInsurancePackageById(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
@@ -63,5 +63,39 @@ public class InsurancePackageManagementService {
 
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
+
+  public InsurancePackageDto updateInsurancePackage(UUID id,
+      InsurancePackageDto insurancePackageDto) {
+    InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
+    if (insurancePackage.getStatus() != PackageStatus.ACTIVE) {
+      insurancePackage.setName(insurancePackageDto.getName());
+      insurancePackage.setStartDate(insurancePackageDto.getStartDate());
+      insurancePackage.setEndDate(insurancePackageDto.getEndDate());
+      insurancePackage.setPayrollFrequency(insurancePackageDto.getPayrollFrequency());
+
+      if (insurancePackageDto.getStatus() == PackageStatus.DEACTIVATED || (
+          insurancePackageDto.getStatus() == null
+              && insurancePackage.getStatus() == PackageStatus.DEACTIVATED)) {
+        insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+      } else {
+        LocalDate now = LocalDate.now();
+        if (now.isBefore(insurancePackage.getStartDate())) {
+          insurancePackage.setStatus(PackageStatus.INITIALIZED);
+        } else if (!now.isAfter(insurancePackage.getEndDate())) {
+          insurancePackage.setStatus(PackageStatus.ACTIVE);
+        } else {
+          insurancePackage.setStatus(PackageStatus.EXPIRED);
+        }
+      }
+
+      insurancePackageRepository.save(insurancePackage);
+      return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
+
+    } else {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot update active insurance package");
+    }
+  }
+
 
 }
