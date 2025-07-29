@@ -54,14 +54,14 @@ public class InsurancePackageSpecification {
   private static Predicate startDatePredicate(InsurancePackageFilter filter, Root<?> root,
       CriteriaBuilder cb) {
     return filter.getStartDate() != null
-        ? cb.equal(root.get("startDate"), filter.getStartDate())
+        ? cb.greaterThanOrEqualTo(root.get("startDate"), filter.getStartDate())
         : null;
   }
 
   private static Predicate endDatePredicate(InsurancePackageFilter filter, Root<?> root,
       CriteriaBuilder cb) {
     return filter.getEndDate() != null
-        ? cb.equal(root.get("endDate"), filter.getEndDate())
+        ? cb.lessThanOrEqualTo(root.get("endDate"), filter.getEndDate())
         : null;
   }
 
