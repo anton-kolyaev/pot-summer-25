@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -168,6 +169,19 @@ class Auth0UserManagementControllerTest {
   }
 
   @Test
+  void testCreateUserWhenAuth0ExceptionShouldThrowRuntimeException() throws Auth0Exception {
+    // Arrange
+    Auth0UserDto userDto = new Auth0UserDto("test@example.com", "password123", "Test User");
+    when(auth0UserManagementService.createUser(any(Auth0UserDto.class)))
+        .thenThrow(new Auth0Exception("Auth0 creation failed"));
+
+    // Act & Assert
+    RuntimeException exception = assertThrows(RuntimeException.class, 
+        () -> controller.createUser(userDto));
+    assertEquals("Auth0 user creation failed: Auth0 creation failed", exception.getMessage());
+  }
+
+  @Test
   void testGetUserByIdSuccess() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123456789";
@@ -196,6 +210,19 @@ class Auth0UserManagementControllerTest {
   }
 
   @Test
+  void testGetUserByIdWhenAuth0ExceptionShouldThrowRuntimeException() throws Auth0Exception {
+    // Arrange
+    String userId = "auth0|123456789";
+    when(auth0UserManagementService.getUserDtoById(userId))
+        .thenThrow(new Auth0Exception("Auth0 retrieval failed"));
+
+    // Act & Assert
+    RuntimeException exception = assertThrows(RuntimeException.class, 
+        () -> controller.getUserById(userId));
+    assertEquals("Auth0 user retrieval failed: Auth0 retrieval failed", exception.getMessage());
+  }
+
+  @Test
   void testGetUsersSuccess() throws Auth0Exception {
     // Arrange
     List<Auth0UserDto> users = Arrays.asList(
@@ -210,6 +237,18 @@ class Auth0UserManagementControllerTest {
     // Assert
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(users, response.getBody());
+  }
+
+  @Test
+  void testGetUsersWhenAuth0ExceptionShouldThrowRuntimeException() throws Auth0Exception {
+    // Arrange
+    when(auth0UserManagementService.getUserDtos(any()))
+        .thenThrow(new Auth0Exception("Auth0 list failed"));
+
+    // Act & Assert
+    RuntimeException exception = assertThrows(RuntimeException.class, 
+        () -> controller.getUsers(null, null));
+    assertEquals("Auth0 user list retrieval failed: Auth0 list failed", exception.getMessage());
   }
 
   @Test
@@ -229,6 +268,20 @@ class Auth0UserManagementControllerTest {
   }
 
   @Test
+  void testUpdateUserWhenAuth0ExceptionShouldThrowRuntimeException() throws Auth0Exception {
+    // Arrange
+    String userId = "auth0|123456789";
+    Auth0UserDto userDto = new Auth0UserDto("test@example.com", "password123", "Updated User");
+    when(auth0UserManagementService.updateUser(userId, userDto))
+        .thenThrow(new Auth0Exception("Auth0 update failed"));
+
+    // Act & Assert
+    RuntimeException exception = assertThrows(RuntimeException.class, 
+        () -> controller.updateUser(userId, userDto));
+    assertEquals("Auth0 user update failed: Auth0 update failed", exception.getMessage());
+  }
+
+  @Test
   void testDeleteUserSuccess() throws Auth0Exception {
     // Arrange
     String userId = "auth0|123456789";
@@ -239,6 +292,19 @@ class Auth0UserManagementControllerTest {
 
     // Assert
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+  }
+
+  @Test
+  void testDeleteUserWhenAuth0ExceptionShouldThrowRuntimeException() throws Auth0Exception {
+    // Arrange
+    String userId = "auth0|123456789";
+    doThrow(new Auth0Exception("Auth0 deletion failed"))
+        .when(auth0UserManagementService).deleteUser(userId);
+
+    // Act & Assert
+    RuntimeException exception = assertThrows(RuntimeException.class, 
+        () -> controller.deleteUser(userId));
+    assertEquals("Auth0 user deletion failed: Auth0 deletion failed", exception.getMessage());
   }
 
   @Test
