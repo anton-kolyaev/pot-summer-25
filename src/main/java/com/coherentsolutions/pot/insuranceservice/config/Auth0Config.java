@@ -29,8 +29,7 @@ public class Auth0Config {
     if (!StringUtils.hasText(auth0Properties.domain()) 
         || !StringUtils.hasText(auth0Properties.apiToken())) {
       throw new IllegalStateException(
-          "Auth0 configuration is incomplete. Please set AUTH0_DOMAIN and AUTH0_API_TOKEN "
-          + "environment variables.");
+          "Auth0 configuration is incomplete. Please set AUTH0_DOMAIN and AUTH0_API_TOKEN environment variables.");
     }
     
     return ManagementAPI.newBuilder(auth0Properties.domain(), auth0Properties.apiToken())
