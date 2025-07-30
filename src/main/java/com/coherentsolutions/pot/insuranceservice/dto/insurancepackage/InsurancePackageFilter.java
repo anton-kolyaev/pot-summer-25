@@ -1,37 +1,23 @@
 package com.coherentsolutions.pot.insuranceservice.dto.insurancepackage;
 
-import com.coherentsolutions.pot.insuranceservice.annotation.ValidateEndDateIsAfterStartDate;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@ValidateEndDateIsAfterStartDate(startDate = "startDate", endDate = "endDate")
-@Data
-@Builder
+@Setter
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
-public class InsurancePackageDto {
+public class InsurancePackageFilter {
 
-  private UUID id;
-
-  @NotBlank
+  private UUID companyId;
   private String name;
-
-  @NotNull
   private LocalDate startDate;
-
-  @NotNull
   private LocalDate endDate;
-
-  @NotNull
   private PayrollFrequency payrollFrequency;
-
   private PackageStatus status;
+
 }
