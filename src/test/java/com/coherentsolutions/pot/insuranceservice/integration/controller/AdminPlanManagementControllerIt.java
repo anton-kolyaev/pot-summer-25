@@ -13,7 +13,10 @@ import com.coherentsolutions.pot.insuranceservice.integration.containers.Postgre
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,6 +72,13 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
   private String toJson(Object obj) throws Exception {
     return objectMapper.writeValueAsString(obj);
+  }
+
+  private PlanType buildPlanType(String code, String name) {
+    PlanType type = new PlanType();
+    type.setCode(code);
+    type.setName(name);
+    return type;
   }
 
   @Test
@@ -204,5 +214,24 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     mockMvc.perform(get(ENDPOINT))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2));
+  }
+
+  @Test
+  @DisplayName("Should return all plan types")
+  void shouldReturnAllPlanTypes() throws Exception {
+    mockMvc.perform(get(ENDPOINT + "/plan-types"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[?(@.code=='DENTAL')]").exists())
+        .andExpect(jsonPath("$[?(@.code=='MEDICAL')]").exists());
+  }
+
+  @Test
+  @DisplayName("Should return empty list when no plan types exist")
+  void shouldReturnEmptyListWhenNoPlanTypesExist() throws Exception {
+    planTypeRepository.deleteAll();
+
+    mockMvc.perform(get(ENDPOINT + "/plan-types"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0));
   }
 }
