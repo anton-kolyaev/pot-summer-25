@@ -418,4 +418,39 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
   }
 
+  @Test
+  @DisplayName("Should return 400 when updating insurance package with start date before today")
+  void shouldFailWhenUpdatingStartDateBeforeToday() throws Exception {
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Date Validation Plan");
+    insurancePackage.setStartDate(LocalDate.now().plusDays(5));
+    insurancePackage.setEndDate(LocalDate.now().plusMonths(3));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.INITIALIZED);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    InsurancePackageDto invalidUpdateDto = InsurancePackageDto.builder()
+        .name("Date Validation Plan")
+        .startDate(LocalDate.now().minusDays(1))
+        .endDate(LocalDate.now().plusMonths(3))
+        .payrollFrequency(PayrollFrequency.MONTHLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    mockMvc.perform(
+            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidUpdateDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.error.message").value(
+            "400 BAD_REQUEST \"Updated start date cannot be earlier than today\""));
+  }
+
 }

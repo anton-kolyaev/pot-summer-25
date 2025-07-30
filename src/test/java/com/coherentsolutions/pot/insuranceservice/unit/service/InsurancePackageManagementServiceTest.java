@@ -364,4 +364,35 @@ public class InsurancePackageManagementServiceTest {
 
     verify(insurancePackageRepository).findByIdOrThrow(packageId);
   }
+
+  @Test
+  @DisplayName("Should return 400 when updating insurance package with start date before today")
+  void shouldReturn400WhenUpdatingInsurancePackageWithStartDateBeforeToday() {
+    UUID packageId = UUID.randomUUID();
+
+    InsurancePackage existingPackage = new InsurancePackage();
+    existingPackage.setId(packageId);
+    existingPackage.setStatus(PackageStatus.DEACTIVATED);
+    existingPackage.setStartDate(LocalDate.now().plusDays(1));
+    existingPackage.setEndDate(LocalDate.now().plusMonths(1));
+
+    InsurancePackageDto updateDto = InsurancePackageDto.builder()
+        .name("Invalid Start Date Update")
+        .startDate(LocalDate.now().minusDays(1))
+        .endDate(LocalDate.now().plusMonths(2))
+        .payrollFrequency(PayrollFrequency.MONTHLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(existingPackage);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+      insurancePackageManagementService.updateInsurancePackage(packageId, updateDto);
+    });
+
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
+    assertEquals("Updated start date cannot be earlier than today", e.getReason());
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+  }
 }
