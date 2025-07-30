@@ -13,8 +13,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +32,8 @@ public class InsurancePackageManagementService {
     return insurancePackages.map(insurancePackageMapper::toInsurancePackageDto);
   }
 
-  public InsurancePackageDto getInsurancePackageById(@PathVariable UUID id) {
+
+  public InsurancePackageDto getInsurancePackageById(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
@@ -44,6 +46,19 @@ public class InsurancePackageManagementService {
     Company company = companyRepository.findByIdOrThrow(companyId);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.INITIALIZED);
+    insurancePackageRepository.save(insurancePackage);
+
+    return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
+  }
+
+  public InsurancePackageDto deactivateInsurancePackage(UUID id) {
+    InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
+
+    if (insurancePackage.getStatus() == PackageStatus.DEACTIVATED) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Insurance package is already deactivated");
+    }
+    insurancePackage.setStatus(PackageStatus.DEACTIVATED);
     insurancePackageRepository.save(insurancePackage);
 
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
