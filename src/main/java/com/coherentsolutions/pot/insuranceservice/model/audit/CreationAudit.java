@@ -10,13 +10,11 @@ import org.springframework.data.annotation.CreatedDate;
 @Getter
 @MappedSuperclass
 public abstract class CreationAudit {
-  
+
   @CreatedBy
   @Column(name = "created_by", nullable = false, updatable = false)
   private String createdBy;
-
   @CreatedDate
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
-  
 }
