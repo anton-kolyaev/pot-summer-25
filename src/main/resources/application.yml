@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: optional:dotenv:.env
   application:
     name: Insurance Service
   main:
@@ -13,7 +15,23 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
-
+  security:
+    oauth2:
+      client:
+        registration:
+          auth0:
+            client-id: ${AUTH0_CLIENT_ID:}
+            client-secret: ${AUTH0_CLIENT_SECRET:}
+            scope: openid
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          auth0:
+            issuer-uri: "https://${AUTH0_DOMAIN:}/"
+      resourceserver:
+        jwt:
+          issuer-uri: "https://${AUTH0_DOMAIN:}/"
+          audiences: ${AUTH0_AUDIENCE:}
 # Auth0 Configuration
 auth0:
   enabled: ${AUTH0_ENABLED:false} # Set to true to enable Auth0 integration
@@ -22,10 +40,15 @@ auth0:
   client-secret: ${AUTH0_CLIENT_SECRET:} # your-client-secret
   audience: ${AUTH0_AUDIENCE:} # https://your-domain.auth0.com/api/v2/
   timeout: ${AUTH0_TIMEOUT:10000} # Default timeout in milliseconds
-
 management:
   endpoints:
     web:
       exposure:
         include: ${ACTUATOR_ENDPOINTS:health,info}
-        
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: ${AUTH0_CLIENT_ID:}
+      use-pkce-with-authorization-code-grant: true
+      additional-query-string-params:
+        audience: ${AUTH0_AUDIENCE:}
