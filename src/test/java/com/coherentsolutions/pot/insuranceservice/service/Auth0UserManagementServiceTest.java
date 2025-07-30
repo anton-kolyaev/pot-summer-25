@@ -91,7 +91,7 @@ class Auth0UserManagementServiceTest {
   @Test
   void testCreateUserWithValidDtoReturnsUserDto() throws Auth0Exception {
     // Given
-    Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "password123", "Test User");
+    final Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "password123", "Test User");
     User mappedUser = new User();
     mappedUser.setEmail("test@example.com");
     mappedUser.setName("Test User");
@@ -232,7 +232,7 @@ class Auth0UserManagementServiceTest {
   @Test
   void testGetUsersWithFilterReturnsUserList() throws Auth0Exception {
     // Given
-    UserFilter filter = new UserFilter();
+    final UserFilter filter = new UserFilter();
     User user1 = new User();
     user1.setId("auth0|1");
     user1.setEmail("user1@example.com");
@@ -261,7 +261,7 @@ class Auth0UserManagementServiceTest {
   @Test
   void testGetUsersWithNullFilterReturnsAllUsers() throws Auth0Exception {
     // Given
-    UserFilter filter = null;
+    final UserFilter filter = null;
     User user1 = new User();
     user1.setId("auth0|1");
     user1.setEmail("user1@example.com");
@@ -286,14 +286,14 @@ class Auth0UserManagementServiceTest {
   @Test
   void testGetUserDtosWithFilterReturnsUserDtoList() throws Auth0Exception {
     // Given
-    UserFilter filter = new UserFilter();
+    final UserFilter filter = new UserFilter();
     User user1 = new User();
     user1.setId("auth0|1");
     user1.setEmail("user1@example.com");
     User user2 = new User();
     user2.setId("auth0|2");
     user2.setEmail("user2@example.com");
-    List<User> users = Arrays.asList(user1, user2);
+    final List<User> users = Arrays.asList(user1, user2);
 
     Auth0UserDto dto1 = new Auth0UserDto("user1@example.com", null, "User One");
     dto1.setUserId("auth0|1");
@@ -353,7 +353,7 @@ class Auth0UserManagementServiceTest {
   void testUpdateUserWithValidDtoReturnsUpdatedUserDto() throws Auth0Exception {
     // Given
     String userId = "auth0|123";
-    Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "newpassword", "Updated Name");
+    final Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "newpassword", "Updated Name");
 
     User existingUser = new User();
     existingUser.setId(userId);
@@ -447,7 +447,7 @@ class Auth0UserManagementServiceTest {
     user.setId("auth0|123");
     user.setEmail(email);
     user.setName("Test User");
-    List<User> expectedUsers = Arrays.asList(user);
+    final List<User> expectedUsers = Arrays.asList(user);
 
     Request<UsersPage> usersPageRequest = mock(Request.class);
     Response<UsersPage> usersPageResponse = mock(Response.class);
@@ -473,7 +473,7 @@ class Auth0UserManagementServiceTest {
     user.setId("auth0|123");
     user.setEmail(email);
     user.setName("Test User");
-    List<User> users = Arrays.asList(user);
+    final List<User> users = Arrays.asList(user);
 
     Auth0UserDto expectedDto = new Auth0UserDto(email, null, "Test User");
     expectedDto.setUserId("auth0|123");
@@ -500,11 +500,11 @@ class Auth0UserManagementServiceTest {
   @Test
   void testGetUserDtosWithNullFilterReturnsAllUserDtos() throws Auth0Exception {
     // Given
-    UserFilter filter = null;
+    final UserFilter filter = null;
     User user = new User();
     user.setId("auth0|123");
     user.setEmail("test@example.com");
-    List<User> users = Arrays.asList(user);
+    final List<User> users = Arrays.asList(user);
 
     Auth0UserDto expectedDto = new Auth0UserDto("test@example.com", null, "Test User");
     expectedDto.setUserId("auth0|123");
