@@ -1,5 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
+import static com.coherentsolutions.pot.insuranceservice.model.InsurancePackage.calculateStatus;
+
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageFilter;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
@@ -26,6 +28,22 @@ public class InsurancePackageManagementService {
   private final InsurancePackageRepository insurancePackageRepository;
   private final InsurancePackageMapper insurancePackageMapper;
   private final CompanyRepository companyRepository;
+
+  private void validateOnUpdate(InsurancePackage insurancePackage,
+      InsurancePackageDto insurancePackageDto) {
+    if (insurancePackage.getStatus() == PackageStatus.ACTIVE) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot update active insurance package");
+    }
+
+    LocalDate today = LocalDate.now();
+    if (insurancePackageDto.getStartDate() != null
+        && !insurancePackage.getStartDate().isEqual(insurancePackageDto.getStartDate())
+        && insurancePackageDto.getStartDate().isBefore(today)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Updated start date cannot be earlier than today");
+    }
+  }
 
   @Transactional(readOnly = true)
   public Page<InsurancePackageDto> getInsurancePackagesWithFilters(
@@ -74,18 +92,7 @@ public class InsurancePackageManagementService {
       InsurancePackageDto insurancePackageDto) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
 
-    if (insurancePackage.getStatus() == PackageStatus.ACTIVE) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Cannot update active insurance package");
-    }
-
-    LocalDate today = LocalDate.now();
-    if (insurancePackageDto.getStartDate() != null
-        && !insurancePackage.getStartDate().isEqual(insurancePackageDto.getStartDate())
-        && insurancePackageDto.getStartDate().isBefore(today)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Updated start date cannot be earlier than today");
-    }
+    validateOnUpdate(insurancePackage, insurancePackageDto);
 
     insurancePackage.setName(insurancePackageDto.getName());
     insurancePackage.setStartDate(insurancePackageDto.getStartDate());
@@ -96,7 +103,7 @@ public class InsurancePackageManagementService {
         && insurancePackage.getStatus() != PackageStatus.DEACTIVATED) {
       insurancePackage.setStatus(PackageStatus.DEACTIVATED);
     } else {
-      insurancePackage.setStatus(InsurancePackageStatusUpdater.calculateStatus(insurancePackage, true));
+      insurancePackage.setStatus(calculateStatus(insurancePackage, true));
     }
 
     insurancePackageRepository.save(insurancePackage);
