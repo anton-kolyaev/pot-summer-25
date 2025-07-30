@@ -20,7 +20,6 @@ import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @ActiveProfiles("test")
@@ -66,7 +66,6 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
   void shouldGetInsurancePackagesWithFilters() throws Exception {
 
     Company company = createCompany("Test Company", "test@example.com", "https://test.com");
-
 
     InsurancePackage package1 = new InsurancePackage();
     package1.setName("Standard Health Package");
