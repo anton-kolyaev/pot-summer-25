@@ -13,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
@@ -81,5 +80,20 @@ public class InsurancePackage {
   @LastModifiedDate
   @Column(name = "updated_at")
   private Instant updatedAt;
+
+  public static PackageStatus calculateStatus(InsurancePackage insurancePackage,
+      boolean allowReactivation) {
+    if (!allowReactivation && insurancePackage.getStatus() == PackageStatus.DEACTIVATED) {
+      return PackageStatus.DEACTIVATED;
+    }
+    LocalDate now = LocalDate.now();
+    if (now.isBefore(insurancePackage.getStartDate())) {
+      return PackageStatus.INITIALIZED;
+    } else if (!now.isAfter(insurancePackage.getEndDate())) {
+      return PackageStatus.ACTIVE;
+    } else {
+      return PackageStatus.EXPIRED;
+    }
+  }
 
 }
