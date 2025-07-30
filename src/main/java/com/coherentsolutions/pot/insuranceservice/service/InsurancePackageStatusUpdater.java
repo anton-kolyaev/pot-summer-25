@@ -16,7 +16,10 @@ public class InsurancePackageStatusUpdater {
 
   private final InsurancePackageRepository insurancePackageRepository;
 
-  public static PackageStatus calculateStatus(InsurancePackage insurancePackage) {
+  public static PackageStatus calculateStatus(InsurancePackage insurancePackage, boolean allowReactivation) {
+    if (!allowReactivation && insurancePackage.getStatus() == PackageStatus.DEACTIVATED) {
+      return PackageStatus.DEACTIVATED;
+    }
     LocalDate now = LocalDate.now();
     if (now.isBefore(insurancePackage.getStartDate())) {
       return PackageStatus.INITIALIZED;
@@ -33,7 +36,7 @@ public class InsurancePackageStatusUpdater {
     List<InsurancePackage> packages = insurancePackageRepository.findAll();
 
     for (InsurancePackage insurancePackage : packages) {
-      insurancePackage.setStatus(calculateStatus(insurancePackage));
+      insurancePackage.setStatus(calculateStatus(insurancePackage, false));
     }
 
     insurancePackageRepository.saveAll(packages);
