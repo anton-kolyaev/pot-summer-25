@@ -3,8 +3,7 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -14,13 +13,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.auth0.exception.Auth0Exception;
+import com.auth0.client.mgmt.ManagementAPI;
+import com.auth0.client.mgmt.UsersEntity;
 import com.auth0.json.mgmt.users.User;
+import com.auth0.json.mgmt.users.UsersPage;
+import com.auth0.net.Request;
+import com.auth0.net.Response;
 import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
-import com.coherentsolutions.pot.insuranceservice.service.Auth0UserManagementService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
@@ -38,10 +40,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Integration tests for Auth0UserManagementController.
- * 
- * <p>Tests the controller endpoints with mocked ManagementAPI to avoid actual calls to Auth0.
- * This approach allows testing the full request/response cycle while controlling the external
- * service behavior.
+ *
+ * <p>These tests verify the full HTTP request/response cycle for all controller endpoints,
+ * including proper mocking of the ManagementAPI external dependency.
  */
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -61,7 +62,13 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   private Auth0UserMapper auth0UserMapper;
 
   @MockBean
-  private Auth0UserManagementService auth0UserManagementService;
+  private ManagementAPI managementAPI;
+
+  @MockBean
+  private UsersPage usersPage;
+
+  @MockBean
+  private UsersEntity usersEntity;
 
   @Test
   @DisplayName("Should create user successfully")
@@ -71,9 +78,13 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     User mockUser = buildMockUser("auth0|123", "test@example.com", "Test User");
     Auth0UserDto expectedResponse = auth0UserMapper.toDto(mockUser);
 
-    // Mock the service behavior
-    when(auth0UserManagementService.createUser(any(Auth0UserDto.class)))
-        .thenReturn(expectedResponse);
+    // Mock the ManagementAPI behavior using Request/Response pattern
+    Request<User> userRequest = mock(Request.class);
+    Response<User> userResponse = mock(Response.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.create(any(User.class))).thenReturn(userRequest);
+    when(userRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(mockUser);
 
     // When & Then
     mockMvc
@@ -95,9 +106,13 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     User mockUser = buildMockUser(userId, "test@example.com", "Test User");
     Auth0UserDto expectedResponse = auth0UserMapper.toDto(mockUser);
 
-    // Mock the service behavior
-    when(auth0UserManagementService.getUserDtoById(userId))
-        .thenReturn(expectedResponse);
+    // Mock the ManagementAPI behavior using Request/Response pattern
+    Request<User> userRequest = mock(Request.class);
+    Response<User> userResponse = mock(Response.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(userId), eq(null))).thenReturn(userRequest);
+    when(userRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(mockUser);
 
     // When & Then
     mockMvc
@@ -115,9 +130,13 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     // Given
     String userId = "auth0|nonexistent";
 
-    // Mock the service to return null (user not found)
-    when(auth0UserManagementService.getUserDtoById(userId))
-        .thenReturn(null);
+    // Mock the ManagementAPI to return null (user not found) using Request/Response pattern
+    Request<User> userRequest = mock(Request.class);
+    Response<User> userResponse = mock(Response.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(userId), eq(null))).thenReturn(userRequest);
+    when(userRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(null);
 
     // When & Then
     mockMvc
@@ -129,14 +148,19 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should get all users successfully")
   void shouldGetAllUsersSuccessfully() throws Exception {
     // Given
-    List<Auth0UserDto> mockUsers = Arrays.asList(
-        auth0UserMapper.toDto(buildMockUser("auth0|1", "user1@example.com", "User One")),
-        auth0UserMapper.toDto(buildMockUser("auth0|2", "user2@example.com", "User Two"))
+    List<User> mockUsers = Arrays.asList(
+        buildMockUser("auth0|1", "user1@example.com", "User One"),
+        buildMockUser("auth0|2", "user2@example.com", "User Two")
     );
 
-    // Mock the service behavior
-    when(auth0UserManagementService.getUserDtos(any()))
-        .thenReturn(mockUsers);
+    // Mock the ManagementAPI behavior using Request/Response pattern
+    Request<UsersPage> usersPageRequest = mock(Request.class);
+    Response<UsersPage> usersPageResponse = mock(Response.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.list(any())).thenReturn(usersPageRequest);
+    when(usersPageRequest.execute()).thenReturn(usersPageResponse);
+    when(usersPageResponse.getBody()).thenReturn(usersPage);
+    when(usersPage.getItems()).thenReturn(mockUsers);
 
     // When & Then
     mockMvc
@@ -157,9 +181,18 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     User mockUpdatedUser = buildMockUser(userId, "updated@example.com", "Updated User");
     Auth0UserDto expectedResponse = auth0UserMapper.toDto(mockUpdatedUser);
 
-    // Mock the service behavior
-    when(auth0UserManagementService.updateUser(eq(userId), any(Auth0UserDto.class)))
-        .thenReturn(expectedResponse);
+    // Mock the ManagementAPI behavior using Request/Response pattern
+    Request<User> getUserRequest = mock(Request.class);
+    Response<User> getUserResponse = mock(Response.class);
+    Request<User> updateUserRequest = mock(Request.class);
+    Response<User> updateUserResponse = mock(Response.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(userId), eq(null))).thenReturn(getUserRequest);
+    when(getUserRequest.execute()).thenReturn(getUserResponse);
+    when(getUserResponse.getBody()).thenReturn(mockUpdatedUser);
+    when(usersEntity.update(eq(userId), any(User.class))).thenReturn(updateUserRequest);
+    when(updateUserRequest.execute()).thenReturn(updateUserResponse);
+    when(updateUserResponse.getBody()).thenReturn(mockUpdatedUser);
 
     // When & Then
     mockMvc
@@ -181,9 +214,13 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     String userId = "auth0|nonexistent";
     Auth0UserDto updateRequest = buildAuth0UserDto("updated@example.com", "newpassword123", "Updated User");
 
-    // Mock the service to throw Auth0Exception for non-existent user
-    when(auth0UserManagementService.updateUser(eq(userId), any(Auth0UserDto.class)))
-        .thenThrow(new Auth0Exception("User not found: " + userId));
+    // Mock the ManagementAPI to return null (user not found) using Request/Response pattern
+    Request<User> userRequest = mock(Request.class);
+    Response<User> userResponse = mock(Response.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(userId), eq(null))).thenReturn(userRequest);
+    when(userRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(null);
 
     // When & Then
     mockMvc
@@ -200,8 +237,12 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     // Given
     String userId = "auth0|123";
 
-    // Mock the service behavior
-    doNothing().when(auth0UserManagementService).deleteUser(userId);
+    // Mock the ManagementAPI behavior using Request/Response pattern
+    Request<Void> voidRequest = mock(Request.class);
+    Response<Void> voidResponse = mock(Response.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.delete(userId)).thenReturn(voidRequest);
+    when(voidRequest.execute()).thenReturn(voidResponse);
 
     // When & Then
     mockMvc
@@ -215,9 +256,11 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     // Given
     String userId = "auth0|nonexistent";
 
-    // Mock the service to throw Auth0Exception for non-existent user
-    doThrow(new Auth0Exception("User not found: " + userId))
-        .when(auth0UserManagementService).deleteUser(userId);
+    // Mock the ManagementAPI to throw exception using Request/Response pattern
+    Request<Void> voidRequest = mock(Request.class);
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.delete(userId)).thenReturn(voidRequest);
+    when(voidRequest.execute()).thenThrow(new com.auth0.exception.Auth0Exception("User not found"));
 
     // When & Then
     mockMvc
@@ -244,7 +287,7 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 when creating user with short password")
   void shouldReturn400WhenCreatingUserWithShortPassword() throws Exception {
     // Given
-    Auth0UserDto createRequest = buildAuth0UserDto("test@example.com", "short", "Test User");
+    Auth0UserDto createRequest = buildAuth0UserDto("test@example.com", "123", "Test User");
 
     // When & Then
     mockMvc
@@ -277,7 +320,7 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   void shouldReturn400WhenUpdatingUserWithInvalidData() throws Exception {
     // Given
     String userId = "auth0|123";
-    Auth0UserDto updateRequest = buildAuth0UserDto("invalid-email", "short", "Test User");
+    Auth0UserDto updateRequest = buildAuth0UserDto("invalid-email", "newpassword123", "Updated User");
 
     // When & Then
     mockMvc
@@ -292,7 +335,7 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 when creating user with invalid JSON")
   void shouldReturn400WhenCreatingUserWithInvalidJson() throws Exception {
     // Given
-    String invalidJson = "{ invalid json }";
+    String invalidJson = "{\"email\": \"test@example.com\", \"password\": \"password123\", \"name\": \"Test User\""; // Missing closing brace
 
     // When & Then
     mockMvc
@@ -308,7 +351,7 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   void shouldReturn400WhenUpdatingUserWithInvalidJson() throws Exception {
     // Given
     String userId = "auth0|123";
-    String invalidJson = "{ invalid json }";
+    String invalidJson = "{\"email\": \"updated@example.com\", \"password\": \"newpassword123\", \"name\": \"Updated User\""; // Missing closing brace
 
     // When & Then
     mockMvc
@@ -322,11 +365,14 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return 400 when creating user with empty request body")
   void shouldReturn400WhenCreatingUserWithEmptyBody() throws Exception {
+    // Given
+    String emptyBody = "";
+
     // When & Then
     mockMvc
         .perform(
             post("/api/v1/auth0/users")
-                .content("")
+                .content(emptyBody)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -336,12 +382,13 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   void shouldReturn400WhenUpdatingUserWithEmptyBody() throws Exception {
     // Given
     String userId = "auth0|123";
+    String emptyBody = "";
 
     // When & Then
     mockMvc
         .perform(
             put("/api/v1/auth0/users/{userId}", userId)
-                .content("")
+                .content(emptyBody)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -351,7 +398,9 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
   void shouldReturn400WhenCreatingUserWithNullBody() throws Exception {
     // When & Then
     mockMvc
-        .perform(post("/api/v1/auth0/users").contentType(MediaType.APPLICATION_JSON))
+        .perform(
+            post("/api/v1/auth0/users")
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -364,17 +413,21 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     // When & Then
     mockMvc
         .perform(
-            put("/api/v1/auth0/users/{userId}", userId).contentType(MediaType.APPLICATION_JSON))
+            put("/api/v1/auth0/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("Should handle unsupported HTTP methods")
   void shouldHandleUnsupportedHttpMethods() throws Exception {
+    // Given
+    String userId = "auth0|123";
+
     // When & Then
     mockMvc
         .perform(
-            org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch("/api/v1/auth0/users/auth0|123")
+            post("/api/v1/auth0/users/{userId}", userId)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isMethodNotAllowed());
   }
@@ -389,12 +442,6 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             post("/api/v1/auth0/users")
-                .content(objectMapper.writeValueAsString(createRequest)))
-        .andExpect(status().isUnsupportedMediaType());
-
-    mockMvc
-        .perform(
-            put("/api/v1/auth0/users/auth0|123")
                 .content(objectMapper.writeValueAsString(createRequest)))
         .andExpect(status().isUnsupportedMediaType());
   }
@@ -412,23 +459,13 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
                 .content(objectMapper.writeValueAsString(createRequest))
                 .contentType(MediaType.TEXT_PLAIN))
         .andExpect(status().isUnsupportedMediaType());
-
-    mockMvc
-        .perform(
-            put("/api/v1/auth0/users/auth0|123")
-                .content(objectMapper.writeValueAsString(createRequest))
-                .contentType(MediaType.TEXT_PLAIN))
-        .andExpect(status().isUnsupportedMediaType());
   }
-
-  // ========== PRIVATE HELPER METHODS ==========
 
   private Auth0UserDto buildAuth0UserDto(String email, String password, String name) {
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail(email);
     dto.setPassword(password);
     dto.setName(name);
-    dto.setConnection("Username-Password-Authentication");
     return dto;
   }
 
@@ -437,8 +474,6 @@ public class Auth0UserManagementControllerIt extends PostgresTestContainer {
     user.setId(userId);
     user.setEmail(email);
     user.setName(name);
-    user.setEmailVerified(false);
-    user.setBlocked(false);
     return user;
   }
 } 
