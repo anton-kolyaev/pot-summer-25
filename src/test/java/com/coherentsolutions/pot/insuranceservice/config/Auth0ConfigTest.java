@@ -16,16 +16,16 @@ class Auth0ConfigTest {
 
   @Test
   void testAuth0ConfigClassLoadsSuccessfully() {
-    // Arrange & Act
+    // Given & When
     Auth0Config config = new Auth0Config();
 
-    // Assert
+    // Then
     assertNotNull(config);
   }
 
   @Test
   void testManagementAPIWithValidPropertiesReturnsManagementAPI() {
-    // Arrange
+    // Given
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -35,16 +35,16 @@ class Auth0ConfigTest {
         true
     );
 
-    // Act
+    // When
     ManagementAPI result = config.managementAPI(properties);
 
-    // Assert
+    // Then
     assertNotNull(result);
   }
 
   @Test
   void testManagementAPIWithNullDomainThrowsException() {
-    // Arrange
+    // Given
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         null,
@@ -54,13 +54,13 @@ class Auth0ConfigTest {
         true
     );
 
-    // Act & Assert
+    // When & Then
     assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
   }
 
   @Test
   void testManagementAPIWithEmptyDomainThrowsException() {
-    // Arrange
+    // Given
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "",
@@ -70,13 +70,13 @@ class Auth0ConfigTest {
         true
     );
 
-    // Act & Assert
+    // When & Then
     assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
   }
 
   @Test
   void testManagementAPIWithNullApiTokenThrowsException() {
-    // Arrange
+    // Given
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -86,13 +86,13 @@ class Auth0ConfigTest {
         true
     );
 
-    // Act & Assert
+    // When & Then
     assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
   }
 
   @Test
   void testManagementAPIWithEmptyApiTokenThrowsException() {
-    // Arrange
+    // Given
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
@@ -102,16 +102,16 @@ class Auth0ConfigTest {
         true
     );
 
-    // Act & Assert
+    // When & Then
     assertThrows(IllegalStateException.class, () -> config.managementAPI(properties));
   }
 
   @Test
   void testConfigClassHasConfigurationAnnotation() {
-    // Arrange & Act
+    // Given & When
     Auth0Config config = new Auth0Config();
 
-    // Assert
+    // Then
     assertNotNull(config.getClass()
         .getAnnotation(org.springframework.context.annotation.Configuration.class));
   }

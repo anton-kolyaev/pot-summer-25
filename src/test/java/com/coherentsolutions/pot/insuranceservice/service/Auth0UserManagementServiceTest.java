@@ -38,22 +38,22 @@ class Auth0UserManagementServiceTest {
 
   @Test
   void testServiceClassLoadsSuccessfully() {
-    // Arrange & Act
+    // Given & When
     Auth0UserManagementService service = new Auth0UserManagementService(
         managementAPI, auth0UserMapper);
 
-    // Assert
+    // Then
     assertNotNull(service);
   }
 
   @Test
   void testCreateUserWithValidUserReturnsUser() throws Auth0Exception {
-    // Arrange
+    // Given
     User inputUser = new User();
     inputUser.setEmail("test@example.com");
     inputUser.setName("Test User");
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(inputUser);
     assertNotNull(inputUser.getEmail());
     assertNotNull(inputUser.getName());
@@ -61,10 +61,10 @@ class Auth0UserManagementServiceTest {
 
   @Test
   void testCreateUserWithValidDtoReturnsUserDto() throws Auth0Exception {
-    // Arrange
+    // Given
     Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "password123", "Test User");
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(inputDto);
     assertNotNull(inputDto.getEmail());
     assertNotNull(inputDto.getName());
@@ -72,52 +72,52 @@ class Auth0UserManagementServiceTest {
 
   @Test
   void testGetUserByIdWithValidIdReturnsUser() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(userId);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testGetUserDtoByIdWithValidIdReturnsUserDto() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(userId);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testGetUsersWithFilterReturnsUserList() throws Auth0Exception {
-    // Arrange
+    // Given
     UserFilter filter = new UserFilter();
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(filter);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testGetUserDtosWithFilterReturnsUserDtoList() throws Auth0Exception {
-    // Arrange
+    // Given
     UserFilter filter = new UserFilter();
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(filter);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testUpdateUserWithValidDataReturnsUpdatedUser() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
     User inputUser = new User();
     inputUser.setName("Updated Name");
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(userId);
     assertNotNull(inputUser);
     assertNotNull(inputUser.getName());
@@ -125,11 +125,11 @@ class Auth0UserManagementServiceTest {
 
   @Test
   void testUpdateUserWithValidDtoReturnsUpdatedUserDto() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
     Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "newpassword", "Updated Name");
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(userId);
     assertNotNull(inputDto);
     assertNotNull(inputDto.getEmail());
@@ -137,52 +137,52 @@ class Auth0UserManagementServiceTest {
 
   @Test
   void testDeleteUserWithValidIdExecutesSuccessfully() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(userId);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testGetUsersByEmailWithValidEmailReturnsMatchingUsers() throws Auth0Exception {
-    // Arrange
+    // Given
     String email = "test@example.com";
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(email);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testGetUserDtosByEmailWithValidEmailReturnsMatchingUserDtos() throws Auth0Exception {
-    // Arrange
+    // Given
     String email = "test@example.com";
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(email);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testCreateUserWhenAuth0ExceptionThrowsException() throws Auth0Exception {
-    // Arrange
+    // Given
     User inputUser = new User();
     inputUser.setEmail("test@example.com");
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(inputUser);
     assertNotNull(inputUser.getEmail());
   }
 
   @Test
   void testUpdateUserWhenUserNotFoundThrowsException() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
     Auth0UserDto inputDto = new Auth0UserDto("test@example.com", "password", "Test User");
 
-    // Act & Assert - Test that method exists and can be called
+    // When & Then - Test that method exists and can be called
     assertNotNull(userId);
     assertNotNull(inputDto);
     assertNotNull(inputDto.getEmail());
@@ -190,24 +190,24 @@ class Auth0UserManagementServiceTest {
 
   @Test
   void testServiceConstructorWithValidParameters() {
-    // Arrange & Act
+    // Given & When
     Auth0UserManagementService service = new Auth0UserManagementService(
         managementAPI, auth0UserMapper);
 
-    // Assert
+    // Then
     assertNotNull(service);
   }
 
   @Test
   void testServiceMethodsExist() {
-    // Arrange
+    // Given
     String userId = "test-user";
     Auth0UserDto dto;
     UserFilter filter;
     dto = new Auth0UserDto();
     filter = new UserFilter();
 
-    // Act & Assert - Test that all method signatures exist
+    // When & Then - Test that all method signatures exist
     assertNotNull(userId);
     String email = "test@example.com";
     assertNotNull(email);
@@ -220,46 +220,46 @@ class Auth0UserManagementServiceTest {
 
   @Test
   void testGetUserDtoByIdWithNullUserReturnsNull() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
 
-    // Act & Assert - Test null handling
+    // When & Then - Test null handling
     assertNotNull(userId);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testUpdateUserWithNullUserThrowsException() throws Auth0Exception {
-    // Arrange
+    // Given
     String userId = "auth0|123";
     User inputUser = null;
 
-    // Act & Assert - Test null handling
+    // When & Then - Test null handling
     assertNotNull(userId);
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testGetUsersWithNullFilterReturnsAllUsers() throws Auth0Exception {
-    // Arrange
+    // Given
     UserFilter filter = null;
 
-    // Act & Assert - Test null handling
+    // When & Then - Test null handling
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testGetUserDtosWithNullFilterReturnsAllUserDtos() throws Auth0Exception {
-    // Arrange
+    // Given
     UserFilter filter = null;
 
-    // Act & Assert - Test null handling
+    // When & Then - Test null handling
     assertNotNull(auth0UserManagementService);
   }
 
   @Test
   void testServiceHasAllRequiredMethods() {
-    // Arrange & Act - Test that service class has all expected methods
+    // Given & When - Test that service class has all expected methods
     assertNotNull(auth0UserManagementService);
     
     // Test that we can create instances of required types
@@ -267,7 +267,7 @@ class Auth0UserManagementServiceTest {
     Auth0UserDto dto = new Auth0UserDto();
     UserFilter filter = new UserFilter();
     
-    // Assert
+    // Then
     assertNotNull(user);
     assertNotNull(dto);
     assertNotNull(filter);

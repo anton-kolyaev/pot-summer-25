@@ -14,13 +14,13 @@ class Auth0ExceptionTest {
 
   @Test
   void testConstructorWithMessage() {
-    // Arrange
+    // Given
     String message = "Test error message";
 
-    // Act
+    // When
     Auth0Exception exception = new Auth0Exception(message);
 
-    // Assert
+    // Then
     assertEquals(message, exception.getMessage());
     assertEquals("AUTH0_ERROR", exception.getErrorCode());
     assertEquals(500, exception.getHttpStatus());
@@ -28,14 +28,14 @@ class Auth0ExceptionTest {
 
   @Test
   void testConstructorWithMessageAndCause() {
-    // Arrange
+    // Given
     String message = "Test error message";
     Throwable cause = new RuntimeException("Original cause");
 
-    // Act
+    // When
     Auth0Exception exception = new Auth0Exception(message, cause);
 
-    // Assert
+    // Then
     assertEquals(message, exception.getMessage());
     assertEquals(cause, exception.getCause());
     assertEquals("AUTH0_ERROR", exception.getErrorCode());
@@ -44,15 +44,15 @@ class Auth0ExceptionTest {
 
   @Test
   void testConstructorWithMessageErrorCodeAndHttpStatus() {
-    // Arrange
+    // Given
     String message = "Test error message";
     String errorCode = "AUTH0_VALIDATION_ERROR";
     int httpStatus = 400;
 
-    // Act
+    // When
     Auth0Exception exception = new Auth0Exception(message, errorCode, httpStatus);
 
-    // Assert
+    // Then
     assertEquals(message, exception.getMessage());
     assertEquals(errorCode, exception.getErrorCode());
     assertEquals(httpStatus, exception.getHttpStatus());
@@ -60,16 +60,16 @@ class Auth0ExceptionTest {
 
   @Test
   void testConstructorWithMessageCauseErrorCodeAndHttpStatus() {
-    // Arrange
+    // Given
     String message = "Test error message";
     Throwable cause = new RuntimeException("Original cause");
     String errorCode = "AUTH0_CONNECTION_ERROR";
     int httpStatus = 503;
 
-    // Act
+    // When
     Auth0Exception exception = new Auth0Exception(message, cause, errorCode, httpStatus);
 
-    // Assert
+    // Then
     assertEquals(message, exception.getMessage());
     assertEquals(cause, exception.getCause());
     assertEquals(errorCode, exception.getErrorCode());
@@ -78,10 +78,10 @@ class Auth0ExceptionTest {
 
   @Test
   void testExceptionInheritance() {
-    // Arrange & Act
+    // Given & When
     Auth0Exception exception = new Auth0Exception("Test message");
 
-    // Assert
+    // Then
     assertNotNull(exception);
     // Should be instance of RuntimeException
     assertEquals(RuntimeException.class, exception.getClass().getSuperclass());
@@ -89,34 +89,34 @@ class Auth0ExceptionTest {
 
   @Test
   void testDefaultErrorCodeAndHttpStatus() {
-    // Arrange & Act
+    // Given & When
     Auth0Exception exception = new Auth0Exception("Test message");
 
-    // Assert
+    // Then
     assertEquals("AUTH0_ERROR", exception.getErrorCode());
     assertEquals(500, exception.getHttpStatus());
   }
 
   @Test
   void testCustomErrorCodeAndHttpStatus() {
-    // Arrange
+    // Given
     String errorCode = "CUSTOM_ERROR";
     int httpStatus = 422;
 
-    // Act
+    // When
     Auth0Exception exception = new Auth0Exception("Test message", errorCode, httpStatus);
 
-    // Assert
+    // Then
     assertEquals(errorCode, exception.getErrorCode());
     assertEquals(httpStatus, exception.getHttpStatus());
   }
 
   @Test
   void testExceptionWithNullMessage() {
-    // Arrange & Act
+    // Given & When
     Auth0Exception exception = new Auth0Exception(null);
 
-    // Assert
+    // Then
     assertEquals(null, exception.getMessage());
     assertEquals("AUTH0_ERROR", exception.getErrorCode());
     assertEquals(500, exception.getHttpStatus());
@@ -124,10 +124,10 @@ class Auth0ExceptionTest {
 
   @Test
   void testExceptionWithEmptyMessage() {
-    // Arrange & Act
+    // Given & When
     Auth0Exception exception = new Auth0Exception("");
 
-    // Assert
+    // Then
     assertEquals("", exception.getMessage());
     assertEquals("AUTH0_ERROR", exception.getErrorCode());
     assertEquals(500, exception.getHttpStatus());

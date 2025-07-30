@@ -19,24 +19,24 @@ class Auth0UserDtoTest {
 
   @Test
   void testDefaultConstructor() {
-    // Act
+    // When
     Auth0UserDto dto = new Auth0UserDto();
 
-    // Assert
+    // Then
     assertNotNull(dto);
   }
 
   @Test
   void testParameterizedConstructor() {
-    // Arrange
+    // Given
     String email = "test@example.com";
     String password = "password123";
     String name = "Test User";
 
-    // Act
+    // When
     Auth0UserDto dto = new Auth0UserDto(email, password, name);
 
-    // Assert
+    // Then
     assertEquals(email, dto.getEmail());
     assertEquals(password, dto.getPassword());
     assertEquals(name, dto.getName());
@@ -44,10 +44,10 @@ class Auth0UserDtoTest {
 
   @Test
   void testSettersAndGetters() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
 
-    // Act
+    // When
     dto.setEmail("test@example.com");
     dto.setPassword("password123");
     dto.setName("Test User");
@@ -64,7 +64,7 @@ class Auth0UserDtoTest {
     appMetadata.put("role", "Developer");
     dto.setAppMetadata(appMetadata);
 
-    // Assert
+    // Then
     assertEquals("test@example.com", dto.getEmail());
     assertEquals("password123", dto.getPassword());
     assertEquals("Test User", dto.getName());
@@ -78,43 +78,43 @@ class Auth0UserDtoTest {
 
   @Test
   void testDefaultValues() {
-    // Act
+    // When
     Auth0UserDto dto = new Auth0UserDto();
 
-    // Assert
+    // Then
     assertFalse(dto.isEmailVerified());
     assertFalse(dto.isBlocked());
   }
 
   @Test
   void testEqualsAndHashCode() {
-    // Arrange
+    // Given
     final Auth0UserDto dto1 = new Auth0UserDto("test@example.com", "password123", "Test User");
     final Auth0UserDto dto2 = new Auth0UserDto("test@example.com", "password123", "Test User");
 
-    // Act & Assert
+    // When & Then
     assertNotNull(dto1);
     assertNotNull(dto2);
   }
 
   @Test
   void testToString() {
-    // Arrange
+    // Given
     final Auth0UserDto dto = new Auth0UserDto("test@example.com", "password123", "Test User");
 
-    // Act
+    // When
     String result = dto.toString();
 
-    // Assert
+    // Then
     assertNotNull(result);
   }
 
   @Test
   void testNullValues() {
-    // Arrange
+    // Given
     final Auth0UserDto dto = new Auth0UserDto();
 
-    // Act
+    // When
     dto.setEmail(null);
     dto.setPassword(null);
     dto.setName(null);
@@ -123,7 +123,7 @@ class Auth0UserDtoTest {
     dto.setUserMetadata(null);
     dto.setAppMetadata(null);
 
-    // Assert
+    // Then
     assertEquals(null, dto.getEmail());
     assertEquals(null, dto.getPassword());
     assertEquals(null, dto.getName());
@@ -135,17 +135,17 @@ class Auth0UserDtoTest {
 
   @Test
   void testEmptyStrings() {
-    // Arrange
+    // Given
     final Auth0UserDto dto = new Auth0UserDto();
 
-    // Act
+    // When
     dto.setEmail("");
     dto.setPassword("");
     dto.setName("");
     dto.setNickname("");
     dto.setPicture("");
 
-    // Assert
+    // Then
     assertEquals("", dto.getEmail());
     assertEquals("", dto.getPassword());
     assertEquals("", dto.getName());
@@ -155,7 +155,7 @@ class Auth0UserDtoTest {
 
   @Test
   void testMetadataOperations() {
-    // Arrange
+    // Given
     final Auth0UserDto dto = new Auth0UserDto();
     final Map<String, Object> userMetadata = new HashMap<>();
     userMetadata.put("key1", "value1");
@@ -165,11 +165,11 @@ class Auth0UserDtoTest {
     appMetadata.put("role", "admin");
     appMetadata.put("permissions", Arrays.asList("read", "write"));
 
-    // Act
+    // When
     dto.setUserMetadata(userMetadata);
     dto.setAppMetadata(appMetadata);
 
-    // Assert
+    // Then
     assertEquals(userMetadata, dto.getUserMetadata());
     assertEquals(appMetadata, dto.getAppMetadata());
     assertEquals("value1", dto.getUserMetadata().get("key1"));
@@ -179,22 +179,22 @@ class Auth0UserDtoTest {
 
   @Test
   void testBooleanFlags() {
-    // Arrange
+    // Given
     final Auth0UserDto dto = new Auth0UserDto();
 
-    // Act
+    // When
     dto.setEmailVerified(true);
     dto.setBlocked(true);
 
-    // Assert
+    // Then
     assertTrue(dto.isEmailVerified());
     assertTrue(dto.isBlocked());
 
-    // Act
+    // When
     dto.setEmailVerified(false);
     dto.setBlocked(false);
 
-    // Assert
+    // Then
     assertFalse(dto.isEmailVerified());
     assertFalse(dto.isBlocked());
   }

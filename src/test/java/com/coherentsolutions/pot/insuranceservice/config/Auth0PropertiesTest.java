@@ -14,7 +14,7 @@ class Auth0PropertiesTest {
 
   @Test
   void testConstructorWithValidDataCreatesProperties() {
-    // Arrange & Act
+    // Given & When
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
@@ -23,7 +23,7 @@ class Auth0PropertiesTest {
         true
     );
 
-    // Assert
+    // Then
     assertNotNull(properties);
     assertEquals("test-domain.auth0.com", properties.domain());
     assertEquals("test-api-token", properties.apiToken());
@@ -34,7 +34,7 @@ class Auth0PropertiesTest {
 
   @Test
   void testConstructorWithZeroTimeoutSetsDefaultTimeout() {
-    // Arrange & Act
+    // Given & When
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
@@ -43,13 +43,13 @@ class Auth0PropertiesTest {
         true
     );
 
-    // Assert
+    // Then
     assertEquals(10000, properties.timeout());
   }
 
   @Test
   void testConstructorWithNegativeTimeoutSetsDefaultTimeout() {
-    // Arrange & Act
+    // Given & When
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
@@ -58,13 +58,13 @@ class Auth0PropertiesTest {
         true
     );
 
-    // Assert
+    // Then
     assertEquals(10000, properties.timeout());
   }
 
   @Test
   void testConstructorWithValidTimeoutKeepsTimeout() {
-    // Arrange & Act
+    // Given & When
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
@@ -73,13 +73,13 @@ class Auth0PropertiesTest {
         true
     );
 
-    // Assert
+    // Then
     assertEquals(5000, properties.timeout());
   }
 
   @Test
   void testConstructorWithNullValuesHandlesCorrectly() {
-    // Arrange & Act
+    // Given & When
     Auth0Properties properties = new Auth0Properties(
         null,
         null,
@@ -88,7 +88,7 @@ class Auth0PropertiesTest {
         false
     );
 
-    // Assert
+    // Then
     assertNotNull(properties);
     assertEquals(null, properties.domain());
     assertEquals(null, properties.apiToken());
@@ -99,7 +99,7 @@ class Auth0PropertiesTest {
 
   @Test
   void testConstructorWithEmptyStringsHandlesCorrectly() {
-    // Arrange & Act
+    // Given & When
     Auth0Properties properties = new Auth0Properties(
         "",
         "",
@@ -108,7 +108,7 @@ class Auth0PropertiesTest {
         false
     );
 
-    // Assert
+    // Then
     assertNotNull(properties);
     assertEquals("", properties.domain());
     assertEquals("", properties.apiToken());
@@ -119,7 +119,7 @@ class Auth0PropertiesTest {
 
   @Test
   void testRecordImmutabilityWorksCorrectly() {
-    // Arrange
+    // Given
     Auth0Properties properties = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
@@ -128,7 +128,7 @@ class Auth0PropertiesTest {
         true
     );
 
-    // Act & Assert - Record should be immutable, so we can only read values
+    // When & Then - Record should be immutable, so we can only read values
     assertEquals("test-domain.auth0.com", properties.domain());
     assertEquals("test-api-token", properties.apiToken());
     assertEquals("https://test-domain.auth0.com/api/v2/", properties.audience());
@@ -138,7 +138,7 @@ class Auth0PropertiesTest {
 
   @Test
   void testRecordEqualityWorksCorrectly() {
-    // Arrange
+    // Given
     Auth0Properties properties1 = new Auth0Properties(
         "test-domain.auth0.com",
         "test-api-token",
@@ -155,7 +155,7 @@ class Auth0PropertiesTest {
         true
     );
 
-    // Act & Assert
+    // When & Then
     assertEquals(properties1, properties2);
     assertEquals(properties1.hashCode(), properties2.hashCode());
   }

@@ -29,7 +29,7 @@ class Auth0UserMapperTest {
 
   @Test
   void testToAuth0UserWithValidDtoReturnsUser() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
     dto.setPassword("password123");
@@ -47,10 +47,10 @@ class Auth0UserMapperTest {
     appMetadata.put("role", "Developer");
     dto.setAppMetadata(appMetadata);
 
-    // Act
+    // When
     User result = auth0UserMapper.toAuth0User(dto);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals("test@example.com", result.getEmail());
     assertEquals("Test User", result.getName());
@@ -62,16 +62,16 @@ class Auth0UserMapperTest {
 
   @Test
   void testToAuth0UserWithNullPassword() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
     dto.setName("Test User");
     dto.setPassword(null);
 
-    // Act
+    // When
     User result = auth0UserMapper.toAuth0User(dto);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals("test@example.com", result.getEmail());
     assertEquals("Test User", result.getName());
@@ -79,16 +79,16 @@ class Auth0UserMapperTest {
 
   @Test
   void testToAuth0UserWithEmptyPassword() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
     dto.setName("Test User");
     dto.setPassword("");
 
-    // Act
+    // When
     User result = auth0UserMapper.toAuth0User(dto);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals("test@example.com", result.getEmail());
     assertEquals("Test User", result.getName());
@@ -96,7 +96,7 @@ class Auth0UserMapperTest {
 
   @Test
   void testToDtoWithValidUserReturnsDto() {
-    // Arrange
+    // Given
     User user = new User();
     user.setEmail("test@example.com");
     user.setName("Test User");
@@ -111,10 +111,10 @@ class Auth0UserMapperTest {
     appMetadata.put("role", "Developer");
     user.setAppMetadata(appMetadata);
 
-    // Act
+    // When
     Auth0UserDto result = auth0UserMapper.toDto(user);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals("test@example.com", result.getEmail());
     assertEquals("Test User", result.getName());
@@ -128,16 +128,16 @@ class Auth0UserMapperTest {
 
   @Test
   void testToDtoWithNullUserReturnsNull() {
-    // Act
+    // When
     Auth0UserDto result = auth0UserMapper.toDto(null);
 
-    // Assert
+    // Then
     assertNull(result);
   }
 
   @Test
   void testUpdateUserFromDto() {
-    // Arrange
+    // Given
     User existingUser = new User();
     existingUser.setEmail("old@example.com");
     existingUser.setName("Old User");
@@ -148,17 +148,17 @@ class Auth0UserMapperTest {
     dto.setPassword("newpassword123");
     dto.setEmailVerified(true);
 
-    // Act
+    // When
     auth0UserMapper.updateUserFromDto(dto, existingUser);
 
-    // Assert
+    // Then
     assertEquals("new@example.com", existingUser.getEmail());
     assertEquals("New User", existingUser.getName());
   }
 
   @Test
   void testUpdateUserFromDtoWithNullPassword() {
-    // Arrange
+    // Given
     User existingUser = new User();
     existingUser.setEmail("old@example.com");
     existingUser.setName("Old User");
@@ -168,27 +168,27 @@ class Auth0UserMapperTest {
     dto.setName("New User");
     dto.setPassword(null);
 
-    // Act
+    // When
     auth0UserMapper.updateUserFromDto(dto, existingUser);
 
-    // Assert
+    // Then
     assertEquals("new@example.com", existingUser.getEmail());
     assertEquals("New User", existingUser.getName());
   }
 
   @Test
   void testMapperWithNullMetadata() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
     dto.setName("Test User");
     dto.setUserMetadata(null);
     dto.setAppMetadata(null);
 
-    // Act
+    // When
     User result = auth0UserMapper.toAuth0User(dto);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals("test@example.com", result.getEmail());
     assertEquals("Test User", result.getName());
@@ -198,17 +198,17 @@ class Auth0UserMapperTest {
 
   @Test
   void testMapperWithEmptyMetadata() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
     dto.setName("Test User");
     dto.setUserMetadata(new HashMap<>());
     dto.setAppMetadata(new HashMap<>());
 
-    // Act
+    // When
     User result = auth0UserMapper.toAuth0User(dto);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals("test@example.com", result.getEmail());
     assertEquals("Test User", result.getName());
@@ -220,7 +220,7 @@ class Auth0UserMapperTest {
 
   @Test
   void testMapperWithComplexMetadata() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
     dto.setName("Test User");
@@ -237,10 +237,10 @@ class Auth0UserMapperTest {
     appMetadata.put("permissions", Arrays.asList("read", "write", "delete"));
     dto.setAppMetadata(appMetadata);
 
-    // Act
+    // When
     User result = auth0UserMapper.toAuth0User(dto);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals(userMetadata, result.getUserMetadata());
     assertEquals(appMetadata, result.getAppMetadata());
@@ -248,17 +248,17 @@ class Auth0UserMapperTest {
 
   @Test
   void testMapperHandlesOptionalFields() {
-    // Arrange
+    // Given
     Auth0UserDto dto = new Auth0UserDto();
     dto.setEmail("test@example.com");
     dto.setName("Test User");
     dto.setNickname("testuser");
     dto.setPicture("https://example.com/picture.jpg");
 
-    // Act
+    // When
     User result = auth0UserMapper.toAuth0User(dto);
 
-    // Assert
+    // Then
     assertNotNull(result);
     assertEquals("test@example.com", result.getEmail());
     assertEquals("Test User", result.getName());

@@ -45,27 +45,27 @@ class Auth0HealthIndicatorTest {
 
   @Test
   void testHealthIndicatorClassLoadsSuccessfully() {
-    // Assert
+    // Then
     assertNotNull(healthIndicator);
   }
 
   @Test
   void testHealthIndicatorHasComponentAnnotation() {
-    // Assert
+    // Then
     assertNotNull(healthIndicator.getClass()
         .getAnnotation(Component.class));
   }
 
   @Test
   void testHealthIndicatorHasConditionalOnPropertyAnnotation() {
-    // Assert
+    // Then
     assertNotNull(healthIndicator.getClass()
         .getAnnotation(ConditionalOnProperty.class));
   }
 
   @Test
   void testHealthIndicatorImplementsHealthIndicator() {
-    // Assert
+    // Then
     assertTrue(healthIndicator instanceof HealthIndicator);
   }
 
@@ -213,20 +213,20 @@ class Auth0HealthIndicatorTest {
 
   @Test
   void testHealthIndicatorConstructorInjectsDependencies() {
-    // Assert
+    // Then
     assertNotNull(healthIndicator);
     // If the constructor works, dependencies are injected
   }
 
   @Test
   void testHealthIndicatorHasHealthMethod() throws Exception {
-    // Assert
+    // Then
     assertNotNull(healthIndicator.getClass().getMethod("health"));
   }
 
   @Test
   void testHealthIndicatorMethodReturnsHealth() throws Exception {
-    // Assert
+    // Then
     assertEquals(Health.class, healthIndicator.getClass().getMethod("health").getReturnType());
   }
 } 
