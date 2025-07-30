@@ -99,8 +99,7 @@ public class InsurancePackageManagementService {
     insurancePackage.setEndDate(insurancePackageDto.getEndDate());
     insurancePackage.setPayrollFrequency(insurancePackageDto.getPayrollFrequency());
 
-    if (insurancePackageDto.getStatus() == PackageStatus.DEACTIVATED
-        && insurancePackage.getStatus() != PackageStatus.DEACTIVATED) {
+    if (insurancePackageDto.getStatus() == PackageStatus.DEACTIVATED) {
       insurancePackage.setStatus(PackageStatus.DEACTIVATED);
     } else {
       insurancePackage.setStatus(calculateStatus(insurancePackage, true));
