@@ -9,6 +9,7 @@ import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageSpecification;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -72,6 +73,14 @@ public class InsurancePackageManagementService {
           "Cannot update active insurance package");
     }
 
+    LocalDate today = LocalDate.now();
+    if (insurancePackageDto.getStartDate() != null
+        && !insurancePackage.getStartDate().isEqual(insurancePackageDto.getStartDate())
+        && insurancePackageDto.getStartDate().isBefore(today)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Updated start date cannot be earlier than today");
+    }
+
     insurancePackage.setName(insurancePackageDto.getName());
     insurancePackage.setStartDate(insurancePackageDto.getStartDate());
     insurancePackage.setEndDate(insurancePackageDto.getEndDate());
@@ -81,7 +90,7 @@ public class InsurancePackageManagementService {
         && insurancePackage.getStatus() != PackageStatus.DEACTIVATED) {
       insurancePackage.setStatus(PackageStatus.DEACTIVATED);
     } else {
-      insurancePackage.setStatus(InsurancePackageStatusUpdater.calculateStatus(insurancePackage));
+      insurancePackage.setStatus(InsurancePackageStatusUpdater.calculateStatus(insurancePackage, true));
     }
 
     insurancePackageRepository.save(insurancePackage);
