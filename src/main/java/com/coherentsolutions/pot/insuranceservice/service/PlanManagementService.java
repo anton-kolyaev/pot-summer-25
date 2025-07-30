@@ -1,11 +1,14 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
+import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
 import com.coherentsolutions.pot.insuranceservice.mapper.PlanMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
+import com.coherentsolutions.pot.insuranceservice.repository.PlanSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,4 +51,10 @@ public class PlanManagementService {
     return planMapper.toDto(updated);
   }
 
+
+  @Transactional(readOnly = true)
+  public List<PlanDto> getPlansWithFilter(PlanFilter filter) {
+    List<Plan> plans = planRepository.findAll(PlanSpecification.withFilter(filter));
+    return plans.stream().map(planMapper::toDto).toList();
+  }
 }

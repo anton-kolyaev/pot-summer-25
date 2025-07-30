@@ -35,4 +35,9 @@ public class AdminPlanManagementController {
   public PlanDto updatePlan(@PathVariable UUID id, @Valid @RequestBody PlanDto planDto) {
     return planManagementService.updatePlan(id, planDto);
   }
+
+  @GetMapping
+  public List<PlanDto> getPlans(PlanFilter filter) {
+    return planManagementService.getPlansWithFilter(filter);
+  }
 }

@@ -11,6 +11,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * to run PostgreSQL in a Docker environment.
  */
 
+@Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public abstract class PostgresTestContainer {
 

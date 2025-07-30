@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
+import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
 import com.coherentsolutions.pot.insuranceservice.mapper.PlanMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
@@ -17,16 +18,19 @@ import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.coherentsolutions.pot.insuranceservice.service.PlanManagementService;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -165,5 +169,47 @@ public class PlanManagementServiceTest {
     verify(planRepository).findById(planId);
     verify(planTypeRepository).findById(3);
     verify(planRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should return all plans when no filter is applied")
+  void shouldReturnAllPlansWithoutFilter() {
+    List<Plan> plans = List.of(plan);
+    List<PlanDto> expectedDtos = List.of(planDto);
+
+    when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(plans);
+    when(planMapper.toDto(plan)).thenReturn(planDto);
+
+    List<PlanDto> result = planManagementService.getPlansWithFilter(new PlanFilter());
+
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertEquals(planDto, result.get(0));
+
+    verify(planRepository).findAll(ArgumentMatchers.<Specification<Plan>>any());
+    verify(planMapper).toDto(plan);
+  }
+
+  @Test
+  @DisplayName("Should return filtered plans by type ID")
+  void shouldReturnFilteredPlansByType() {
+    PlanFilter filter = new PlanFilter();
+    filter.setTypeId(3);
+
+    List<Plan> filteredPlans = List.of(plan);
+    List<PlanDto> expectedDtos = List.of(planDto);
+
+    when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(
+        filteredPlans);
+    when(planMapper.toDto(plan)).thenReturn(planDto);
+
+    List<PlanDto> result = planManagementService.getPlansWithFilter(filter);
+
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertEquals(3, result.get(0).getType());
+
+    verify(planRepository).findAll(ArgumentMatchers.<Specification<Plan>>any());
+    verify(planMapper).toDto(plan);
   }
 }
