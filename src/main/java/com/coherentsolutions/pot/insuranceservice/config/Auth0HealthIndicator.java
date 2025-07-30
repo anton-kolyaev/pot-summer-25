@@ -51,7 +51,7 @@ public class Auth0HealthIndicator implements HealthIndicator {
           .build();
           
     } catch (Auth0Exception e) {
-      return org.springframework.boot.actuate.health.Health.down()
+      return Health.down()
           .withDetail("reason", "Auth0 API connection failed")
           .withDetail("error", e.getMessage())
           .build();
