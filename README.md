@@ -59,6 +59,6 @@ Swagger UI is wired for the **OAuth2.0 Authorization Code + PKCE** flow, so you 
 ### **`.env`** setup
 
 An **`.env.example`** template is available in project root. 
-- Create a file called **.env** at the project root (or **.env.test** for test‑specific overrides).
+- Create a file called **.env** in the project root (or **.env.test** for test‑specific overrides).
 - Populate every placeholder with your real Auth0 values before starting the app.
 - These variables are referenced by **application.yml** and **application-test.yml**.
