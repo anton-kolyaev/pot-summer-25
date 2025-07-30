@@ -395,4 +395,37 @@ public class InsurancePackageManagementServiceTest {
 
     verify(insurancePackageRepository).findByIdOrThrow(packageId);
   }
+
+  @Test
+  @DisplayName("Should retain deactivated status when updating deactivated package with same status")
+  void shouldRetainDeactivatedStatusOnUpdate() {
+    UUID packageId = UUID.randomUUID();
+
+    InsurancePackage existingPackage = new InsurancePackage();
+    existingPackage.setId(packageId);
+    existingPackage.setStatus(PackageStatus.DEACTIVATED);
+    existingPackage.setStartDate(LocalDate.now().plusDays(1));
+    existingPackage.setEndDate(LocalDate.now().plusMonths(2));
+
+    InsurancePackageDto updateDto = InsurancePackageDto.builder()
+        .status(PackageStatus.DEACTIVATED)
+        .startDate(existingPackage.getStartDate())
+        .endDate(existingPackage.getEndDate())
+        .build();
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(existingPackage);
+    when(insurancePackageRepository.save(existingPackage)).thenReturn(existingPackage);
+    when(insurancePackageMapper.toInsurancePackageDto(existingPackage)).thenReturn(updateDto);
+
+    InsurancePackageDto result = insurancePackageManagementService.updateInsurancePackage(
+        packageId, updateDto);
+
+    assertNotNull(result);
+    assertEquals(PackageStatus.DEACTIVATED, result.getStatus());
+    assertEquals(PackageStatus.DEACTIVATED, existingPackage.getStatus());
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+    verify(insurancePackageRepository).save(existingPackage);
+    verify(insurancePackageMapper).toInsurancePackageDto(existingPackage);
+  }
 }
