@@ -43,7 +43,7 @@ out/
 .env.test
 .env.production
 *.env
-=======
+
 ### Environment Variables ###
 .env
 .env.local

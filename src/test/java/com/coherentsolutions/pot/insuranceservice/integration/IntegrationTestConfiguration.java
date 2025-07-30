@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 /**
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Primary;
  * support and mocked ManagementAPI for Auth0 integration tests.
  */
 @TestConfiguration
+@Import({TestSecurityConfig.class, MockMvcTestConfig.class})
 public class IntegrationTestConfiguration {
 
   @Bean
@@ -23,10 +25,4 @@ public class IntegrationTestConfiguration {
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     return objectMapper;
   }
-
-  @Bean
-  @Primary
-  public ManagementAPI managementAPI() {
-    return org.mockito.Mockito.mock(ManagementAPI.class);
-  }
-} 
+}
