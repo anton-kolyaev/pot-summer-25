@@ -2,7 +2,9 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
@@ -21,7 +23,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
   @Autowired
   private PlanTypeRepository planTypeRepository;
-  
+
   private Integer dentalTypeId;
 
   @BeforeEach
@@ -156,5 +157,52 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     mockMvc.perform(post(ENDPOINT)
             .content(toJson(createRequest)))
         .andExpect(status().isUnsupportedMediaType());
+  }
+
+  @Test
+  @DisplayName("Should return plans filtered by type")
+  void shouldReturnPlansFilteredByType() throws Exception {
+    // Given
+    PlanDto plan1 = buildPlanDto("Dental Plan A", dentalTypeId, new BigDecimal("100.00"));
+    PlanDto plan2 = buildPlanDto("Dental Plan B", dentalTypeId, new BigDecimal("200.00"));
+
+    mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(plan1)))
+        .andExpect(status().isCreated());
+
+    mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(plan2)))
+        .andExpect(status().isCreated());
+
+    // When / Then
+    mockMvc.perform(get(ENDPOINT)
+            .param("typeId", String.valueOf(dentalTypeId)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(2))
+        .andExpect(jsonPath("$[0].name").value("Dental Plan A"))
+        .andExpect(jsonPath("$[1].name").value("Dental Plan B"));
+  }
+
+  @Test
+  @DisplayName("Should return all plans when no filter is provided")
+  void shouldReturnAllPlansWithoutFilter() throws Exception {
+    PlanDto plan1 = buildPlanDto("Generic Plan A", dentalTypeId, new BigDecimal("150.00"));
+    PlanDto plan2 = buildPlanDto("Generic Plan B", dentalTypeId, new BigDecimal("250.00"));
+
+    mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(plan1)))
+        .andExpect(status().isCreated());
+
+    mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(plan2)))
+        .andExpect(status().isCreated());
+
+    mockMvc.perform(get(ENDPOINT))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(2));
   }
 }
