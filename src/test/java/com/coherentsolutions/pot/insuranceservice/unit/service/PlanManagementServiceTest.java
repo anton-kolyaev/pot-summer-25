@@ -104,7 +104,7 @@ public class PlanManagementServiceTest {
 
     verify(planTypeRepository).findById(3);
     verify(planRepository, never()).save(any());
-    verify(planMapper, never()).toDto(any());
+    verify(planMapper, never()).toDto(any(Plan.class));
   }
 
   @Test
