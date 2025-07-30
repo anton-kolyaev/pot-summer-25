@@ -47,17 +47,17 @@ class SecurityConfigIt extends PostgresTestContainer {
   @DisplayName("Protected endpoint with JWT returns 200")
   void protectedEndpointWithJwt() throws Exception {
     mockMvc.perform(get("/v1/companies")
-    .with(jwt().jwt(j -> j.claim("sub", "tester"))))
+            .with(jwt().jwt(j -> j.claim("sub", "tester"))))
         .andExpect(status().isOk());
   }
-  
+
   @Test
   @DisplayName("Spring Security must not create an HTTP session")
   void sessionIsNotCreated() throws Exception {
     mockMvc.perform(get("/v1/companies").with(jwt().jwt(j -> j.claim("sub", "tester"))))
         .andExpect(cookie().doesNotExist("JSESSIONID"))
         .andExpect(result ->
-        assertNull(
-        result.getRequest().getSession(false), "HttpSession should not exist"));
+            assertNull(
+                result.getRequest().getSession(false), "HttpSession should not exist"));
   }
 }

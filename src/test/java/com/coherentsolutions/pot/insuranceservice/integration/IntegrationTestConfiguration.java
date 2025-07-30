@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Primary;
  * support.
  */
 @TestConfiguration
-@Import({ TestSecurityConfig.class, MockMvcTestConfig.class })
+@Import({TestSecurityConfig.class, MockMvcTestConfig.class})
 public class IntegrationTestConfiguration {
 
   @Bean

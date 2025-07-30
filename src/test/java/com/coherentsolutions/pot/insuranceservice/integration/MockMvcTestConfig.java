@@ -9,8 +9,9 @@ import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
 public class MockMvcTestConfig {
+
   @Bean
-    public MockMvcBuilderCustomizer defaultAuthHeader() {
+  public MockMvcBuilderCustomizer defaultAuthHeader() {
     return builder -> builder.defaultRequest(
         get("/").with(jwt().jwt(jwt -> jwt.claim("sub", "test-user"))));
   }

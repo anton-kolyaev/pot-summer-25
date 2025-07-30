@@ -7,11 +7,12 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @TestConfiguration
 public class TestSecurityConfig {
+
   @Bean
-    public JwtDecoder jwtDecoder() {
+  public JwtDecoder jwtDecoder() {
     return tokenValue -> Jwt.withTokenValue(tokenValue)
-    .header("alg", "none")
-    .claim("sub", "test-user")
-    .build();
+        .header("alg", "none")
+        .claim("sub", "test-user")
+        .build();
   }
 }
