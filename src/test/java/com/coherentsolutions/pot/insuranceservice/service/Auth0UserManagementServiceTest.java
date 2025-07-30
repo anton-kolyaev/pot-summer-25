@@ -83,9 +83,8 @@ class Auth0UserManagementServiceTest {
 
     // Then
     assertNotNull(result);
-    assertEquals("auth0|123", result.getId());
-    assertEquals("test@example.com", result.getEmail());
-    assertEquals("Test User", result.getName());
+    assertEquals(expectedUser, result);
+    verify(usersEntity).create(inputUser);
   }
 
   @Test
