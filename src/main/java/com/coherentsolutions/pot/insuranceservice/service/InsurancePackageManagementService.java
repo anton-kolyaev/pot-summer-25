@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -26,6 +27,7 @@ public class InsurancePackageManagementService {
   private final InsurancePackageMapper insurancePackageMapper;
   private final CompanyRepository companyRepository;
 
+  @Transactional(readOnly = true)
   public Page<InsurancePackageDto> getInsurancePackagesWithFilters(
       InsurancePackageFilter filter, Pageable pageable) {
     Page<InsurancePackage> insurancePackages = insurancePackageRepository.findAll(
@@ -33,11 +35,13 @@ public class InsurancePackageManagementService {
     return insurancePackages.map(insurancePackageMapper::toInsurancePackageDto);
   }
 
+  @Transactional(readOnly = true)
   public InsurancePackageDto getInsurancePackageById(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
 
+  @Transactional
   public InsurancePackageDto createInsurancePackage(
       UUID companyId,
       InsurancePackageDto insurancePackageDto) {
@@ -51,6 +55,7 @@ public class InsurancePackageManagementService {
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
 
+  @Transactional
   public InsurancePackageDto deactivateInsurancePackage(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
 
@@ -64,6 +69,7 @@ public class InsurancePackageManagementService {
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
 
+  @Transactional
   public InsurancePackageDto updateInsurancePackage(UUID id,
       InsurancePackageDto insurancePackageDto) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
