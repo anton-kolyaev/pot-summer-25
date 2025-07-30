@@ -56,21 +56,9 @@ public class PlanManagementServiceTest {
 
   @BeforeEach
   void setUp() {
-    planDto = PlanDto.builder()
-        .name("Vision Plan")
-        .type(3)
-        .contribution(new BigDecimal("123.45"))
-        .build();
-
-    planType = new PlanType();
-    planType.setId(3);
-    planType.setCode("VISION");
-
-    plan = new Plan();
-    plan.setId(UUID.randomUUID());
-    plan.setName("Vision Plan");
-    plan.setType(planType);
-    plan.setContribution(new BigDecimal("123.45"));
+    planDto = buildPlanDto("Vision Plan", 3, new BigDecimal("123.45"));
+    planType = buildPlanType(3, "VISION");
+    plan = buildPlan(UUID.randomUUID(), "Vision Plan", planType, new BigDecimal("123.45"));
   }
 
   @Test
@@ -111,27 +99,28 @@ public class PlanManagementServiceTest {
   }
 
   @Test
-  @DisplayName("Should update plan successfully")
+  @DisplayName("Should update plan successfully when type remains the same")
   void shouldUpdatePlanSuccessfully() {
     UUID planId = UUID.randomUUID();
 
-    doCallRealMethod().when(planTypeRepository).findByIdOrThrow(3);
-    when(planTypeRepository.findById(3)).thenReturn(Optional.of(planType));
-    when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
-    when(planRepository.save(plan)).thenReturn(plan);
-    when(planMapper.toDto(plan)).thenReturn(planDto);
+    PlanType sameType = buildPlanType(3, "VISION");
+    Plan existingPlan = buildPlan(planId, "Vision Plan", sameType, new BigDecimal("123.45"));
+    PlanDto updatedDto = buildPlanDto("Updated Vision Plan", 3, new BigDecimal("456.78"));
 
-    PlanDto result = planManagementService.updatePlan(planId, planDto);
+    when(planRepository.findById(planId)).thenReturn(Optional.of(existingPlan));
+    when(planRepository.save(existingPlan)).thenReturn(existingPlan);
+    when(planMapper.toDto(existingPlan)).thenReturn(updatedDto);
+
+    PlanDto result = planManagementService.updatePlan(planId, updatedDto);
 
     assertNotNull(result);
-    assertEquals(planDto.getName(), result.getName());
-    assertEquals(planDto.getType(), result.getType());
-    assertEquals(planDto.getContribution(), result.getContribution());
+    assertEquals("Updated Vision Plan", result.getName());
+    assertEquals(new BigDecimal("456.78"), result.getContribution());
+    assertEquals(3, result.getType());
 
     verify(planRepository).findById(planId);
-    verify(planTypeRepository).findById(3);
-    verify(planRepository).save(plan);
-    verify(planMapper).toDto(plan);
+    verify(planRepository).save(existingPlan);
+    verify(planMapper).toDto(existingPlan);
   }
 
   @Test
@@ -156,18 +145,21 @@ public class PlanManagementServiceTest {
   void shouldThrowWhenInvalidTypeDuringUpdate() {
     UUID planId = UUID.randomUUID();
 
-    when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
-    doCallRealMethod().when(planTypeRepository).findByIdOrThrow(3);
-    when(planTypeRepository.findById(3)).thenReturn(Optional.empty());
+    PlanType existingType = buildPlanType(1, "VISION");
+    Plan existingPlan = buildPlan(planId, "Vision Plan", existingType, new BigDecimal("123.45"));
+
+    PlanDto updatedDto = buildPlanDto("Updated Plan", 3, new BigDecimal("999.99")); // new type
+
+    when(planRepository.findById(planId)).thenReturn(Optional.of(existingPlan));
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-        () -> planManagementService.updatePlan(planId, planDto));
+        () -> planManagementService.updatePlan(planId, updatedDto));
 
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-    assertEquals("Invalid plan type", exception.getReason());
+    assertEquals("Changing plan type is not allowed", exception.getReason());
 
     verify(planRepository).findById(planId);
-    verify(planTypeRepository).findById(3);
+    verify(planTypeRepository, never()).findById(any());
     verify(planRepository, never()).save(any());
   }
 
@@ -211,5 +203,52 @@ public class PlanManagementServiceTest {
 
     verify(planRepository).findAll(ArgumentMatchers.<Specification<Plan>>any());
     verify(planMapper).toDto(plan);
+  }
+
+  @Test
+  @DisplayName("Should throw BAD_REQUEST when trying to change the plan type")
+  void shouldThrowWhenPlanTypeIsChanged() {
+    UUID planId = UUID.randomUUID();
+
+    PlanType originalType = buildPlanType(3, "VISION");
+    Plan existingPlan = buildPlan(planId, "Vision Plan", originalType, new BigDecimal("123.45"));
+
+    PlanDto updatedDto = buildPlanDto("New Plan Name", 2, new BigDecimal("456.78")); // type changed
+
+    when(planRepository.findById(planId)).thenReturn(Optional.of(existingPlan));
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> planManagementService.updatePlan(planId, updatedDto));
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Changing plan type is not allowed", exception.getReason());
+
+    verify(planRepository).findById(planId);
+    verify(planTypeRepository, never()).findById(any());
+    verify(planRepository, never()).save(any());
+  }
+
+  private PlanDto buildPlanDto(String name, int typeId, BigDecimal contribution) {
+    return PlanDto.builder()
+        .name(name)
+        .type(typeId)
+        .contribution(contribution)
+        .build();
+  }
+
+  private Plan buildPlan(UUID id, String name, PlanType type, BigDecimal contribution) {
+    Plan plan = new Plan();
+    plan.setId(id);
+    plan.setName(name);
+    plan.setType(type);
+    plan.setContribution(contribution);
+    return plan;
+  }
+
+  private PlanType buildPlanType(int id, String code) {
+    PlanType planType = new PlanType();
+    planType.setId(id);
+    planType.setCode(code);
+    return planType;
   }
 }

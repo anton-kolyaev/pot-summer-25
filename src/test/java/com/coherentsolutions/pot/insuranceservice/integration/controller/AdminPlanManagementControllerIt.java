@@ -209,8 +209,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   }
 
   @Test
-  @DisplayName("Should return 400 for invalid plan type on update")
-  void shouldReturnBadRequestForInvalidPlanTypeOnUpdate() throws Exception {
+  @DisplayName("Should return 400 when trying to change plan type on update")
+  void shouldReturnBadRequestWhenChangingPlanTypeOnUpdate() throws Exception {
 
     PlanDto createRequest = buildPlanDto("Temporary Plan", dentalTypeId, new BigDecimal("150.00"));
 

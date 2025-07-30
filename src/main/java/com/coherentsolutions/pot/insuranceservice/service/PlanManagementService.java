@@ -41,11 +41,13 @@ public class PlanManagementService {
     Plan existing = planRepository.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
 
-    PlanType planType = planTypeRepository.findByIdOrThrow(planDto.getType());
+    if (!existing.getType().getId().equals(planDto.getType())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Changing plan type is not allowed");
+    }
 
     existing.setName(planDto.getName());
     existing.setContribution(planDto.getContribution());
-    existing.setType(planType);
 
     Plan updated = planRepository.save(existing);
     return planMapper.toDto(updated);
