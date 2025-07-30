@@ -20,6 +20,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @ExtendWith(MockitoExtension.class)
 class Auth0HealthIndicatorTest {
@@ -50,20 +53,20 @@ class Auth0HealthIndicatorTest {
   void testHealthIndicatorHasComponentAnnotation() {
     // Assert
     assertNotNull(healthIndicator.getClass()
-        .getAnnotation(org.springframework.stereotype.Component.class));
+        .getAnnotation(Component.class));
   }
 
   @Test
   void testHealthIndicatorHasConditionalOnPropertyAnnotation() {
     // Assert
     assertNotNull(healthIndicator.getClass()
-        .getAnnotation(org.springframework.boot.autoconfigure.condition.ConditionalOnProperty.class));
+        .getAnnotation(ConditionalOnProperty.class));
   }
 
   @Test
   void testHealthIndicatorImplementsHealthIndicator() {
     // Assert
-    assertTrue(healthIndicator instanceof org.springframework.boot.actuate.health.HealthIndicator);
+    assertTrue(healthIndicator instanceof HealthIndicator);
   }
 
   @SuppressWarnings("unchecked")
