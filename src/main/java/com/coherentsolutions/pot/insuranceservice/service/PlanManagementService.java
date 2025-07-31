@@ -9,6 +9,7 @@ import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -39,19 +40,22 @@ public class PlanManagementService {
 
   @Transactional
   public PlanDto updatePlan(UUID id, PlanDto planDto) {
-    Plan existing = planRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
+    Plan existing = planRepository.findByIdOrThrow(id);
 
-    if (!existing.getType().getId().equals(planDto.getType())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Changing plan type is not allowed");
-    }
+    validateOnUpdate(existing, planDto);
 
     existing.setName(planDto.getName());
     existing.setContribution(planDto.getContribution());
 
     Plan updated = planRepository.save(existing);
     return planMapper.toDto(updated);
+  }
+
+  private void validateOnUpdate(Plan existing, PlanDto planDto) {
+    if (!existing.getType().getId().equals(planDto.getType())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Changing plan type is not allowed");
+    }
   }
 
 
