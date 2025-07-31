@@ -61,7 +61,7 @@ public class PlanManagementService {
     return plans.stream().map(planMapper::toDto).toList();
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public List<PlanTypeDto> getAllPlanTypes() {
     return planTypeRepository.findAll()
         .stream()
