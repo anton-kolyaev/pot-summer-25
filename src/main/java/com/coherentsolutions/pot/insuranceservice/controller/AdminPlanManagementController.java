@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insuranceservice.controller;
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
+import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanTypeDto;
 import com.coherentsolutions.pot.insuranceservice.service.PlanManagementService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -40,4 +41,10 @@ public class AdminPlanManagementController {
   public List<PlanDto> getPlans(PlanFilter filter) {
     return planManagementService.getPlansWithFilter(filter);
   }
+
+  @GetMapping("/plan-types")
+  public List<PlanTypeDto> getPlanTypes() {
+    return planManagementService.getAllPlanTypes();
+  }
+
 }

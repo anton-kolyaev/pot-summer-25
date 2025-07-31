@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.service;
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
+import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanTypeDto;
 import com.coherentsolutions.pot.insuranceservice.mapper.PlanMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
@@ -58,5 +59,13 @@ public class PlanManagementService {
   public List<PlanDto> getPlansWithFilter(PlanFilter filter) {
     List<Plan> plans = planRepository.findAll(PlanSpecification.withFilter(filter));
     return plans.stream().map(planMapper::toDto).toList();
+  }
+
+  @Transactional(readOnly = true)
+  public List<PlanTypeDto> getAllPlanTypes() {
+    return planTypeRepository.findAll()
+        .stream()
+        .map(planMapper::toDto)
+        .toList();
   }
 }

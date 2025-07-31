@@ -7,10 +7,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
+import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanTypeDto;
 import com.coherentsolutions.pot.insuranceservice.mapper.PlanMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
@@ -95,7 +97,7 @@ public class PlanManagementServiceTest {
 
     verify(planTypeRepository).findById(3);
     verify(planRepository, never()).save(any());
-    verify(planMapper, never()).toDto(any());
+    verify(planMapper, never()).toDto(any(Plan.class));
   }
 
   @Test
@@ -204,6 +206,49 @@ public class PlanManagementServiceTest {
     verify(planRepository).findAll(ArgumentMatchers.<Specification<Plan>>any());
     verify(planMapper).toDto(plan);
   }
+
+  @Test
+  @DisplayName("Should return all plan types")
+  void shouldReturnAllPlanTypes() {
+    PlanType dental = buildPlanType(1, "DENTAL");
+    dental.setName("Dental Plan");
+
+    PlanType medical = buildPlanType(2, "MEDICAL");
+    medical.setName("Medical Plan");
+
+    PlanTypeDto dentalDto = new PlanTypeDto(1, "DENTAL", "Dental Plan");
+    PlanTypeDto medicalDto = new PlanTypeDto(2, "MEDICAL", "Medical Plan");
+
+    when(planTypeRepository.findAll()).thenReturn(List.of(dental, medical));
+    when(planMapper.toDto(dental)).thenReturn(dentalDto);
+    when(planMapper.toDto(medical)).thenReturn(medicalDto);
+
+    List<PlanTypeDto> result = planManagementService.getAllPlanTypes();
+
+    assertNotNull(result);
+    assertEquals(2, result.size());
+    assertEquals("DENTAL", result.get(0).getCode());
+    assertEquals("MEDICAL", result.get(1).getCode());
+
+    verify(planTypeRepository).findAll();
+    verify(planMapper).toDto(dental);
+    verify(planMapper).toDto(medical);
+  }
+
+  @Test
+  @DisplayName("Should return empty list when no plan types exist")
+  void shouldReturnEmptyListWhenNoPlanTypes() {
+    when(planTypeRepository.findAll()).thenReturn(List.of());
+
+    List<PlanTypeDto> result = planManagementService.getAllPlanTypes();
+
+    assertNotNull(result);
+    assertEquals(0, result.size());
+
+    verify(planTypeRepository).findAll();
+    verifyNoInteractions(planMapper);
+  }
+
 
   @Test
   @DisplayName("Should throw BAD_REQUEST when trying to change the plan type")

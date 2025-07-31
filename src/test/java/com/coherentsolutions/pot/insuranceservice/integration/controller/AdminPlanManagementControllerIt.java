@@ -73,6 +73,13 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     return objectMapper.writeValueAsString(obj);
   }
 
+  private PlanType buildPlanType(String code, String name) {
+    PlanType type = new PlanType();
+    type.setCode(code);
+    type.setName(name);
+    return type;
+  }
+
   @Test
   @DisplayName("Should create plan successfully")
   void shouldCreatePlanSuccessfully() throws Exception {
@@ -290,5 +297,24 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     mockMvc.perform(get(ENDPOINT))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2));
+  }
+
+  @Test
+  @DisplayName("Should return all plan types")
+  void shouldReturnAllPlanTypes() throws Exception {
+    mockMvc.perform(get(ENDPOINT + "/plan-types"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[?(@.code=='DENTAL')]").exists())
+        .andExpect(jsonPath("$[?(@.code=='MEDICAL')]").exists());
+  }
+
+  @Test
+  @DisplayName("Should return empty list when no plan types exist")
+  void shouldReturnEmptyListWhenNoPlanTypesExist() throws Exception {
+    planTypeRepository.deleteAll();
+
+    mockMvc.perform(get(ENDPOINT + "/plan-types"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(0));
   }
 }
