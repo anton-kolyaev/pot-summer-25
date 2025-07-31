@@ -8,11 +8,13 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 @TestConfiguration
 public class TestSecurityConfig {
 
+  private static final String TEST_UUID = "11111111-2222-3333-4444-555555555555";
+
   @Bean
   public JwtDecoder jwtDecoder() {
     return tokenValue -> Jwt.withTokenValue(tokenValue)
         .header("alg", "none")
-        .claim("sub", "test-user")
+        .subject(TEST_UUID)
         .build();
   }
 }

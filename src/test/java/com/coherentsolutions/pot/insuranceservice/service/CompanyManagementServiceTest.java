@@ -55,8 +55,7 @@ class CompanyManagementServiceTest {
     testCompany.setId(companyId);
     testCompany.setName("Test Company");
     testCompany.setStatus(CompanyStatus.ACTIVE);
-    testCompany.setCreatedAt(Instant.now());
-
+    
     testCompanyDto = CompanyDto.builder()
         .id(companyId)
         .name("Test Company")

@@ -75,8 +75,6 @@ class CompanyManagementServiceTest {
     testCompany.setStatus(CompanyStatus.ACTIVE);
     testCompany.setAddressData(List.of(testAddress));
     testCompany.setPhoneData(List.of(testPhone));
-    testCompany.setCreatedAt(Instant.now());
-    testCompany.setUpdatedAt(Instant.now());
 
     testCompanyDto = CompanyDto.builder()
         .id(testCompanyId)
@@ -85,8 +83,6 @@ class CompanyManagementServiceTest {
         .email("test@company.com")
         .website("https://testcompany.com")
         .status(CompanyStatus.ACTIVE)
-        .createdAt(Instant.now())
-        .updatedAt(Instant.now())
         .build();
   }
 
