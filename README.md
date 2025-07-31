@@ -49,7 +49,7 @@ Once the app is running, visit:
 Swagger UI is wired for the **OAuth2.0 Authorization Code + PKCE** flow, so you can test secured endpoints right from the browser.
 
 1. Start the app.
-2. Visit http://localhost:8080/swagger-ui.html
+2. Visit http://localhost:8080/swagger-ui/index.html
 3. Click Authorize → Auth0 → Authorize.
 4. Log in on Auth0’s page with a valid tenant user.
 5. Back in Swagger UI, a green padlock appears.
