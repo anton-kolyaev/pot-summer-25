@@ -35,8 +35,8 @@ spring:
 # Auth0 Configuration
 auth0:
   enabled: ${AUTH0_ENABLED:true} # Set to true to enable Auth0 integration
-  domain: "https://${AUTH0_DOMAIN:}/" # your-domain.auth0.com
-  api-token: "https://${auth0_domain}/oauth/token" # your-api-token
+  domain: ${AUTH0_DOMAIN:} # your-domain.auth0.com
+  api-token: ${AUTH0_API_TOKEN:} # your-api-token
   audience: ${AUTH0_AUDIENCE:} # https://your-domain.auth0.com/api/v2/
   timeout: ${AUTH0_TIMEOUT:10000} # Default timeout in milliseconds
 management:
