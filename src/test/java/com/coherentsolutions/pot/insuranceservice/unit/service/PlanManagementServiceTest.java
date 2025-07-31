@@ -274,6 +274,40 @@ public class PlanManagementServiceTest {
     verify(planRepository, never()).save(any());
   }
 
+  @Test
+  @DisplayName("Should soft delete plan successfully")
+  void shouldSoftDeletePlanSuccessfully() {
+    UUID planId = UUID.randomUUID();
+    Plan existingPlan = buildPlan(planId, "Test Plan", planType, new BigDecimal("123.45"));
+
+    when(planRepository.findActiveByIdOrThrow(planId)).thenReturn(existingPlan);
+    when(planRepository.save(existingPlan)).thenReturn(existingPlan);
+
+    planManagementService.softDeletePlan(planId);
+
+    assertNotNull(existingPlan.getDeletedAt());  // check that deletedAt is set
+    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository).save(existingPlan);
+  }
+
+  @Test
+  @DisplayName("Should throw NOT_FOUND when soft deleting non-existent plan")
+  void shouldThrowNotFoundWhenSoftDeletingNonExistentPlan() {
+    UUID planId = UUID.randomUUID();
+
+    when(planRepository.findActiveByIdOrThrow(planId))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> planManagementService.softDeletePlan(planId));
+
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("Plan not found", exception.getReason());
+
+    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository, never()).save(any());
+  }
+
   private PlanDto buildPlanDto(String name, int typeId, BigDecimal contribution) {
     return PlanDto.builder()
         .name(name)
