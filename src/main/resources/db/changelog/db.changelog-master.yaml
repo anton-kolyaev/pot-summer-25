@@ -17,4 +17,6 @@ databaseChangeLog:
       file: db/changelog/changeset/insert-plan-types.sql
   - include:
       file: db/changelog/on-delete-cascade-insurance-packages.sql
+  - include:
+      file: db/changelog/create-deleted-at-column.sql
 

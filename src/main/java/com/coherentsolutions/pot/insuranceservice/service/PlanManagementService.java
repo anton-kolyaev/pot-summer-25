@@ -72,4 +72,11 @@ public class PlanManagementService {
         .map(planMapper::toDto)
         .toList();
   }
+
+  @Transactional
+  public void softDeletePlan(UUID id) {
+    Plan plan = planRepository.findActiveByIdOrThrow(id);
+    plan.setDeletedAt(Instant.now());
+    planRepository.save(plan);
+  }
 }

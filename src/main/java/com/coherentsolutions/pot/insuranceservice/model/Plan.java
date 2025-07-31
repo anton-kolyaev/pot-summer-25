@@ -40,6 +40,9 @@ public class Plan {
   @Column(name = "contribution", nullable = false)
   private BigDecimal contribution;
 
+  @Column(name = "deleted_at")
+  private Instant deletedAt;
+
   @CreatedBy
   @Column(name = "created_by")
   private UUID createdBy;
