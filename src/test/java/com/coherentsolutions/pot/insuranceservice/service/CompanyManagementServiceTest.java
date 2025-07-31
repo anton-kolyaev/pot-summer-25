@@ -16,7 +16,6 @@ import com.coherentsolutions.pot.insuranceservice.mapper.CompanyMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -55,8 +54,7 @@ class CompanyManagementServiceTest {
     testCompany.setId(companyId);
     testCompany.setName("Test Company");
     testCompany.setStatus(CompanyStatus.ACTIVE);
-    testCompany.setCreatedAt(Instant.now());
-
+    
     testCompanyDto = CompanyDto.builder()
         .id(companyId)
         .name("Test Company")
