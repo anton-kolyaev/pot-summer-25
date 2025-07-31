@@ -50,7 +50,7 @@ public class AdminPlanManagementController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deletePlan(@PathVariable UUID id) {
+  public void softDeletePlan(@PathVariable UUID id) {
     planManagementService.softDeletePlan(id);
   }
 
