@@ -28,7 +28,7 @@ public class AuditConfig {
     @Override
     public Optional<UUID> getCurrentAuditor() {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-      if (auth instanceof JwtAuthenticationToken jwt) {
+      if (auth instanceof JwtAuthenticationToken) {
         return Optional.of(UUID.fromString(auth.getName()));
       }
       return Optional.of(SYSTEM);

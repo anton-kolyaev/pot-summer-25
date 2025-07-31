@@ -8,7 +8,6 @@ import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;

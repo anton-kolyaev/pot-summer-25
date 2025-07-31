@@ -5,7 +5,6 @@ import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +20,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * Represents a company entity in the insurance service domain. Mapped to the "companies" table in

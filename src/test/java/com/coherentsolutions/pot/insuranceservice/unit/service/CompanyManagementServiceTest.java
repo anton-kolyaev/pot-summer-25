@@ -17,7 +17,6 @@ import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.service.CompanyManagementService;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
