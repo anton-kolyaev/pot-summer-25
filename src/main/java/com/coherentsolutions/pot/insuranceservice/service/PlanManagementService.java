@@ -40,7 +40,7 @@ public class PlanManagementService {
 
   @Transactional
   public PlanDto updatePlan(UUID id, PlanDto planDto) {
-    Plan existing = planRepository.findByIdOrThrow(id);
+    Plan existing = planRepository.findAnyByIdOrThrow(id);
 
     validateOnUpdate(existing, planDto);
 

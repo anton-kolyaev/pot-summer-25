@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 public interface PlanRepository extends JpaRepository<Plan, UUID>, JpaSpecificationExecutor<Plan> {
 
-  default Plan findByIdOrThrow(UUID id) {
+  default Plan findAnyByIdOrThrow(UUID id) {
     return findById(id).orElseThrow(() ->
         new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
   }
