@@ -57,7 +57,6 @@ public class InsurancePackageManagementServiceTest {
   @Test
   @DisplayName("Should get insurance packages with filters including status, startDate and endDate")
   void shouldGetInsurancePackagesWithFilters() {
-    // Arrange
     InsurancePackageFilter filter = new InsurancePackageFilter();
     filter.setName("Standard");
     filter.setPayrollFrequency(PayrollFrequency.MONTHLY);
@@ -287,5 +286,146 @@ public class InsurancePackageManagementServiceTest {
 
     verify(insurancePackageRepository).findByIdOrThrow(packageId);
     verifyNoInteractions(insurancePackageMapper);
+  }
+
+  @Test
+  @DisplayName("Should update insurance package")
+  void shouldUpdateInsurancePackageWithCorrectDates() {
+    UUID packageId = UUID.randomUUID();
+
+    InsurancePackage existingPackage = new InsurancePackage();
+    existingPackage.setId(packageId);
+    existingPackage.setStatus(PackageStatus.DEACTIVATED);
+    existingPackage.setStartDate(LocalDate.of(2025, 1, 1));
+    existingPackage.setEndDate(LocalDate.of(2025, 6, 1));
+
+    InsurancePackageDto updateDto = InsurancePackageDto.builder()
+        .name("Updated Plan")
+        .startDate(LocalDate.now().plusDays(1))
+        .endDate(LocalDate.now().plusMonths(2))
+        .payrollFrequency(PayrollFrequency.WEEKLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    InsurancePackage updatedPackage = new InsurancePackage();
+    updatedPackage.setId(packageId);
+    updatedPackage.setName(updateDto.getName());
+    updatedPackage.setStartDate(updateDto.getStartDate());
+    updatedPackage.setEndDate(updateDto.getEndDate());
+    updatedPackage.setPayrollFrequency(updateDto.getPayrollFrequency());
+    updatedPackage.setStatus(updateDto.getStatus());
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(existingPackage);
+    when(insurancePackageRepository.save(existingPackage)).thenReturn(existingPackage);
+    when(insurancePackageMapper.toInsurancePackageDto(existingPackage)).thenReturn(updateDto);
+
+    InsurancePackageDto result = insurancePackageManagementService.updateInsurancePackage(packageId,
+        updateDto);
+
+    assertNotNull(result);
+    assertEquals("Updated Plan", result.getName());
+    assertEquals(updateDto.getStartDate(), result.getStartDate());
+    assertEquals(updateDto.getEndDate(), result.getEndDate());
+    assertEquals(PayrollFrequency.WEEKLY, result.getPayrollFrequency());
+    assertEquals(PackageStatus.INITIALIZED, result.getStatus());
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+    verify(insurancePackageRepository).save(existingPackage);
+    verify(insurancePackageMapper).toInsurancePackageDto(existingPackage);
+  }
+
+  @Test
+  @DisplayName("Should return 400 when updating active insurance package")
+  void shouldReturn400WhenUpdatingActiveInsurancePackage() {
+    UUID packageId = UUID.randomUUID();
+
+    InsurancePackage existingPackage = new InsurancePackage();
+    existingPackage.setId(packageId);
+    existingPackage.setStatus(PackageStatus.ACTIVE);
+    existingPackage.setStartDate(LocalDate.now().minusDays(10));
+    existingPackage.setEndDate(LocalDate.now().plusMonths(1));
+
+    InsurancePackageDto updateDto = InsurancePackageDto.builder()
+        .name("Attempted Update")
+        .startDate(LocalDate.now())
+        .endDate(LocalDate.now().plusMonths(2))
+        .payrollFrequency(PayrollFrequency.MONTHLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(existingPackage);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+      insurancePackageManagementService.updateInsurancePackage(packageId, updateDto);
+    });
+
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
+    assertEquals("Cannot update active insurance package", e.getReason());
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+  }
+
+  @Test
+  @DisplayName("Should return 400 when updating insurance package with start date before today")
+  void shouldReturn400WhenUpdatingInsurancePackageWithStartDateBeforeToday() {
+    UUID packageId = UUID.randomUUID();
+
+    InsurancePackage existingPackage = new InsurancePackage();
+    existingPackage.setId(packageId);
+    existingPackage.setStatus(PackageStatus.DEACTIVATED);
+    existingPackage.setStartDate(LocalDate.now().plusDays(1));
+    existingPackage.setEndDate(LocalDate.now().plusMonths(1));
+
+    InsurancePackageDto updateDto = InsurancePackageDto.builder()
+        .name("Invalid Start Date Update")
+        .startDate(LocalDate.now().minusDays(1))
+        .endDate(LocalDate.now().plusMonths(2))
+        .payrollFrequency(PayrollFrequency.MONTHLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(existingPackage);
+
+    ResponseStatusException e = assertThrows(ResponseStatusException.class, () -> {
+      insurancePackageManagementService.updateInsurancePackage(packageId, updateDto);
+    });
+
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
+    assertEquals("Updated start date cannot be earlier than today", e.getReason());
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+  }
+
+  @Test
+  @DisplayName("Should retain deactivated status when updating deactivated package with same status")
+  void shouldRetainDeactivatedStatusOnUpdate() {
+    UUID packageId = UUID.randomUUID();
+
+    InsurancePackage existingPackage = new InsurancePackage();
+    existingPackage.setId(packageId);
+    existingPackage.setStatus(PackageStatus.DEACTIVATED);
+    existingPackage.setStartDate(LocalDate.now().plusDays(1));
+    existingPackage.setEndDate(LocalDate.now().plusMonths(2));
+
+    InsurancePackageDto updateDto = InsurancePackageDto.builder()
+        .status(PackageStatus.DEACTIVATED)
+        .startDate(existingPackage.getStartDate())
+        .endDate(existingPackage.getEndDate())
+        .build();
+
+    when(insurancePackageRepository.findByIdOrThrow(packageId)).thenReturn(existingPackage);
+    when(insurancePackageRepository.save(existingPackage)).thenReturn(existingPackage);
+    when(insurancePackageMapper.toInsurancePackageDto(existingPackage)).thenReturn(updateDto);
+
+    InsurancePackageDto result = insurancePackageManagementService.updateInsurancePackage(
+        packageId, updateDto);
+
+    assertNotNull(result);
+    assertEquals(PackageStatus.DEACTIVATED, result.getStatus());
+    assertEquals(PackageStatus.DEACTIVATED, existingPackage.getStatus());
+
+    verify(insurancePackageRepository).findByIdOrThrow(packageId);
+    verify(insurancePackageRepository).save(existingPackage);
+    verify(insurancePackageMapper).toInsurancePackageDto(existingPackage);
   }
 }

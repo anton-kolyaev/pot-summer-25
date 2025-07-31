@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
+
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageFilter;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
@@ -9,12 +10,14 @@ import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageSpecification;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -25,6 +28,23 @@ public class InsurancePackageManagementService {
   private final InsurancePackageMapper insurancePackageMapper;
   private final CompanyRepository companyRepository;
 
+  private void validateOnUpdate(InsurancePackage insurancePackage,
+      InsurancePackageDto insurancePackageDto) {
+    if (insurancePackage.getStatus() == PackageStatus.ACTIVE) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Cannot update active insurance package");
+    }
+
+    LocalDate today = LocalDate.now();
+    if (insurancePackageDto.getStartDate() != null
+        && !insurancePackage.getStartDate().isEqual(insurancePackageDto.getStartDate())
+        && insurancePackageDto.getStartDate().isBefore(today)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Updated start date cannot be earlier than today");
+    }
+  }
+
+  @Transactional(readOnly = true)
   public Page<InsurancePackageDto> getInsurancePackagesWithFilters(
       InsurancePackageFilter filter, Pageable pageable) {
     Page<InsurancePackage> insurancePackages = insurancePackageRepository.findAll(
@@ -32,12 +52,13 @@ public class InsurancePackageManagementService {
     return insurancePackages.map(insurancePackageMapper::toInsurancePackageDto);
   }
 
-
+  @Transactional(readOnly = true)
   public InsurancePackageDto getInsurancePackageById(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
 
+  @Transactional
   public InsurancePackageDto createInsurancePackage(
       UUID companyId,
       InsurancePackageDto insurancePackageDto) {
@@ -51,6 +72,7 @@ public class InsurancePackageManagementService {
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
 
+  @Transactional
   public InsurancePackageDto deactivateInsurancePackage(UUID id) {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
 
@@ -63,5 +85,28 @@ public class InsurancePackageManagementService {
 
     return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
   }
+
+  @Transactional
+  public InsurancePackageDto updateInsurancePackage(UUID id,
+      InsurancePackageDto insurancePackageDto) {
+    InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
+
+    validateOnUpdate(insurancePackage, insurancePackageDto);
+
+    insurancePackage.setName(insurancePackageDto.getName());
+    insurancePackage.setStartDate(insurancePackageDto.getStartDate());
+    insurancePackage.setEndDate(insurancePackageDto.getEndDate());
+    insurancePackage.setPayrollFrequency(insurancePackageDto.getPayrollFrequency());
+
+    if (insurancePackageDto.getStatus() == PackageStatus.DEACTIVATED) {
+      insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    } else {
+      insurancePackage.calculateStatus(true);
+    }
+
+    insurancePackageRepository.save(insurancePackage);
+    return insurancePackageMapper.toInsurancePackageDto(insurancePackage);
+  }
+
 
 }
