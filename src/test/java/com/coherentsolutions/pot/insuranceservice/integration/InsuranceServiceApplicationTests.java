@@ -8,7 +8,10 @@ import org.springframework.test.context.TestPropertySource;
 
 
 @SpringBootTest
-@TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
+@TestPropertySource(properties = {
+    "spring.main.allow-bean-definition-overriding=true",
+    "auth0.enabled=false"
+})
 @Import(TestSecurityConfig.class)
 class InsuranceServiceApplicationTests extends PostgresTestContainer {
 

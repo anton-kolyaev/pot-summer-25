@@ -5,6 +5,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,7 +30,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @ActiveProfiles("test")
 @SpringBootTest
 @Import(IntegrationTestConfiguration.class)
@@ -49,17 +52,20 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
   @Autowired
   private ObjectMapper objectMapper;
 
+  private Company createCompany(String name, String email, String website) {
+    Company company = new Company();
+    company.setName(name);
+    company.setEmail(email);
+    company.setCountryCode("USA");
+    company.setWebsite(website);
+    return companyRepository.save(company);
+  }
+
   @Test
   @DisplayName("Should get insurance packages with filters successfully")
   void shouldGetInsurancePackagesWithFilters() throws Exception {
 
-    Company company = new Company();
-    company.setName("Test Company");
-    company.setEmail("test@example.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://test.com");
-    company = companyRepository.save(company);
-    UUID companyId = company.getId();
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
 
     InsurancePackage package1 = new InsurancePackage();
     package1.setName("Standard Health Package");
@@ -84,28 +90,22 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     filter.setPayrollFrequency(PayrollFrequency.MONTHLY);
     filter.setCompanyId(company.getId());
 
-    try {
-      mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
-              .param("name", "standard")
-              .param("payrollFrequency", "MONTHLY")
-              .contentType(APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.content.length()").value(1))
-          .andExpect(jsonPath("$.content[0].name").value("Standard Health Package"));
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    UUID companyId = company.getId();
+
+    mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+            .param("name", "standard")
+            .param("payrollFrequency", "MONTHLY")
+            .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.content[0].name").value("Standard Health Package"));
+
   }
 
   @Test
   @DisplayName("Should return empty page if filter doesn't match any packages")
   void shouldReturnEmptyResultWhenNoMatch() throws Exception {
-    Company company = new Company();
-    company.setName("Empty Filter Co");
-    company.setEmail("empty@example.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://empty.com");
-    company = companyRepository.save(company);
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
 
     InsurancePackage pkg = new InsurancePackage();
     pkg.setName("Invisible Plan");
@@ -122,29 +122,21 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     filter.setPayrollFrequency(PayrollFrequency.WEEKLY);
     filter.setCompanyId(companyId);
 
-    try {
-      mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
-              .param("name", "nonexistent")
-              .param("payrollFrequency", "WEEKLY")
-              .contentType(APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.content").isArray())
-          .andExpect(jsonPath("$.content.length()").value(0));
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+            .param("name", "nonexistent")
+            .param("payrollFrequency", "WEEKLY")
+            .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content").isArray())
+        .andExpect(jsonPath("$.content.length()").value(0));
+
   }
 
 
   @Test
   @DisplayName("Should retrieve Insurance Package by its ID")
   void shouldRetrieveInsurancePackageById() throws Exception {
-    Company company = new Company();
-    company.setName("Retrieve Company");
-    company.setEmail("retrieve@company.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://retrieve.com");
-    company = companyRepository.save(company);
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
 
     InsurancePackage insurancePackage = new InsurancePackage();
     insurancePackage.setName("Gold Health Plan");
@@ -158,18 +150,15 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID companyId = company.getId();
     UUID packageId = insurancePackage.getId();
 
-    try {
-      mockMvc.perform(get("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
-              .contentType(APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.id").value(packageId.toString()))
-          .andExpect(jsonPath("$.name").value("Gold Health Plan"))
-          .andExpect(jsonPath("$.startDate").value("2025-09-01"))
-          .andExpect(jsonPath("$.endDate").value("2025-12-31"))
-          .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"));
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    mockMvc.perform(get("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+            .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(packageId.toString()))
+        .andExpect(jsonPath("$.name").value("Gold Health Plan"))
+        .andExpect(jsonPath("$.startDate").value("2025-09-01"))
+        .andExpect(jsonPath("$.endDate").value("2025-12-31"))
+        .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"));
+
   }
 
   @Test
@@ -178,14 +167,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID companyId = UUID.randomUUID();
     UUID nonExistentPackageId = UUID.randomUUID();
 
-    try {
-      mockMvc.perform(
-              get("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
-                  .contentType(APPLICATION_JSON))
-          .andExpect(status().isNotFound());
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    mockMvc.perform(
+            get("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+
   }
 
   @Test
@@ -198,29 +184,19 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .payrollFrequency(PayrollFrequency.MONTHLY)
         .build();
 
-    Company company = new Company();
-    company.setName("Test Company");
-    company.setEmail("company@example.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://example.com");
-    company = companyRepository.save(company);
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
     UUID companyId = company.getId();
 
-    try {
-      mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
-              .contentType(String.valueOf(APPLICATION_JSON))
-              .content(objectMapper.writeValueAsString(insurancePackageDto)))
-          .andExpect(status().isCreated())
-          .andExpect(jsonPath("$.name").value("Standard Health Package"))
-          .andExpect(jsonPath("$.startDate").value("2025-08-01"))
-          .andExpect(jsonPath("$.endDate").value("2025-12-31"))
-          .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"))
-          .andExpect(jsonPath("$.status").value("INITIALIZED"));
+    mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
+            .contentType(String.valueOf(APPLICATION_JSON))
+            .content(objectMapper.writeValueAsString(insurancePackageDto)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.name").value("Standard Health Package"))
+        .andExpect(jsonPath("$.startDate").value("2025-08-01"))
+        .andExpect(jsonPath("$.endDate").value("2025-12-31"))
+        .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"))
+        .andExpect(jsonPath("$.status").value("INITIALIZED"));
 
-    } finally {
-
-      companyRepository.deleteById(companyId);
-    }
 
   }
 
@@ -233,23 +209,15 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .payrollFrequency(PayrollFrequency.MONTHLY)
         .build();
 
-    Company company = new Company();
-    company.setName("Invalid Name Company");
-    company.setEmail("test@company.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://example.com");
-    company = companyRepository.save(company);
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
 
     UUID companyId = company.getId();
 
-    try {
-      mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
-              .contentType(APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(insurancePackageDto)))
-          .andExpect(status().isBadRequest());
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(insurancePackageDto)))
+        .andExpect(status().isBadRequest());
+
   }
 
   @Test
@@ -262,37 +230,24 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .payrollFrequency(PayrollFrequency.MONTHLY)
         .build();
 
-    Company company = new Company();
-    company.setName("Invalid Date Company");
-    company.setEmail("test@company.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://example.com");
-    company = companyRepository.save(company);
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
 
     UUID companyId = company.getId();
 
-    try {
-      mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
-              .contentType(APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(insurancePackageDto)))
-          .andExpect(status().isBadRequest())
-          .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
-          .andExpect(jsonPath("$.error.details.validationErrors.endDate[0]").value(
-              "End date must be after start date"));
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(insurancePackageDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.error.details.validationErrors.endDate[0]").value(
+            "End date must be after start date"));
+
   }
 
   @Test
   @DisplayName("Should deactivate Insurance Package successfully")
   void shouldDeactivateInsurancePackageSuccessfully() throws Exception {
-    Company company = new Company();
-    company.setName("Deactivate Co");
-    company.setEmail("deactivate@company.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://deactivate.com");
-    company = companyRepository.save(company);
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
 
     InsurancePackage insurancePackage = new InsurancePackage();
     insurancePackage.setName("Deactivation Test Plan");
@@ -306,25 +261,17 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID packageId = insurancePackage.getId();
     UUID companyId = company.getId();
 
-    try {
-      mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
-              .contentType(APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andExpect(jsonPath("$.status").value("DEACTIVATED"));
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+            .contentType(APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.status").value("DEACTIVATED"));
+
   }
 
   @Test
   @DisplayName("Should fail to deactivate already deactivated Insurance Package")
   void shouldFailToDeactivateAlreadyDeactivatedPackage() throws Exception {
-    Company company = new Company();
-    company.setName("Deactivated Co");
-    company.setEmail("deactivated@company.com");
-    company.setCountryCode("USA");
-    company.setWebsite("https://deactivated.com");
-    company = companyRepository.save(company);
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
 
     InsurancePackage insurancePackage = new InsurancePackage();
     insurancePackage.setName("Already Deactivated Plan");
@@ -338,13 +285,10 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID packageId = insurancePackage.getId();
     UUID companyId = company.getId();
 
-    try {
-      mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
-              .contentType(APPLICATION_JSON))
-          .andExpect(status().isBadRequest());
-    } finally {
-      companyRepository.deleteById(companyId);
-    }
+    mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+            .contentType(APPLICATION_JSON))
+        .andExpect(status().isBadRequest());
+
   }
 
   @Test
@@ -357,6 +301,156 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
             delete("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isNotFound());
+  }
+
+  @Test
+  @DisplayName("Should update insurance package")
+  void shouldUpdateInsurancePackageWithCorrectDates() throws Exception {
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Original Plan");
+    insurancePackage.setStartDate(LocalDate.of(2025, 1, 1));
+    insurancePackage.setEndDate(LocalDate.of(2025, 6, 1));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    LocalDate newStartDate = LocalDate.now().plusDays(1);
+    LocalDate newEndDate = LocalDate.now().plusMonths(2);
+
+    InsurancePackageDto updatedDto = InsurancePackageDto.builder()
+        .name("Updated Plan")
+        .startDate(newStartDate)
+        .endDate(newEndDate)
+        .payrollFrequency(PayrollFrequency.WEEKLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    mockMvc.perform(
+            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedDto)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.name").value("Updated Plan"))
+        .andExpect(jsonPath("$.startDate").value(newStartDate.toString()))
+        .andExpect(jsonPath("$.endDate").value(newEndDate.toString()))
+        .andExpect(jsonPath("$.payrollFrequency").value("WEEKLY"))
+        .andExpect(jsonPath("$.status").value("INITIALIZED"));
+
+  }
+
+  @Test
+  @DisplayName("Should fail update validation when end date is before start date")
+  void shouldFailWhenUpdateEndDateBeforeStartDate() throws Exception {
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Invalid Plan");
+    insurancePackage.setStartDate(LocalDate.of(2025, 1, 1));
+    insurancePackage.setEndDate(LocalDate.of(2025, 6, 1));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    LocalDate invalidStartDate = LocalDate.now().plusDays(10);
+    LocalDate invalidEndDate = LocalDate.now().plusDays(5);
+
+    InsurancePackageDto invalidDto = InsurancePackageDto.builder()
+        .name("Invalid Plan")
+        .startDate(invalidStartDate)
+        .endDate(invalidEndDate)
+        .payrollFrequency(PayrollFrequency.WEEKLY)
+        .build();
+
+    mockMvc.perform(
+            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.error.details.validationErrors.endDate[0]").value(
+            "End date must be after start date"));
+
+  }
+
+  @Test
+  @DisplayName("Should return 400 when updating active insurance package")
+  void shouldFailWhenUpdatingActivePackage() throws Exception {
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Active Plan");
+    insurancePackage.setStartDate(LocalDate.now().minusDays(10));
+    insurancePackage.setEndDate(LocalDate.now().plusDays(10));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.ACTIVE);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    InsurancePackageDto updatedDto = InsurancePackageDto.builder()
+        .name("Attempted Update")
+        .startDate(LocalDate.now().plusDays(1))
+        .endDate(LocalDate.now().plusMonths(1))
+        .payrollFrequency(PayrollFrequency.WEEKLY)
+        .status(PackageStatus.ACTIVE)
+        .build();
+
+    mockMvc.perform(
+            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.error.message").value(
+            "400 BAD_REQUEST \"Cannot update active insurance package\""));
+
+  }
+
+  @Test
+  @DisplayName("Should return 400 when updating insurance package with start date before today")
+  void shouldFailWhenUpdatingStartDateBeforeToday() throws Exception {
+    Company company = createCompany("Test Company", "test@example.com", "https://test.com");
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setName("Date Validation Plan");
+    insurancePackage.setStartDate(LocalDate.now().plusDays(5));
+    insurancePackage.setEndDate(LocalDate.now().plusMonths(3));
+    insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
+    insurancePackage.setCompany(company);
+    insurancePackage.setStatus(PackageStatus.INITIALIZED);
+    insurancePackage = insurancePackageRepository.save(insurancePackage);
+
+    UUID companyId = company.getId();
+    UUID packageId = insurancePackage.getId();
+
+    InsurancePackageDto invalidUpdateDto = InsurancePackageDto.builder()
+        .name("Date Validation Plan")
+        .startDate(LocalDate.now().minusDays(1))
+        .endDate(LocalDate.now().plusMonths(3))
+        .payrollFrequency(PayrollFrequency.MONTHLY)
+        .status(PackageStatus.INITIALIZED)
+        .build();
+
+    mockMvc.perform(
+            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidUpdateDto)))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.error.code").value("BAD_REQUEST"))
+        .andExpect(jsonPath("$.error.message").value(
+            "400 BAD_REQUEST \"Updated start date cannot be earlier than today\""));
   }
 
 }
