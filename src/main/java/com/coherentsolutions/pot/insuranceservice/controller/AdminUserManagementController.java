@@ -1,7 +1,9 @@
 package com.coherentsolutions.pot.insuranceservice.controller;
 
+import com.auth0.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
+import com.coherentsolutions.pot.insuranceservice.service.UserInvitationService;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -31,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class AdminUserManagementController {
 
   private final UserManagementService userManagementService;
+  private final UserInvitationService userInvitationService;
 
   /**
    * Creates a new user.
@@ -39,6 +42,28 @@ public class AdminUserManagementController {
   @ResponseStatus(HttpStatus.CREATED)
   public UserDto createUser(@Valid @RequestBody UserDto userDto) {
     return userManagementService.createUser(userDto);
+  }
+
+  /**
+   * Invites a new user via email.
+   * 
+   * This endpoint:
+   * 1. Saves the user to the local database with PENDING status
+   * 2. Creates the user in Auth0 with invitation enabled
+   * 3. Auth0 sends an invitation email to the user
+   * 
+   * @param userDto the user data to invite
+   * @return the created user DTO
+   */
+  @PostMapping("/invite")
+  @ResponseStatus(HttpStatus.CREATED)
+  public UserDto inviteUser(@Valid @RequestBody UserDto userDto) {
+    try {
+      return userInvitationService.inviteUser(userDto);
+    } catch (Auth0Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
+          "Failed to send invitation: " + e.getMessage());
+    }
   }
 
   /**
@@ -72,6 +97,17 @@ public class AdminUserManagementController {
   @PutMapping("/{id}/reactivation")
   public UserDto reactivateUser(@PathVariable("id") UUID id) {
     return userManagementService.reactivateUser(id);
+  }
+
+  /**
+   * Activates a user after they complete the invitation process.
+   * 
+   * @param id the user ID to activate
+   * @return the updated user DTO
+   */
+  @PutMapping("/{id}/activate")
+  public UserDto activateUser(@PathVariable("id") UUID id) {
+    return userInvitationService.activateUser(id);
   }
 
   /**

@@ -167,4 +167,16 @@ public class Auth0UserManagementService {
     UserFilter filter = new UserFilter().withQuery("email:" + email);
     return getUserDtos(filter);
   }
+
+  /**
+   * Creates a new user in Auth0 with invitation enabled.
+   *
+   * @param userDto the user DTO (password can be null for invitation)
+   * @return the created user
+   * @throws Auth0Exception if the operation fails
+   */
+  public User createUserWithInvitation(Auth0UserDto userDto) throws Auth0Exception {
+    User user = auth0UserMapper.toAuth0User(userDto);
+    return createUser(user);
+  }
 } 
