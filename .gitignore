@@ -35,3 +35,21 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Environment Files ###
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+
+### Environment Variables ###
+.env
+.env.local
+.env.*.local
+
+### Auth0 Credential Files ###
+auth0-credentials.txt
+setup-auth0-env.sh
+auth0-secrets.txt
