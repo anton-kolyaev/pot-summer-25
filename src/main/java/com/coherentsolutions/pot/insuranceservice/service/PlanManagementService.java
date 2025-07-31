@@ -9,6 +9,7 @@ import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,31 @@ public class PlanManagementService {
   public PlanDto createPlan(PlanDto planDto) {
     Plan plan = planMapper.toEntity(planDto);
 
-    PlanType planType = planTypeRepository.findById(planDto.getType())
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid plan type"));
+    PlanType planType = planTypeRepository.findByIdOrThrow(planDto.getType());
 
     plan.setType(planType);
 
     Plan saved = planRepository.save(plan);
     return planMapper.toDto(saved);
   }
+
+  @Transactional
+  public PlanDto updatePlan(UUID id, PlanDto planDto) {
+    Plan existing = planRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
+
+    if (!existing.getType().getId().equals(planDto.getType())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Changing plan type is not allowed");
+    }
+
+    existing.setName(planDto.getName());
+    existing.setContribution(planDto.getContribution());
+
+    Plan updated = planRepository.save(existing);
+    return planMapper.toDto(updated);
+  }
+
 
   @Transactional(readOnly = true)
   public List<PlanDto> getPlansWithFilter(PlanFilter filter) {
