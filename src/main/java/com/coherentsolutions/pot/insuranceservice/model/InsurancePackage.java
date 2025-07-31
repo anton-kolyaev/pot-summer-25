@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.model;
 
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
+import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -15,25 +16,19 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "insurance_packages")
-public class InsurancePackage {
+public class InsurancePackage extends Auditable {
 
   @NotNull
   @Enumerated(EnumType.STRING)
@@ -64,22 +59,6 @@ public class InsurancePackage {
   @Enumerated(EnumType.STRING)
   @Column(name = "payroll_frequency", nullable = false, length = 20)
   private PayrollFrequency payrollFrequency;
-
-  @CreatedBy
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @LastModifiedBy
-  @Column(name = "updated_by")
-  private UUID updatedBy;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 
   public void calculateStatus(boolean allowReactivation) {
     if (!allowReactivation && this.status == PackageStatus.DEACTIVATED) {

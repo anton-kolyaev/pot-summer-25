@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
+import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +17,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -26,10 +26,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
 /**
  * Represents a user within the insurance system. A user is associated with a company. This entity
@@ -40,7 +36,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @Getter
 @Setter
 @Table(name = "users")
-public class User {
+public class User extends Auditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -88,21 +84,5 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
       orphanRemoval = true, fetch = FetchType.EAGER)
   private Set<UserFunctionAssignment> functions;
-
-  @CreatedBy
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @LastModifiedBy
-  @Column(name = "updated_by")
-  private UUID updatedBy;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 
 }
