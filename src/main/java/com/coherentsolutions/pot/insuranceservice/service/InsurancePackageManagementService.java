@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
-import static com.coherentsolutions.pot.insuranceservice.model.InsurancePackage.calculateStatus;
 
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageDto;
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageFilter;
@@ -102,7 +101,7 @@ public class InsurancePackageManagementService {
     if (insurancePackageDto.getStatus() == PackageStatus.DEACTIVATED) {
       insurancePackage.setStatus(PackageStatus.DEACTIVATED);
     } else {
-      insurancePackage.setStatus(calculateStatus(insurancePackage, true));
+      insurancePackage.calculateStatus(true);
     }
 
     insurancePackageRepository.save(insurancePackage);

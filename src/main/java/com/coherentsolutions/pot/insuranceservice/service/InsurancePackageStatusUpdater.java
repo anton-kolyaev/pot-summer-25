@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
-import static com.coherentsolutions.pot.insuranceservice.model.InsurancePackage.calculateStatus;
 
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
@@ -23,7 +22,7 @@ public class InsurancePackageStatusUpdater {
     List<InsurancePackage> packages = insurancePackageRepository.findAll();
 
     for (InsurancePackage insurancePackage : packages) {
-      insurancePackage.setStatus(calculateStatus(insurancePackage, false));
+      insurancePackage.calculateStatus(false);
     }
 
     insurancePackageRepository.saveAll(packages);

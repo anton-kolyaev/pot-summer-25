@@ -81,18 +81,17 @@ public class InsurancePackage {
   @Column(name = "updated_at")
   private Instant updatedAt;
 
-  public static PackageStatus calculateStatus(InsurancePackage insurancePackage,
-      boolean allowReactivation) {
-    if (!allowReactivation && insurancePackage.getStatus() == PackageStatus.DEACTIVATED) {
-      return PackageStatus.DEACTIVATED;
+  public void calculateStatus(boolean allowReactivation) {
+    if (!allowReactivation && this.status == PackageStatus.DEACTIVATED) {
+      return;
     }
-    LocalDate now = LocalDate.now();
-    if (now.isBefore(insurancePackage.getStartDate())) {
-      return PackageStatus.INITIALIZED;
-    } else if (!now.isAfter(insurancePackage.getEndDate())) {
-      return PackageStatus.ACTIVE;
+    var now = LocalDate.now();
+    if (now.isBefore(this.startDate)) {
+      this.status = PackageStatus.INITIALIZED;
+    } else if (!now.isAfter(this.endDate)) {
+      this.status = PackageStatus.ACTIVE;
     } else {
-      return PackageStatus.EXPIRED;
+      this.status = PackageStatus.EXPIRED;
     }
   }
 
