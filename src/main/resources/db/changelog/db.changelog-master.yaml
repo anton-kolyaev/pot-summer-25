@@ -17,4 +17,15 @@ databaseChangeLog:
       file: db/changelog/changeset/insert-plan-types.sql
   - include:
       file: db/changelog/on-delete-cascade-insurance-packages.sql
+  - include:
+      file: db/changelog/create-table-revinfo.sql
+  - include:
+      file: db/changelog/create-table-companies_aud.sql
+  - include:
+      file: db/changelog/create-table-user_functions_aud.sql
+  - include:
+      file: db/changelog/create-table-users_aud.sql
+  - include:
+      file: db/changelog/create-sequence-revinfo_seq.sql
+
 
