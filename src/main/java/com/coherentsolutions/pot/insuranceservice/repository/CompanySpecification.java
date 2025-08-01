@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StringUtils;
 
 /**
  * Provides JPA Specifications to filter {@link Company} entities based on various criteria
@@ -26,7 +27,9 @@ public class CompanySpecification {
     List<Specification<Company>> specs = new ArrayList<>();
 
     specs.add(like(filter.getName(), r -> r.get("name")));
-    specs.add(equal(filter.getCountryCode(), r -> r.get("countryCode")));
+    specs.add(equal(
+        StringUtils.hasText(filter.getCountryCode()) ? filter.getCountryCode().toUpperCase() : null,
+        r -> r.get("countryCode")));
     specs.add(equal(filter.getStatus(), r -> r.get("status")));
     specs.add(greaterThanOrEqualTo(filter.getCreatedFrom(), r -> r.get("createdAt")));
     specs.add(lessThanOrEqualTo(filter.getCreatedTo(), r -> r.get("createdAt")));
