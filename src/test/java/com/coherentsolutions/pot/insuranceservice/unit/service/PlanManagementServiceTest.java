@@ -109,7 +109,7 @@ public class PlanManagementServiceTest {
     Plan existingPlan = buildPlan(planId, "Vision Plan", sameType, new BigDecimal("123.45"));
     PlanDto updatedDto = buildPlanDto("Updated Vision Plan", 3, new BigDecimal("456.78"));
 
-    when(planRepository.findActiveByIdOrThrow(planId)).thenReturn(existingPlan);
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
     when(planRepository.save(existingPlan)).thenReturn(existingPlan);
     when(planMapper.toDto(existingPlan)).thenReturn(updatedDto);
 
@@ -120,7 +120,7 @@ public class PlanManagementServiceTest {
     assertEquals(new BigDecimal("456.78"), result.getContribution());
     assertEquals(3, result.getType());
 
-    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planRepository).save(existingPlan);
     verify(planMapper).toDto(existingPlan);
   }
@@ -130,7 +130,7 @@ public class PlanManagementServiceTest {
   void shouldThrowWhenPlanNotFoundForUpdate() {
     UUID planId = UUID.randomUUID();
 
-    when(planRepository.findActiveByIdOrThrow(planId))
+    when(planRepository.findByIdOrThrow(planId))
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -139,7 +139,7 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     assertEquals("Plan not found", exception.getReason());
 
-    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planRepository, never()).save(any());
   }
 
@@ -153,7 +153,7 @@ public class PlanManagementServiceTest {
 
     PlanDto updatedDto = buildPlanDto("Updated Plan", 3, new BigDecimal("999.99")); // new type
 
-    when(planRepository.findActiveByIdOrThrow(planId)).thenReturn(existingPlan);
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
         () -> planManagementService.updatePlan(planId, updatedDto));
@@ -161,7 +161,7 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     assertEquals("Changing plan type is not allowed", exception.getReason());
 
-    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planTypeRepository, never()).findById(any());
     verify(planRepository, never()).save(any());
   }
@@ -261,7 +261,7 @@ public class PlanManagementServiceTest {
 
     PlanDto updatedDto = buildPlanDto("New Plan Name", 2, new BigDecimal("456.78"));
 
-    when(planRepository.findActiveByIdOrThrow(planId)).thenReturn(existingPlan);
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
         () -> planManagementService.updatePlan(planId, updatedDto));
@@ -269,7 +269,7 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     assertEquals("Changing plan type is not allowed", exception.getReason());
 
-    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planTypeRepository, never()).findById(any());
     verify(planRepository, never()).save(any());
   }
@@ -280,13 +280,13 @@ public class PlanManagementServiceTest {
     UUID planId = UUID.randomUUID();
     Plan existingPlan = buildPlan(planId, "Test Plan", planType, new BigDecimal("123.45"));
 
-    when(planRepository.findActiveByIdOrThrow(planId)).thenReturn(existingPlan);
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
     when(planRepository.save(existingPlan)).thenReturn(existingPlan);
 
     planManagementService.softDeletePlan(planId);
 
     assertNotNull(existingPlan.getDeletedAt());  // check that deletedAt is set
-    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planRepository).save(existingPlan);
   }
 
@@ -295,7 +295,7 @@ public class PlanManagementServiceTest {
   void shouldThrowNotFoundWhenSoftDeletingNonExistentPlan() {
     UUID planId = UUID.randomUUID();
 
-    when(planRepository.findActiveByIdOrThrow(planId))
+    when(planRepository.findByIdOrThrow(planId))
         .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -304,7 +304,7 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     assertEquals("Plan not found", exception.getReason());
 
-    verify(planRepository).findActiveByIdOrThrow(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planRepository, never()).save(any());
   }
 

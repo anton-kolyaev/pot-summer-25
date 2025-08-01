@@ -40,7 +40,7 @@ public class PlanManagementService {
 
   @Transactional
   public PlanDto updatePlan(UUID id, PlanDto planDto) {
-    Plan existing = planRepository.findActiveByIdOrThrow(id);
+    Plan existing = planRepository.findByIdOrThrow(id);
 
     validateOnUpdate(existing, planDto);
 
@@ -75,7 +75,7 @@ public class PlanManagementService {
 
   @Transactional
   public void softDeletePlan(UUID id) {
-    Plan plan = planRepository.findActiveByIdOrThrow(id);
+    Plan plan = planRepository.findByIdOrThrow(id);
     plan.setDeletedAt(Instant.now());
     planRepository.save(plan);
   }
