@@ -74,7 +74,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
         });
   }
 
-  private PlanDto buildPlanDto(String name, Integer typeId, BigDecimal contribution, UUID insurancePackageId) {
+  private PlanDto buildPlanDto(String name, Integer typeId, BigDecimal contribution,
+      UUID insurancePackageId) {
     return PlanDto.builder()
         .name(name)
         .type(typeId)
@@ -122,7 +123,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     InsurancePackage testPackage = buildInsurancePackage(testCompany);
 
     PlanDto createRequest = buildPlanDto("Basic Dental Plan", dentalTypeId,
-        new BigDecimal("199.99"),testPackage.getId());
+        new BigDecimal("199.99"), testPackage.getId());
 
     String response = mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +144,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return 400 for invalid plan type")
   void shouldReturnBadRequestForInvalidPlanType() throws Exception {
-    PlanDto createRequest = buildPlanDto("Invalid Type Plan", 9999, new BigDecimal("123.45"),null);
+    PlanDto createRequest = buildPlanDto("Invalid Type Plan", 9999, new BigDecimal("123.45"), null);
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -155,7 +156,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 for negative contribution")
   void shouldReturnBadRequestForNegativeContribution() throws Exception {
     PlanDto createRequest = buildPlanDto("Negative Contribution Plan", dentalTypeId,
-        new BigDecimal("-10.00"),null);
+        new BigDecimal("-10.00"), null);
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -199,7 +200,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return 415 for missing content type")
   void shouldReturnUnsupportedMediaTypeForMissingContentType() throws Exception {
-    PlanDto createRequest = buildPlanDto("No Content Type", dentalTypeId, new BigDecimal("99.99"),null);
+    PlanDto createRequest = buildPlanDto("No Content Type", dentalTypeId, new BigDecimal("99.99"),
+        null);
 
     mockMvc.perform(post(ENDPOINT)
             .content(toJson(createRequest)))
@@ -212,7 +214,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     Company testCompany = buildCompany("Test Company", "test@example.com", "www.test.com");
     InsurancePackage testPackage = buildInsurancePackage(testCompany);
 
-    PlanDto createRequest = buildPlanDto("Original Plan", dentalTypeId, new BigDecimal("150.00"),testPackage.getId());
+    PlanDto createRequest = buildPlanDto("Original Plan", dentalTypeId, new BigDecimal("150.00"),
+        testPackage.getId());
 
     String createResponse = mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -224,7 +227,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
     PlanDto created = objectMapper.readValue(createResponse, PlanDto.class);
 
-    PlanDto updateRequest = buildPlanDto("Updated Plan", dentalTypeId, new BigDecimal("299.99"),testPackage.getId());
+    PlanDto updateRequest = buildPlanDto("Updated Plan", dentalTypeId, new BigDecimal("299.99"),
+        testPackage.getId());
 
     String updateResponse = mockMvc.perform(put(ENDPOINT + "/" + created.getId())
             .contentType(MediaType.APPLICATION_JSON)
@@ -247,7 +251,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   void shouldReturnNotFoundForNonExistentPlan() throws Exception {
     UUID nonExistentId = UUID.randomUUID();
 
-    PlanDto updateRequest = buildPlanDto("Ghost Plan", dentalTypeId, new BigDecimal("123.45"),null);
+    PlanDto updateRequest = buildPlanDto("Ghost Plan", dentalTypeId, new BigDecimal("123.45"),
+        null);
 
     mockMvc.perform(put(ENDPOINT + "/" + nonExistentId)
             .contentType(MediaType.APPLICATION_JSON)
@@ -262,7 +267,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     Company testCompany = buildCompany("Test Company", "test@example.com", "www.test.com");
     InsurancePackage testPackage = buildInsurancePackage(testCompany);
 
-    PlanDto createRequest = buildPlanDto("Temporary Plan", dentalTypeId, new BigDecimal("150.00"),testPackage.getId());
+    PlanDto createRequest = buildPlanDto("Temporary Plan", dentalTypeId, new BigDecimal("150.00"),
+        testPackage.getId());
 
     String createResponse = mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -303,8 +309,10 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     Company testCompany = buildCompany("Test Company", "test@example.com", "www.test.com");
     InsurancePackage testPackage = buildInsurancePackage(testCompany);
 
-    PlanDto plan1 = buildPlanDto("Dental Plan A", dentalTypeId, new BigDecimal("100.00"),testPackage.getId());
-    PlanDto plan2 = buildPlanDto("Dental Plan B", dentalTypeId, new BigDecimal("200.00"),testPackage.getId());
+    PlanDto plan1 = buildPlanDto("Dental Plan A", dentalTypeId, new BigDecimal("100.00"),
+        testPackage.getId());
+    PlanDto plan2 = buildPlanDto("Dental Plan B", dentalTypeId, new BigDecimal("200.00"),
+        testPackage.getId());
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -331,8 +339,10 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     Company testCompany = buildCompany("Test Company", "test@example.com", "www.test.com");
     InsurancePackage testPackage = buildInsurancePackage(testCompany);
 
-    PlanDto plan1 = buildPlanDto("Generic Plan A", dentalTypeId, new BigDecimal("150.00"),testPackage.getId());
-    PlanDto plan2 = buildPlanDto("Generic Plan B", dentalTypeId, new BigDecimal("250.00"),testPackage.getId());
+    PlanDto plan1 = buildPlanDto("Generic Plan A", dentalTypeId, new BigDecimal("150.00"),
+        testPackage.getId());
+    PlanDto plan2 = buildPlanDto("Generic Plan B", dentalTypeId, new BigDecimal("250.00"),
+        testPackage.getId());
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
