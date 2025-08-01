@@ -1,13 +1,12 @@
 package com.coherentsolutions.pot.insuranceservice.repository;
 
+import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.joinEqual;
+
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
 
 public class PlanSpecification {
@@ -16,22 +15,13 @@ public class PlanSpecification {
    * Builds a specification based on the provided filter criteria.
    */
   public static Specification<Plan> withFilter(PlanFilter filter) {
-    return (root, query, cb) -> {
-      List<Predicate> predicates = Stream.of(
-              typeIdPredicate(filter, root, cb)
-          )
-          .filter(Objects::nonNull)
-          .toList();
+    List<Specification<Plan>> specs = new ArrayList<>();
 
-      return predicates.isEmpty()
-          ? cb.conjunction()
-          : cb.and(predicates.toArray(new Predicate[0]));
-    };
-  }
+    specs.add(joinEqual(filter.getTypeId(), "type", "id"));
 
-  private static Predicate typeIdPredicate(PlanFilter filter, Root<Plan> root, CriteriaBuilder cb) {
-    return filter.getTypeId() != null
-        ? cb.equal(root.get("type").get("id"), filter.getTypeId())
-        : null;
+    return specs.stream()
+        .filter(Objects::nonNull)
+        .reduce(Specification::and)
+        .orElse((root, query, cb) -> cb.conjunction());
   }
 }
