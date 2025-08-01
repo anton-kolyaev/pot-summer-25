@@ -28,4 +28,6 @@ public class PlanDto {
   @Positive(message = "Contribution must be positive")
   private BigDecimal contribution;
 
+  private UUID insurancePackageId;
+
 }

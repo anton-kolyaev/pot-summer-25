@@ -14,8 +14,10 @@ import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanTypeDto;
 import com.coherentsolutions.pot.insuranceservice.mapper.PlanMapper;
+import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
+import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.coherentsolutions.pot.insuranceservice.service.PlanManagementService;
@@ -49,6 +51,9 @@ public class PlanManagementServiceTest {
   @Mock
   private PlanMapper planMapper;
 
+  @Mock
+  private InsurancePackageRepository insurancePackageRepository;
+
   @InjectMocks
   private PlanManagementService planManagementService;
 
@@ -66,7 +71,14 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should create a plan when plan type exists")
   void shouldCreatePlanSuccessfully() {
+    UUID insurancePackageId = UUID.randomUUID();
+    planDto.setInsurancePackageId(insurancePackageId);
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+    insurancePackage.setId(insurancePackageId);
+
     doCallRealMethod().when(planTypeRepository).findByIdOrThrow(3);
+    when(insurancePackageRepository.findByIdOrThrow(insurancePackageId)).thenReturn(insurancePackage);
     when(planTypeRepository.findById(3)).thenReturn(Optional.of(planType));
     when(planMapper.toEntity(planDto)).thenReturn(plan);
     when(planRepository.save(Mockito.any(Plan.class))).thenReturn(plan);
@@ -79,6 +91,7 @@ public class PlanManagementServiceTest {
     assertEquals(new BigDecimal("123.45"), result.getContribution());
 
     verify(planTypeRepository).findById(3);
+    verify(insurancePackageRepository).findByIdOrThrow(insurancePackageId);
     verify(planRepository).save(Mockito.any(Plan.class));
     verify(planMapper).toDto(Mockito.any(Plan.class));
   }
