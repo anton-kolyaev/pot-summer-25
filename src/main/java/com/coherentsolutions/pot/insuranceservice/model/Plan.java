@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
@@ -39,6 +40,10 @@ public class Plan {
 
   @Column(name = "contribution", nullable = false)
   private BigDecimal contribution;
+
+  @ManyToOne
+  @JoinColumn(name = "insurance_package_id", nullable = false)
+  private InsurancePackage insurancePackage;
 
   @CreatedBy
   @Column(name = "created_by")
