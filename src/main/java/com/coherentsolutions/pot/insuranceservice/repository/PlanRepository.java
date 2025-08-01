@@ -14,11 +14,4 @@ public interface PlanRepository extends JpaRepository<Plan, UUID>, JpaSpecificat
     return findById(id).orElseThrow(() ->
         new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
   }
-
-  Optional<Plan> findByIdAndDeletedAtIsNull(UUID id);
-
-  default Plan findActiveByIdOrThrow(UUID id) {
-    return findByIdAndDeletedAtIsNull(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
-  }
 }
