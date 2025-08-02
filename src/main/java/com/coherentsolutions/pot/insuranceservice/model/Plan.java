@@ -14,6 +14,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SoftDelete;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -39,6 +40,10 @@ public class Plan {
 
   @Column(name = "contribution", nullable = false)
   private BigDecimal contribution;
+
+  @SoftDelete
+  @Column(name = "deleted_at")
+  private Instant deletedAt;
 
   @CreatedBy
   @Column(name = "created_by")

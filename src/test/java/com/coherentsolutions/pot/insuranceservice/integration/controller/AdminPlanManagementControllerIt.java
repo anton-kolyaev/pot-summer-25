@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -316,5 +317,38 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     mockMvc.perform(get(ENDPOINT + "/plan-types"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(0));
+  }
+
+  @Test
+  @DisplayName("Should soft delete plan successfully")
+  void shouldSoftDeletePlanSuccessfully() throws Exception {
+
+    PlanDto createRequest = buildPlanDto("Soft Delete Plan", dentalTypeId, new BigDecimal("199.99"));
+
+    String createResponse = mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(createRequest)))
+        .andExpect(status().isCreated())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    PlanDto created = objectMapper.readValue(createResponse, PlanDto.class);
+
+    mockMvc.perform(delete(ENDPOINT + "/" + created.getId()))
+        .andExpect(status().isNoContent());
+
+    mockMvc.perform(get(ENDPOINT))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[?(@.id=='" + created.getId() + "')]").doesNotExist());
+  }
+
+  @Test
+  @DisplayName("Should return 404 when trying to delete non-existent or already deleted plan")
+  void shouldReturnNotFoundForDeletingInvalidPlan() throws Exception {
+    UUID nonExistentId = UUID.randomUUID();
+
+    mockMvc.perform(delete(ENDPOINT + "/" + nonExistentId))
+        .andExpect(status().isNotFound());
   }
 }
