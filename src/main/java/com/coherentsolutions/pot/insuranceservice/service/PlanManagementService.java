@@ -76,7 +76,6 @@ public class PlanManagementService {
   @Transactional
   public void softDeletePlan(UUID id) {
     Plan plan = planRepository.findByIdOrThrow(id);
-    plan.setDeletedAt(Instant.now());
-    planRepository.save(plan);
+    planRepository.delete(plan);
   }
 }

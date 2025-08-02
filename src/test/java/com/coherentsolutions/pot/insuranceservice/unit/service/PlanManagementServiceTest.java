@@ -281,13 +281,11 @@ public class PlanManagementServiceTest {
     Plan existingPlan = buildPlan(planId, "Test Plan", planType, new BigDecimal("123.45"));
 
     when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
-    when(planRepository.save(existingPlan)).thenReturn(existingPlan);
 
     planManagementService.softDeletePlan(planId);
 
-    assertNotNull(existingPlan.getDeletedAt());  // check that deletedAt is set
     verify(planRepository).findByIdOrThrow(planId);
-    verify(planRepository).save(existingPlan);
+    verify(planRepository).delete(existingPlan);
   }
 
   @Test
