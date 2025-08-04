@@ -1,6 +1,10 @@
 package com.coherentsolutions.pot.insuranceservice.integration;
 
+import static org.mockito.Mockito.mock;
+
 import com.auth0.client.mgmt.ManagementAPI;
+import com.auth0.client.mgmt.UsersEntity;
+import com.auth0.json.mgmt.users.UsersPage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

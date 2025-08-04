@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

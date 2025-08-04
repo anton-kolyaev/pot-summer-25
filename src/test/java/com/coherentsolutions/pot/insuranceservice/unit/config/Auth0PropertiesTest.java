@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insuranceservice.unit.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import org.junit.jupiter.api.Test;
 
 /**
