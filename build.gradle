@@ -63,21 +63,7 @@ dependencies {
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy jacocoTestReport
-}
-jacocoTestReport {
-    dependsOn test
-}
-jacocoTestCoverageVerification {
-    dependsOn test
-    violationRules {
-        rule {
-            limit{
-                minimum = 0.8
-            }
-        }
-    }
+    enabled = false
 }
 
 tasks.register('unitTest', Test) {
@@ -89,6 +75,7 @@ tasks.register('unitTest', Test) {
 
     useJUnitPlatform()
     include '**/unit/**/*.class'
+
 }
 
 tasks.register('integrationTest', Test) {
@@ -104,9 +91,31 @@ tasks.register('integrationTest', Test) {
     shouldRunAfter tasks.named('unitTest')
 }
 
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+}
+
+jacocoTestCoverageVerification {
+    mustRunAfter tasks.named('unitTest'), tasks.named('integrationTest')
+
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+    }
+
+    executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+}
+
 check {
     dependsOn tasks.named('unitTest')
     dependsOn tasks.named('integrationTest')
     dependsOn tasks.named('jacocoTestCoverageVerification')
 }
-
