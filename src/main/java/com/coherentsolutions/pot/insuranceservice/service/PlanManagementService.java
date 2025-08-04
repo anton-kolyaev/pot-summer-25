@@ -36,8 +36,13 @@ public class PlanManagementService {
 
     plan.setType(planType);
 
-    InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(planDto.getInsurancePackageId());
-    plan.setInsurancePackage(insurancePackage);
+    List<InsurancePackage> packages = insurancePackageRepository.findAllById(planDto.getInsurancePackageIds());
+
+    if (packages.size() != planDto.getInsurancePackageIds().size()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more insurance packages not found");
+    }
+
+    plan.setInsurancePackages(packages);
 
     Plan saved = planRepository.save(plan);
     return planMapper.toDto(saved);

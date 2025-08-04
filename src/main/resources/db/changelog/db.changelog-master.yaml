@@ -18,5 +18,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/on-delete-cascade-insurance-packages.sql
   - include:
-      file: db/changelog/add-insurance-package-to-plan.sql
-
+      file: db/changelog/create-table-insurance-package-plans.sql

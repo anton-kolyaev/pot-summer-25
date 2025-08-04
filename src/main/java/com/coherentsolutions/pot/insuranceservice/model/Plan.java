@@ -6,11 +6,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,9 +42,8 @@ public class Plan {
   @Column(name = "contribution", nullable = false)
   private BigDecimal contribution;
 
-  @ManyToOne
-  @JoinColumn(name = "insurance_package_id", nullable = false)
-  private InsurancePackage insurancePackage;
+  @ManyToMany(mappedBy = "plans")
+  private List<InsurancePackage> insurancePackages;
 
   @CreatedBy
   @Column(name = "created_by")

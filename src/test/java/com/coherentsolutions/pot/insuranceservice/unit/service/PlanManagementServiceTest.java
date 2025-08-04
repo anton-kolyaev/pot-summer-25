@@ -72,13 +72,13 @@ public class PlanManagementServiceTest {
   @DisplayName("Should create a plan when plan type exists")
   void shouldCreatePlanSuccessfully() {
     UUID insurancePackageId = UUID.randomUUID();
-    planDto.setInsurancePackageId(insurancePackageId);
 
     InsurancePackage insurancePackage = new InsurancePackage();
-    insurancePackage.setId(insurancePackageId);
+    planDto.setInsurancePackageIds(List.of(insurancePackageId));
 
     doCallRealMethod().when(planTypeRepository).findByIdOrThrow(3);
-    when(insurancePackageRepository.findByIdOrThrow(insurancePackageId)).thenReturn(insurancePackage);
+    when(insurancePackageRepository.findAllById(List.of(insurancePackageId)))
+        .thenReturn(List.of(insurancePackage));
     when(planTypeRepository.findById(3)).thenReturn(Optional.of(planType));
     when(planMapper.toEntity(planDto)).thenReturn(plan);
     when(planRepository.save(Mockito.any(Plan.class))).thenReturn(plan);
@@ -91,7 +91,7 @@ public class PlanManagementServiceTest {
     assertEquals(new BigDecimal("123.45"), result.getContribution());
 
     verify(planTypeRepository).findById(3);
-    verify(insurancePackageRepository).findByIdOrThrow(insurancePackageId);
+    verify(insurancePackageRepository).findAllById(List.of(insurancePackageId));
     verify(planRepository).save(Mockito.any(Plan.class));
     verify(planMapper).toDto(Mockito.any(Plan.class));
   }

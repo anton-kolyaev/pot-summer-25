@@ -22,6 +22,7 @@ import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -75,12 +76,12 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   }
 
   private PlanDto buildPlanDto(String name, Integer typeId, BigDecimal contribution,
-      UUID insurancePackageId) {
+      UUID... insurancePackageIds) {
     return PlanDto.builder()
         .name(name)
         .type(typeId)
         .contribution(contribution)
-        .insurancePackageId(insurancePackageId)
+        .insurancePackageIds(insurancePackageIds != null ? List.of(insurancePackageIds) : null)
         .build();
   }
 
@@ -144,7 +145,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return 400 for invalid plan type")
   void shouldReturnBadRequestForInvalidPlanType() throws Exception {
-    PlanDto createRequest = buildPlanDto("Invalid Type Plan", 9999, new BigDecimal("123.45"), null);
+    PlanDto createRequest = buildPlanDto("Invalid Type Plan", 9999, new BigDecimal("123.45"), (UUID[]) null);
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -156,7 +157,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 for negative contribution")
   void shouldReturnBadRequestForNegativeContribution() throws Exception {
     PlanDto createRequest = buildPlanDto("Negative Contribution Plan", dentalTypeId,
-        new BigDecimal("-10.00"), null);
+        new BigDecimal("-10.00"), (UUID[]) null);
 
     mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -201,7 +202,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 415 for missing content type")
   void shouldReturnUnsupportedMediaTypeForMissingContentType() throws Exception {
     PlanDto createRequest = buildPlanDto("No Content Type", dentalTypeId, new BigDecimal("99.99"),
-        null);
+        (UUID[]) null);
 
     mockMvc.perform(post(ENDPOINT)
             .content(toJson(createRequest)))
@@ -252,7 +253,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     UUID nonExistentId = UUID.randomUUID();
 
     PlanDto updateRequest = buildPlanDto("Ghost Plan", dentalTypeId, new BigDecimal("123.45"),
-        null);
+        (UUID[]) null);
 
     mockMvc.perform(put(ENDPOINT + "/" + nonExistentId)
             .contentType(MediaType.APPLICATION_JSON)

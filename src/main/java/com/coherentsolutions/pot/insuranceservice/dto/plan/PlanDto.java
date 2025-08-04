@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +29,6 @@ public class PlanDto {
   @Positive(message = "Contribution must be positive")
   private BigDecimal contribution;
 
-  private UUID insurancePackageId;
+  private List<UUID> insurancePackageIds;
 
 }
