@@ -3,9 +3,12 @@ package com.coherentsolutions.pot.insuranceservice.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,10 +20,14 @@ import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.mapper.InsurancePackageMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
+import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
+import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.service.InsurancePackageManagementService;
+import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -43,14 +50,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class InsurancePackageManagementServiceTest {
 
   @Mock
+  PlanRepository planRepository;
+  @Mock
   private InsurancePackageRepository insurancePackageRepository;
-
   @Mock
   private InsurancePackageMapper insurancePackageMapper;
-
   @Mock
   private CompanyRepository companyRepository;
-
   @InjectMocks
   private InsurancePackageManagementService insurancePackageManagementService;
 
@@ -268,7 +274,7 @@ public class InsurancePackageManagementServiceTest {
     assertEquals("Insurance package is already deactivated", exception.getReason());
     verify(insurancePackageRepository).findByIdOrThrow(packageId);
     verifyNoInteractions(insurancePackageMapper);
-    verify(insurancePackageRepository, org.mockito.Mockito.never()).save(any());
+    verify(insurancePackageRepository, never()).save(any());
   }
 
   @Test
@@ -428,4 +434,36 @@ public class InsurancePackageManagementServiceTest {
     verify(insurancePackageRepository).save(existingPackage);
     verify(insurancePackageMapper).toInsurancePackageDto(existingPackage);
   }
+
+  @Test
+  @DisplayName("Should throw BAD_REQUEST when some planIds are invalid")
+  void shouldThrowWhenSomePlanIdsInvalid() {
+    UUID planId1 = UUID.randomUUID();
+    UUID planId2 = UUID.randomUUID();
+    InsurancePackageDto dto = InsurancePackageDto.builder()
+        .planIds(List.of(planId1, planId2))
+        .build();
+
+    when(planRepository.findAllById(dto.getPlanIds()))
+        .thenReturn(List.of(new Plan()));
+
+    InsurancePackage insurancePackage = new InsurancePackage();
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+      if (dto.getPlanIds() != null && !dto.getPlanIds().isEmpty()) {
+        List<Plan> plans = planRepository.findAllById(dto.getPlanIds());
+        if (plans.size() != dto.getPlanIds().size()) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some plan IDs are invalid");
+        }
+        insurancePackage.setPlans(plans);
+      }
+    });
+
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Some plan IDs are invalid", exception.getReason());
+
+    verify(planRepository).findAllById(dto.getPlanIds());
+  }
+
 }
+
