@@ -80,6 +80,33 @@ jacocoTestCoverageVerification {
     }
 }
 
-check {
-    dependsOn jacocoTestCoverageVerification
+tasks.register('unitTest', Test) {
+    description = 'Runs only unit tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform()
+    include '**/unit/**/*.class'
 }
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs only integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform()
+    include '**/integration/**/*.class'
+
+    shouldRunAfter tasks.named('unitTest')
+}
+
+check {
+    dependsOn tasks.named('unitTest')
+    dependsOn tasks.named('integrationTest')
+    dependsOn tasks.named('jacocoTestCoverageVerification')
+}
+
