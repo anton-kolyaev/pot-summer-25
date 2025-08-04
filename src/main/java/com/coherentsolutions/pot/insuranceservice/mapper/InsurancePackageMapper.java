@@ -5,7 +5,6 @@ import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -27,6 +26,6 @@ public interface InsurancePackageMapper {
     }
     return plans.stream()
         .map(Plan::getId)
-        .collect(Collectors.toList());
+        .toList();
   }
 }

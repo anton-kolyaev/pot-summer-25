@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -49,7 +50,7 @@ public class InsurancePackageManagementService {
   }
 
   private void validateAndSetPlans(InsurancePackageDto insurancePackageDto, InsurancePackage insurancePackage) {
-    if (insurancePackageDto.getPlanIds() != null && !insurancePackageDto.getPlanIds().isEmpty()) {
+    if (!CollectionUtils.isEmpty(insurancePackageDto.getPlanIds())) {
       List<Plan> plans = planRepository.findAllById(insurancePackageDto.getPlanIds());
       if (plans.size() != insurancePackageDto.getPlanIds().size()) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some plan IDs are invalid");

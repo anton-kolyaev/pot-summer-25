@@ -1,7 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.dto.insurancepackage;
 
 import com.coherentsolutions.pot.insuranceservice.annotation.ValidateEndDateIsAfterStartDate;
-import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import jakarta.validation.constraints.NotBlank;
