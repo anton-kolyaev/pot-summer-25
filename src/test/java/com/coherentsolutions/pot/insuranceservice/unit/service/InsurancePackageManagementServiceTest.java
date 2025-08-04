@@ -3,10 +3,8 @@ package com.coherentsolutions.pot.insuranceservice.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,9 +23,7 @@ import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.service.InsurancePackageManagementService;
-import java.lang.reflect.Method;
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -51,12 +47,16 @@ public class InsurancePackageManagementServiceTest {
 
   @Mock
   PlanRepository planRepository;
+
   @Mock
   private InsurancePackageRepository insurancePackageRepository;
+
   @Mock
   private InsurancePackageMapper insurancePackageMapper;
+
   @Mock
   private CompanyRepository companyRepository;
+
   @InjectMocks
   private InsurancePackageManagementService insurancePackageManagementService;
 
