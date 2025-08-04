@@ -1,11 +1,13 @@
 package com.coherentsolutions.pot.insuranceservice.dto.insurancepackage;
 
 import com.coherentsolutions.pot.insuranceservice.annotation.ValidateEndDateIsAfterStartDate;
+import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,4 +36,5 @@ public class InsurancePackageDto {
   private PayrollFrequency payrollFrequency;
 
   private PackageStatus status;
+  private List<UUID> planIds;
 }

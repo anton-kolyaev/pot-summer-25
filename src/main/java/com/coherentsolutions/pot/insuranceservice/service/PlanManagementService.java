@@ -4,10 +4,8 @@ import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanTypeDto;
 import com.coherentsolutions.pot.insuranceservice.mapper.PlanMapper;
-import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
-import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
@@ -26,7 +24,6 @@ public class PlanManagementService {
   private final PlanRepository planRepository;
   private final PlanMapper planMapper;
   private final PlanTypeRepository planTypeRepository;
-  private final InsurancePackageRepository insurancePackageRepository;
 
   @Transactional
   public PlanDto createPlan(PlanDto planDto) {
@@ -35,14 +32,6 @@ public class PlanManagementService {
     PlanType planType = planTypeRepository.findByIdOrThrow(planDto.getType());
 
     plan.setType(planType);
-
-    List<InsurancePackage> packages = insurancePackageRepository.findAllById(planDto.getInsurancePackageIds());
-
-    if (packages.size() != planDto.getInsurancePackageIds().size()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more insurance packages not found");
-    }
-
-    plan.setInsurancePackages(packages);
 
     Plan saved = planRepository.save(plan);
     return planMapper.toDto(saved);
