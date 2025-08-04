@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insuranceservice.mapper;
+package com.coherentsolutions.pot.insuranceservice.unit.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.auth0.json.mgmt.users.User;
 import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
+import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
+import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapperImpl;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

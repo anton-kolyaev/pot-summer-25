@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insuranceservice.dto.auth0;
+package com.coherentsolutions.pot.insuranceservice.unit.auth0;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

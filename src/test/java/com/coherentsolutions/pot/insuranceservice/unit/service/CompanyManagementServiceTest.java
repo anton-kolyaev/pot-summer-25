@@ -2,6 +2,9 @@ package com.coherentsolutions.pot.insuranceservice.unit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -10,14 +13,18 @@ import static org.mockito.Mockito.when;
 
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyDto;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyFilter;
+import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyReactivationRequest;
 import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
+import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.mapper.CompanyMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
+import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.service.CompanyManagementService;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,35 +46,31 @@ import org.springframework.web.server.ResponseStatusException;
 @DisplayName("Company Management Service Tests")
 class CompanyManagementServiceTest {
 
-  @Mock
-  private CompanyRepository companyRepository;
+  @Mock private CompanyRepository companyRepository;
+  @Mock private UserRepository userRepository;
+  @Mock private CompanyMapper companyMapper;
 
-  @Mock
-  private CompanyMapper companyMapper;
+  @InjectMocks private CompanyManagementService companyManagementService;
 
-  @InjectMocks
-  private CompanyManagementService companyManagementService;
-
-  private UUID testCompanyId;
+  private UUID companyId;
   private Company testCompany;
   private CompanyDto testCompanyDto;
-  private Address testAddress;
-  private Phone testPhone;
 
   @BeforeEach
   void setUp() {
-    testCompanyId = UUID.randomUUID();
-    testAddress = new Address();
+    companyId = UUID.randomUUID();
+
+    Address testAddress = new Address();
     testAddress.setCountry("USA");
     testAddress.setCity("New York");
     testAddress.setStreet("123 Main St");
 
-    testPhone = new Phone();
+    Phone testPhone = new Phone();
     testPhone.setCode("+1");
     testPhone.setNumber("555-1234");
 
     testCompany = new Company();
-    testCompany.setId(testCompanyId);
+    testCompany.setId(companyId);
     testCompany.setName("Test Company");
     testCompany.setCountryCode("USA");
     testCompany.setEmail("test@company.com");
@@ -79,7 +82,7 @@ class CompanyManagementServiceTest {
     testCompany.setUpdatedAt(Instant.now());
 
     testCompanyDto = CompanyDto.builder()
-        .id(testCompanyId)
+        .id(companyId)
         .name("Test Company")
         .countryCode("USA")
         .email("test@company.com")
@@ -159,11 +162,11 @@ class CompanyManagementServiceTest {
   @DisplayName("Should get company details by ID")
   void shouldGetCompanyDetailsById() {
     // Given
-    when(companyRepository.findByIdOrThrow(testCompanyId)).thenReturn(testCompany);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
     when(companyMapper.toCompanyDto(testCompany)).thenReturn(testCompanyDto);
 
     // When
-    CompanyDto result = companyManagementService.getCompanyDetails(testCompanyId);
+    CompanyDto result = companyManagementService.getCompanyDetails(companyId);
 
     // Then
     // Assertions first
@@ -171,7 +174,7 @@ class CompanyManagementServiceTest {
     assertThat(result).isEqualTo(testCompanyDto);
 
     // Verifications second
-    verify(companyRepository).findByIdOrThrow(testCompanyId);
+    verify(companyRepository).findByIdOrThrow(companyId);
     verify(companyMapper).toCompanyDto(testCompany);
   }
 
@@ -179,18 +182,18 @@ class CompanyManagementServiceTest {
   @DisplayName("Should throw exception when company not found")
   void shouldThrowExceptionWhenCompanyNotFound() {
     // Given
-    when(companyRepository.findByIdOrThrow(testCompanyId)).thenThrow(
+    when(companyRepository.findByIdOrThrow(companyId)).thenThrow(
         new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
 
     // When & Then
     // Assertions first
-    assertThatThrownBy(() -> companyManagementService.getCompanyDetails(testCompanyId))
+    assertThatThrownBy(() -> companyManagementService.getCompanyDetails(companyId))
         .isInstanceOf(ResponseStatusException.class)
         .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND)
         .hasMessage("404 NOT_FOUND \"Company not found\"");
 
     // Verifications second
-    verify(companyRepository).findByIdOrThrow(testCompanyId);
+    verify(companyRepository).findByIdOrThrow(companyId);
   }
 
   @Test
@@ -198,14 +201,14 @@ class CompanyManagementServiceTest {
   void shouldUpdateCompanySuccessfully() {
     // Given
     Company updatedCompany = new Company();
-    updatedCompany.setId(testCompanyId);
+    updatedCompany.setId(companyId);
     updatedCompany.setName("Updated Company");
     updatedCompany.setCountryCode("CAN");
     updatedCompany.setEmail("updated@company.com");
     updatedCompany.setWebsite("https://updatedcompany.com");
 
     CompanyDto updatedCompanyDto = CompanyDto.builder()
-        .id(testCompanyId)
+        .id(companyId)
         .name("Updated Company")
         .countryCode("CAN")
         .email("updated@company.com")
@@ -213,7 +216,7 @@ class CompanyManagementServiceTest {
         .status(CompanyStatus.ACTIVE)
         .build();
 
-    when(companyRepository.findByIdOrThrow(testCompanyId)).thenReturn(testCompany);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
     when(companyRepository.save(any(Company.class))).thenReturn(updatedCompany);
     when(companyMapper.toCompanyDto(updatedCompany)).thenReturn(updatedCompanyDto);
 
@@ -225,7 +228,7 @@ class CompanyManagementServiceTest {
         .build();
 
     // When
-    CompanyDto result = companyManagementService.updateCompany(testCompanyId, updateRequest);
+    CompanyDto result = companyManagementService.updateCompany(companyId, updateRequest);
 
     // Then
     // Assertions first
@@ -236,7 +239,7 @@ class CompanyManagementServiceTest {
     assertThat(result.getWebsite()).isEqualTo("https://updatedcompany.com");
 
     // Verifications second
-    verify(companyRepository).findByIdOrThrow(testCompanyId);
+    verify(companyRepository).findByIdOrThrow(companyId);
     verify(companyRepository).save(any(Company.class));
     verify(companyMapper).toCompanyDto(updatedCompany);
   }
@@ -249,18 +252,207 @@ class CompanyManagementServiceTest {
         .name("Updated Company")
         .build();
 
-    when(companyRepository.findByIdOrThrow(testCompanyId)).thenThrow(
+    when(companyRepository.findByIdOrThrow(companyId)).thenThrow(
         new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
 
     // When & Then
     // Assertions first
-    assertThatThrownBy(() -> companyManagementService.updateCompany(testCompanyId, updateRequest))
+    assertThatThrownBy(() -> companyManagementService.updateCompany(companyId, updateRequest))
         .isInstanceOf(ResponseStatusException.class)
         .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND)
         .hasMessage("404 NOT_FOUND \"Company not found\"");
 
     // Verifications second
-    verify(companyRepository).findByIdOrThrow(testCompanyId);
+    verify(companyRepository).findByIdOrThrow(companyId);
     verify(companyRepository, never()).save(any());
   }
+
+  @Test
+  void deactivateCompanySuccess() {
+    // Given
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+    when(companyRepository.save(any(Company.class))).thenReturn(testCompany);
+    when(companyMapper.toCompanyDto(testCompany)).thenReturn(testCompanyDto);
+
+    // When
+    CompanyDto result = companyManagementService.deactivateCompany(companyId);
+
+    // Then
+    // Assertions first
+    assertNotNull(result);
+    assertEquals(CompanyStatus.DEACTIVATED, testCompany.getStatus());
+
+    // Verifications second
+    verify(companyRepository).findByIdOrThrow(companyId);
+    verify(companyRepository).save(testCompany);
+    verify(userRepository).updateUserStatusByCompanyId(companyId, UserStatus.INACTIVE);
+  }
+
+  @Test
+  void deactivateCompanyCompanyNotFound() {
+    // Given
+    when(companyRepository.findByIdOrThrow(companyId)).thenThrow(
+        new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> companyManagementService.deactivateCompany(companyId));
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("Company not found", exception.getReason());
+  }
+
+  @Test
+  void deactivateCompanyAlreadyDeactivated() {
+    // Given
+    testCompany.setStatus(CompanyStatus.DEACTIVATED);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> companyManagementService.deactivateCompany(companyId));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Company is already deactivated", exception.getReason());
+  }
+
+  @Test
+  void reactivateCompanySuccessAllUsers() {
+    // Given
+    testCompany.setStatus(CompanyStatus.DEACTIVATED);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+    when(companyRepository.save(any(Company.class))).thenReturn(testCompany);
+    when(companyMapper.toCompanyDto(testCompany)).thenReturn(testCompanyDto);
+
+    CompanyReactivationRequest request = new CompanyReactivationRequest(
+        CompanyReactivationRequest.UserReactivationOption.ALL, null);
+
+    // When
+    CompanyDto result = companyManagementService.reactivateCompany(companyId, request);
+
+    // Then
+    // Assertions first
+    assertNotNull(result);
+    assertEquals(CompanyStatus.ACTIVE, testCompany.getStatus());
+
+    // Verifications second
+    verify(companyRepository).findByIdOrThrow(companyId);
+    verify(companyRepository).save(testCompany);
+    verify(userRepository).updateUserStatusByCompanyId(companyId, UserStatus.ACTIVE);
+  }
+
+  @Test
+  void reactivateCompanySuccessSelectedUsers() {
+    // Given
+    testCompany.setStatus(CompanyStatus.DEACTIVATED);
+    List<UUID> selectedUserIds = Arrays.asList(UUID.randomUUID(), UUID.randomUUID());
+
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+    when(companyRepository.save(any(Company.class))).thenReturn(testCompany);
+    when(companyMapper.toCompanyDto(testCompany)).thenReturn(testCompanyDto);
+
+    CompanyReactivationRequest request = new CompanyReactivationRequest(
+        CompanyReactivationRequest.UserReactivationOption.SELECTED, selectedUserIds);
+
+    // When
+    CompanyDto result = companyManagementService.reactivateCompany(companyId, request);
+
+    // Then
+    // Assertions first
+    assertNotNull(result);
+    assertEquals(CompanyStatus.ACTIVE, testCompany.getStatus());
+
+    // Verifications second
+    verify(companyRepository).findByIdOrThrow(companyId);
+    verify(companyRepository).save(testCompany);
+    verify(userRepository).updateUserStatusByIds(selectedUserIds, UserStatus.ACTIVE);
+  }
+
+  @Test
+  void reactivateCompanyCompanyNotFound() {
+    // Given
+    when(companyRepository.findByIdOrThrow(companyId)).thenThrow(
+        new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found"));
+    CompanyReactivationRequest request = new CompanyReactivationRequest(
+        CompanyReactivationRequest.UserReactivationOption.NONE, null);
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> companyManagementService.reactivateCompany(companyId, request));
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("Company not found", exception.getReason());
+  }
+
+  @Test
+  void reactivateCompanyAlreadyActive() {
+    // Given
+    testCompany.setStatus(CompanyStatus.ACTIVE);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+    CompanyReactivationRequest request = new CompanyReactivationRequest(
+        CompanyReactivationRequest.UserReactivationOption.NONE, null);
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> companyManagementService.reactivateCompany(companyId, request));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Company is already active", exception.getReason());
+  }
+
+
+  @Test
+  void reactivateCompanySelectedOptionWithEmptyUserIds() {
+    // Given
+    testCompany.setStatus(CompanyStatus.DEACTIVATED);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+
+    CompanyReactivationRequest request = new CompanyReactivationRequest(
+        CompanyReactivationRequest.UserReactivationOption.SELECTED, null);
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> companyManagementService.reactivateCompany(companyId, request));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Selected user IDs are required when option is SELECTED", exception.getReason());
+  }
+
+  @Test
+  void reactivateCompanySelectedOptionWithEmptyUserIdsList() {
+    // Given
+    testCompany.setStatus(CompanyStatus.DEACTIVATED);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+
+    CompanyReactivationRequest request = new CompanyReactivationRequest(
+        CompanyReactivationRequest.UserReactivationOption.SELECTED, List.of());
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> companyManagementService.reactivateCompany(companyId, request));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Selected user IDs are required when option is SELECTED", exception.getReason());
+  }
+
+  @Test
+  void reactivateCompanyNoneOption() {
+    // Given
+    testCompany.setStatus(CompanyStatus.DEACTIVATED);
+    when(companyRepository.findByIdOrThrow(companyId)).thenReturn(testCompany);
+    when(companyRepository.save(any(Company.class))).thenReturn(testCompany);
+    when(companyMapper.toCompanyDto(testCompany)).thenReturn(testCompanyDto);
+
+    CompanyReactivationRequest request = new CompanyReactivationRequest(
+        CompanyReactivationRequest.UserReactivationOption.NONE, null);
+
+    // When
+    CompanyDto result = companyManagementService.reactivateCompany(companyId, request);
+
+    // Then
+    // Assertions first
+    assertNotNull(result);
+    assertEquals(CompanyStatus.ACTIVE, testCompany.getStatus());
+
+    // Verifications second
+    verify(companyRepository).findByIdOrThrow(companyId);
+    verify(companyRepository).save(testCompany);
+    verify(userRepository, never()).updateUserStatusByCompanyId(any(), any());
+    verify(userRepository, never()).updateUserStatusByIds(any(), any());
+  }
+
 }

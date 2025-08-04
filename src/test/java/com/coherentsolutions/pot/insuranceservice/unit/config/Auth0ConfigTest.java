@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insuranceservice.config;
+package com.coherentsolutions.pot.insuranceservice.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
