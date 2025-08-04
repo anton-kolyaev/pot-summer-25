@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insuranceservice.repository;
 
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.equal;
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.greaterThanOrEqualTo;
-import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.joinEqual;
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.lessThanOrEqualTo;
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.like;
 
@@ -18,7 +17,7 @@ public class InsurancePackageSpecification {
   public static Specification<InsurancePackage> withFilters(InsurancePackageFilter filter) {
     List<Specification<InsurancePackage>> specs = new ArrayList<>();
 
-    specs.add(joinEqual(filter.getCompanyId(), "company", "id"));
+    specs.add(equal(filter.getCompanyId(), r -> r.join("company").get("id")));
     specs.add(like(filter.getName(), r -> r.get("name")));
     specs.add(greaterThanOrEqualTo(filter.getStartDate(), r -> r.get("startDate")));
     specs.add(lessThanOrEqualTo(filter.getEndDate(), r -> r.get("endDate")));

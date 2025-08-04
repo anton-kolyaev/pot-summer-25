@@ -1,8 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.repository;
 
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.equal;
-import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.joinEqual;
-import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.joinIn;
+import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.in;
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.like;
 
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
@@ -26,13 +25,13 @@ public class UserSpecification {
   public static Specification<User> withFilters(UserFilter filter) {
     List<Specification<User>> specs = new ArrayList<>();
 
-    specs.add(joinEqual(filter.getCompanyId(), "company", "id"));
+    specs.add(equal(filter.getCompanyId(), r -> r.join("company").get("id")));
     specs.add(nameLike(filter.getName()));
     specs.add(like(filter.getEmail(), r -> r.get("email")));
     specs.add(equal(filter.getDateOfBirth(), r -> r.get("dateOfBirth")));
     specs.add(equal(filter.getStatus(), r -> r.get("status")));
     specs.add(like(filter.getSsn(), r -> r.get("ssn")));
-    specs.add(joinIn(filter.getFunctions(), "functions", "function"));
+    specs.add(in(filter.getFunctions(), r -> r.join("functions").get("function")));
 
     return specs.stream()
         .filter(Objects::nonNull)

@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insuranceservice.repository;
 
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 import java.util.Collection;
@@ -51,33 +50,14 @@ public class SpecificationBuilder {
     };
   }
 
-  public static <EntityT, ValueTypeT> Specification<EntityT> joinEqual(
-      ValueTypeT value,
-      String joinColumn,
-      String attribute
-  ) {
-    return (root, query, criteriaBuilder) -> {
-      if (value == null) {
-        return null;
-      }
-      Join<EntityT, ?> join = root.join(joinColumn);
-
-      return criteriaBuilder.equal(join.get(attribute), value);
-    };
-  }
-
-  public static <EntityT, ValueTypeT> Specification<EntityT> joinIn(
+  public static <EntityT, ValueTypeT> Specification<EntityT> in(
       Collection<ValueTypeT> values,
-      String joinColumn,
-      String attribute
-  ) {
+      Function<Root<EntityT>, Path<ValueTypeT>> columnPath) {
     return (root, query, criteriaBuilder) -> {
       if (values == null || values.isEmpty()) {
         return null;
       }
-
-      Join<EntityT, ?> join = root.join(joinColumn);
-      return join.get(attribute).in(values);
+      return columnPath.apply(root).in(values);
     };
   }
 
