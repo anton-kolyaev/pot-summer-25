@@ -97,7 +97,7 @@ jacocoTestReport {
         html.required = true
     }
 
-    executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+    executionData.setFrom(fileTree(rootProject.layout.buildDirectory).include("/jacoco/*.exec"))
 }
 
 jacocoTestCoverageVerification {
@@ -111,7 +111,7 @@ jacocoTestCoverageVerification {
         }
     }
 
-    executionData.setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+    executionData.setFrom(fileTree(rootProject.layout.buildDirectory).include("/jacoco/*.exec"))
 }
 
 check {
