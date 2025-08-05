@@ -66,6 +66,7 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should create a plan when plan type exists")
   void shouldCreatePlanSuccessfully() {
+
     doCallRealMethod().when(planTypeRepository).findByIdOrThrow(3);
     when(planTypeRepository.findById(3)).thenReturn(Optional.of(planType));
     when(planMapper.toEntity(planDto)).thenReturn(plan);

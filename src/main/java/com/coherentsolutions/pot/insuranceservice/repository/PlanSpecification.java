@@ -18,8 +18,7 @@ public class PlanSpecification {
   public static Specification<Plan> withFilter(PlanFilter filter) {
     return (root, query, cb) -> {
       List<Predicate> predicates = Stream.of(
-              typeIdPredicate(filter, root, cb),
-              notDeletedPredicate(root, cb)
+              typeIdPredicate(filter, root, cb)
           )
           .filter(Objects::nonNull)
           .toList();
@@ -35,9 +34,4 @@ public class PlanSpecification {
         ? cb.equal(root.get("type").get("id"), filter.getTypeId())
         : null;
   }
-
-  private static Predicate notDeletedPredicate(Root<Plan> root, CriteriaBuilder cb) {
-    return cb.isNull(root.get("deletedAt"));
-  }
 }
-

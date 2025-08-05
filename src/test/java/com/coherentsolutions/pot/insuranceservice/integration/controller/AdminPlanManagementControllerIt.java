@@ -84,6 +84,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should create plan successfully")
   void shouldCreatePlanSuccessfully() throws Exception {
+
     PlanDto createRequest = buildPlanDto("Basic Dental Plan", dentalTypeId,
         new BigDecimal("199.99"));
 
@@ -256,7 +257,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return plans filtered by type")
   void shouldReturnPlansFilteredByType() throws Exception {
-    // Given
+
     PlanDto plan1 = buildPlanDto("Dental Plan A", dentalTypeId, new BigDecimal("100.00"));
     PlanDto plan2 = buildPlanDto("Dental Plan B", dentalTypeId, new BigDecimal("200.00"));
 
@@ -282,6 +283,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return all plans when no filter is provided")
   void shouldReturnAllPlansWithoutFilter() throws Exception {
+
     PlanDto plan1 = buildPlanDto("Generic Plan A", dentalTypeId, new BigDecimal("150.00"));
     PlanDto plan2 = buildPlanDto("Generic Plan B", dentalTypeId, new BigDecimal("250.00"));
 
