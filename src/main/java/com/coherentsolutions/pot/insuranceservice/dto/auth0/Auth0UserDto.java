@@ -27,6 +27,9 @@ public class Auth0UserDto {
   @Email(message = "Email must be valid")
   private String email;
 
+  @Size(min = 8, message = "Password must be at least 8 characters long")
+  private String password;
+
   @NotBlank(message = "Name is required")
   @Size(max = 100, message = "Name must not exceed 100 characters")
   private String name;
@@ -53,6 +56,13 @@ public class Auth0UserDto {
   // Constructor for required fields
   public Auth0UserDto(String email, String name) {
     this.email = email;
+    this.name = name;
+  }
+
+  // Constructor for required fields with password
+  public Auth0UserDto(String email, String password, String name) {
+    this.email = email;
+    this.password = password;
     this.name = name;
   }
 } 

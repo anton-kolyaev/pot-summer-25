@@ -51,9 +51,6 @@ public class AdminUserManagementController {
    * 1. Saves the user to the local database with PENDING status
    * 2. Creates the user in Auth0 with invitation enabled
    * 3. Auth0 sends an invitation email to the user
-   * 
-   * @param userDto the user data to invite
-   * @return the created user DTO
    */
   @PostMapping("/invite")
   @ResponseStatus(HttpStatus.CREATED)
@@ -101,9 +98,6 @@ public class AdminUserManagementController {
 
   /**
    * Activates a user after they complete the invitation process.
-   * 
-   * @param id the user ID to activate
-   * @return the updated user DTO
    */
   @PutMapping("/{id}/activate")
   public UserDto activateUser(@PathVariable("id") UUID id) {

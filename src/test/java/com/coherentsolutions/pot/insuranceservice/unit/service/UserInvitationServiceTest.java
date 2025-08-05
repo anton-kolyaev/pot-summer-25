@@ -182,7 +182,7 @@ public class UserInvitationServiceTest {
 
     // Then
     assertNotNull(result);
-    assertEquals(email, result.getEmail());
+    assertEquals(userDto, result);
     verify(userRepository).findByEmail(email);
     verify(userMapper).toDto(user);
   }

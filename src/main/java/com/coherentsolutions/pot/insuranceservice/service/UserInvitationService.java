@@ -65,6 +65,7 @@ public class UserInvitationService {
     // Create Auth0 user with invitation
     Auth0UserDto auth0UserDto = new Auth0UserDto(
         userDto.getEmail(), 
+        null, // No password for invitation
         userDto.getFirstName() + " " + userDto.getLastName()
     );
     
