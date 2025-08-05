@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insuranceservice.integration;
 
-import com.auth0.client.mgmt.ManagementAPI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
