@@ -177,6 +177,17 @@ public class Auth0UserManagementService {
    */
   public User createUserWithInvitation(Auth0UserDto userDto) throws Auth0Exception {
     User user = auth0UserMapper.toAuth0User(userDto);
+    
+    // Configure user for invitation
+    user.setEmailVerified(false);
+    user.setPassword((char[]) null); // No password for invitation
+    user.setConnection("Username-Password-Authentication");
+    
+    // Auth0 will automatically send invitation email when:
+    // 1. email_verified is false
+    // 2. password is null
+    // 3. User is created via Management API
+    
     return createUser(user);
   }
 } 
