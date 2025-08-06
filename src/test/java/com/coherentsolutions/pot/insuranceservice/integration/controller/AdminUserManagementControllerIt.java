@@ -1,6 +1,8 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.auth0.exception.Auth0Exception;
+import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
@@ -20,6 +24,7 @@ import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
+import com.coherentsolutions.pot.insuranceservice.service.Auth0UserManagementService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.List;
@@ -29,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -71,6 +77,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     TEST_PHONE.setCode("+1");
     TEST_PHONE.setNumber("00000000");
   }
+
+  @MockBean
+  private Auth0UserManagementService auth0UserManagementService;
 
   private Company createAndSaveTestCompany() {
     Company company = new Company();
@@ -122,10 +131,26 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
         .addressData(List.of(TEST_ADDRESS))
         .phoneData(List.of(TEST_PHONE))
         .companyId(company.getId())
-        .status(UserStatus.ACTIVE)
+        .status(UserStatus.INACTIVE) // Users are created with INACTIVE status for invitation flow
         .dateOfBirth(LocalDate.of(1992, 3, 14))
         .ssn(TEST_SSN)
         .build();
+
+    // Setup mock behavior for Auth0 user creation
+    try {
+      when(auth0UserManagementService.createUserWithInvitation(any(Auth0UserDto.class)))
+          .thenAnswer(invocation -> {
+            // Create a mock Auth0 User object
+            com.auth0.json.mgmt.users.User mockAuth0User = new com.auth0.json.mgmt.users.User();
+            mockAuth0User.setId("auth0|mock-user-id");
+            mockAuth0User.setEmail(userDto.getEmail());
+            mockAuth0User.setName(userDto.getFirstName() + " " + userDto.getLastName());
+            mockAuth0User.setEmailVerified(false);
+            return mockAuth0User;
+          });
+    } catch (Auth0Exception e) {
+      // This should not happen in the test
+    }
 
     try {
       mockMvc.perform(post(BASE_URL)
@@ -134,7 +159,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
           .andExpect(status().isCreated())
           .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
           .andExpect(jsonPath("$.username").value(TEST_USERNAME))
-          .andExpect(jsonPath("$.companyId").value(company.getId().toString()));
+          .andExpect(jsonPath("$.companyId").value(company.getId().toString()))
+          .andExpect(jsonPath("$.status").value("INACTIVE")); // User created with INACTIVE status for invitation
     } finally {
       userRepository.deleteAll();
       companyRepository.deleteById(company.getId());

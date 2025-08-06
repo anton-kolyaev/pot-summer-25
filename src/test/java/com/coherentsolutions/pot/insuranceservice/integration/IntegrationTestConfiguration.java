@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Primary;
 
 /**
  * Test configuration for integration tests. Provides custom ObjectMapper with JavaTimeModule
- * support and mocked ManagementAPI for Auth0 integration tests.
+ * support.
  */
 @TestConfiguration
 @Import({TestSecurityConfig.class, MockMvcTestConfig.class})

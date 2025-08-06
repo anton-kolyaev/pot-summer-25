@@ -9,7 +9,6 @@ import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

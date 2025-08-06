@@ -15,7 +15,6 @@ import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.mapper.UserMapper;
 import com.coherentsolutions.pot.insuranceservice.model.User;
-import com.coherentsolutions.pot.insuranceservice.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0UserManagementService;
 import com.coherentsolutions.pot.insuranceservice.service.UserInvitationService;

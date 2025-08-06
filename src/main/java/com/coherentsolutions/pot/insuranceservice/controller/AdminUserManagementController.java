@@ -36,30 +36,22 @@ public class AdminUserManagementController {
   private final UserInvitationService userInvitationService;
 
   /**
-   * Creates a new user.
+   * Creates a new user with invitation via email.
+   * 
+   * This endpoint:
+   * 1. Saves the user to the local database with INACTIVE status
+   * 2. Creates the user in Auth0 with invitation enabled (no password)
+   * 3. Auth0 sends an invitation email to the user
+   * 4. User activates account and creates password via email link
    */
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-    return userManagementService.createUser(userDto);
-  }
-
-  /**
-   * Invites a new user via email.
-   * 
-   * This endpoint:
-   * 1. Saves the user to the local database with INACTIVE status
-   * 2. Creates the user in Auth0 with invitation enabled
-   * 3. Auth0 sends an invitation email to the user
-   */
-  @PostMapping("/invite")
-  @ResponseStatus(HttpStatus.CREATED)
-  public UserDto inviteUser(@Valid @RequestBody UserDto userDto) {
     try {
       return userInvitationService.inviteUser(userDto);
     } catch (Auth0Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, 
-          "Failed to send invitation: " + e.getMessage());
+          "Failed to create user with invitation: " + e.getMessage());
     }
   }
 
