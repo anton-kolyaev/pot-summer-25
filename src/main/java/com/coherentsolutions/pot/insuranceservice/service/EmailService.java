@@ -29,9 +29,13 @@ public class EmailService {
   /**
    * Sends an invitation email to a new user.
    * 
+   *
    * @param toEmail the recipient email address
+   *
    * @param userName the user's name
+   *
    * @param invitationUrl the invitation URL for setting up the account
+   *
    * @param companyName the company name (optional)
    */
   public void sendInvitationEmail(String toEmail, String userName, String invitationUrl, String companyName) {
@@ -54,8 +58,11 @@ public class EmailService {
   /**
    * Sends a real email using Spring Boot Mail.
    * 
+   *
    * @param toEmail the recipient email
+   *
    * @param subject the email subject
+   *
    * @param content the email content
    */
   private void sendRealEmail(String toEmail, String subject, String content) {
@@ -83,9 +90,13 @@ public class EmailService {
   /**
    * Logs email content as fallback when real email sending is not available.
    * 
+   *
    * @param toEmail the recipient email
+   *
    * @param subject the email subject
+   *
    * @param content the email content
+   *
    * @param type the email type (INVITATION or PASSWORD_RESET)
    */
   private void logEmailContent(String toEmail, String subject, String content, String type) {
@@ -101,7 +112,9 @@ public class EmailService {
   /**
    * Builds the invitation email subject.
    * 
+   *
    * @param companyName the company name
+   *
    * @return the email subject
    */
   private String buildInvitationSubject(String companyName) {
@@ -114,9 +127,13 @@ public class EmailService {
   /**
    * Builds the invitation email content.
    * 
+   *
    * @param userName the user's name
+   *
    * @param invitationUrl the invitation URL
+   *
    * @param companyName the company name
+   *
    * @return the email content
    */
   private String buildInvitationEmailContent(String userName, String invitationUrl, String companyName) {
@@ -150,8 +167,11 @@ public class EmailService {
   /**
    * Sends a password reset email.
    * 
+   *
    * @param toEmail the recipient email address
+   *
    * @param userName the user's name
+   *
    * @param resetUrl the password reset URL
    */
   public void sendPasswordResetEmail(String toEmail, String userName, String resetUrl) {
@@ -174,8 +194,11 @@ public class EmailService {
   /**
    * Builds the password reset email content.
    * 
+   *
    * @param userName the user's name
+   *
    * @param resetUrl the reset URL
+   *
    * @return the email content
    */
   private String buildPasswordResetEmailContent(String userName, String resetUrl) {

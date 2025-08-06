@@ -90,8 +90,11 @@ public class AdminUserManagementController {
   /**
    * Resends invitation email to the user.
    * 
+   *
    * @param id the user ID
+   *
    * @param auth0UserId the Auth0 user ID
+   *
    * @param email the user's email
    */
   @PostMapping("/{id}/resend-invitation")

@@ -4,8 +4,6 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0InvitationDto;
 import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
-import com.coherentsolutions.pot.insuranceservice.mapper.UserMapper;
-import com.coherentsolutions.pot.insuranceservice.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +37,9 @@ public class UserInvitationService {
    * 2. Creates the user in Auth0 with invitation email
    * 3. Handles rollback if Auth0 creation fails
    * 
+   *
    * @param userDto the user data to create
+   *
    * @return the created user DTO
    * @throws Auth0Exception if Auth0 invitation creation fails
    */
@@ -74,7 +74,9 @@ public class UserInvitationService {
   /**
    * Builds an Auth0InvitationDto from UserDto.
    * 
+   *
    * @param userDto the user DTO
+   *
    * @return the invitation DTO
    */
   private Auth0InvitationDto buildInvitationDto(UserDto userDto) {
@@ -90,7 +92,9 @@ public class UserInvitationService {
   /**
    * Builds user metadata for Auth0 from UserDto.
    * 
+   *
    * @param userDto the user DTO
+   *
    * @return the user metadata map
    */
   private java.util.Map<String, Object> buildUserMetadata(UserDto userDto) {
@@ -112,8 +116,11 @@ public class UserInvitationService {
   /**
    * Resends invitation email to an existing user.
    * 
+   *
    * @param userId the local user ID
+   *
    * @param auth0UserId the Auth0 user ID
+   *
    * @param email the user's email
    * @throws Auth0Exception if resending invitation fails
    */
@@ -135,7 +142,9 @@ public class UserInvitationService {
   /**
    * Checks if a user exists in both local database and Auth0.
    * 
+   *
    * @param email the email to check
+   *
    * @return true if user exists in both systems, false otherwise
    */
   public boolean userExists(String email) {
