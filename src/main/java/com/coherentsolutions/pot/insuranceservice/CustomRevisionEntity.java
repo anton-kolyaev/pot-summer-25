@@ -21,7 +21,13 @@ import org.hibernate.envers.RevisionEntity;
 @Setter
 public class CustomRevisionEntity extends DefaultRevisionEntity {
 
-  @Column(name = "timestamp")
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "revinfo_seq")
+  @SequenceGenerator(name = "revinfo_seq", sequenceName = "revinfo_seq", allocationSize = 1)
+  @Column(name = "id")
+  private int id;
+
+  @Column(name = "revtstmp", nullable = false)
   private long timestamp;
 
   @Column(name = "created_by")

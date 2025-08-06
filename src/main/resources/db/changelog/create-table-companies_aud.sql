@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS companies_aud (
-    id UUID NOT NULL,
-    rev INTEGER NOT NULL,
+    id UUID,
+    rev INTEGER,
     revtype SMALLINT,
-    name VARCHAR(255) NOT NULL,
-    country_code VARCHAR(3) NOT NULL,
+    name VARCHAR(255),
+    country_code VARCHAR(3),
     phone_data JSONB,
     address_data JSONB,
     email VARCHAR(255),
