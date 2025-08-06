@@ -23,7 +23,6 @@ import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
