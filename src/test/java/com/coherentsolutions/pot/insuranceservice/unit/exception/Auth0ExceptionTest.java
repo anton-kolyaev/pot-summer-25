@@ -1,8 +1,9 @@
-package com.coherentsolutions.pot.insuranceservice.exception;
+package com.coherentsolutions.pot.insuranceservice.unit.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import org.junit.jupiter.api.Test;
 
 /**

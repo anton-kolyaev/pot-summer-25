@@ -1,4 +1,4 @@
-package com.coherentsolutions.pot.insuranceservice.config;
+package com.coherentsolutions.pot.insuranceservice.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,6 +12,8 @@ import com.auth0.client.mgmt.GrantsEntity;
 import com.auth0.client.mgmt.ManagementAPI;
 import com.auth0.exception.Auth0Exception;
 import com.auth0.net.Request;
+import com.coherentsolutions.pot.insuranceservice.config.Auth0HealthIndicator;
+import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
