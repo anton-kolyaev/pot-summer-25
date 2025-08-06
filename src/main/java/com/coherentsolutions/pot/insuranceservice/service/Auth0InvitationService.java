@@ -8,6 +8,7 @@ import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,9 @@ public class Auth0InvitationService {
   private final ManagementAPI managementAPI;
   private final Auth0UserMapper auth0UserMapper;
   private final EmailService emailService;
+  
+  @Value("${auth0.domain:}")
+  private String auth0Domain;
 
   /**
    * Creates a new user in Auth0 with invitation email using password change ticket.
@@ -74,12 +78,19 @@ public class Auth0InvitationService {
    * @throws com.auth0.exception.Auth0Exception if user creation fails
    */
   private User createAuth0UserWithoutPassword(Auth0InvitationDto invitationDto) throws com.auth0.exception.Auth0Exception {
+    log.info("Creating Auth0 user with email: {}, name: {}, connection: {}", 
+             invitationDto.getEmail(), invitationDto.getName(), invitationDto.getConnection());
+    
     User user = new User();
     user.setEmail(invitationDto.getEmail());
     user.setName(invitationDto.getName());
     user.setConnection(invitationDto.getConnection());
     user.setEmailVerified(false); // Important: email is not verified initially
     user.setBlocked(false);
+    
+    // Auth0 requires a password, so we set a secure temporary one
+    // The user will change it via the invitation flow
+    user.setPassword("SecurePassword123!".toCharArray());
     
     // Set user metadata if provided
     if (invitationDto.getUserMetadata() != null) {
@@ -97,7 +108,16 @@ public class Auth0InvitationService {
     }
     user.getAppMetadata().put("invitedToMyApp", true);
     
-    return managementAPI.users().create(user).execute().getBody();
+    try {
+      User createdUser = managementAPI.users().create(user).execute().getBody();
+      log.info("Successfully created Auth0 user with ID: {}", createdUser.getId());
+      return createdUser;
+    } catch (Auth0Exception e) {
+      log.error("Failed to create Auth0 user. Error: {}", e.getMessage());
+      log.error("User data: email={}, name={}, connection={}", 
+                invitationDto.getEmail(), invitationDto.getName(), invitationDto.getConnection());
+      throw e;
+    }
   }
 
   /**
@@ -106,7 +126,7 @@ public class Auth0InvitationService {
    * @param userId the Auth0 user ID
    * @param invitationDto the invitation data
    * @return the ticket URL for the invitation
-   * @throws com.auth0.exception.Auth0Exception if ticket creation fails
+   * @throws Auth0Exception if ticket creation fails
    */
   private String createPasswordChangeTicket(String userId, Auth0InvitationDto invitationDto) throws com.auth0.exception.Auth0Exception {
     log.info("Creating password change ticket for user: {}", userId);
@@ -115,11 +135,10 @@ public class Auth0InvitationService {
     // In a production environment, you would integrate with Auth0's password change ticket API
     // or use a custom email service to send the invitation
     
-    // Create a custom invitation URL (this is a placeholder - replace with actual Auth0 ticket URL)
-    // You would typically get the Auth0 domain from your configuration
-    String auth0Domain = "your-domain.auth0.com"; // Replace with actual Auth0 domain from config
-    String ticketUrl = "https://" + auth0Domain + "/login?client_id=" + invitationDto.getClientId() + 
-                      "&response_type=code&redirect_uri=" + invitationDto.getInvitationUrl() +
+    // Create a custom invitation URL using the actual Auth0 domain
+    String domain = auth0Domain != null && !auth0Domain.isEmpty() ? auth0Domain : "your-domain.auth0.com";
+    String ticketUrl = "https://" + domain + "/login?client_id=" + invitationDto.getClientId() + 
+                      "&response_type=code&redirect_uri=" + (invitationDto.getInvitationUrl() != null ? invitationDto.getInvitationUrl() : "http://localhost:3000/callback") +
                       "&scope=openid profile email&state=invitation&user_id=" + userId;
     
     // Add query parameters to customize the password reset UI

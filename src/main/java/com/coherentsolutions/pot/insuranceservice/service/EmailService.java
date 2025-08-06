@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insuranceservice.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,12 +10,13 @@ import org.springframework.stereotype.Service;
  * <p>This service handles email sending functionality for the application,
  * including invitation emails for new user registration.
  * 
- * <p>Note: This is a simplified implementation that logs email content.
- * In production, you would integrate with a proper email service provider.
+ * <p>Note: This implementation logs email content. To enable real email sending:
+ * 1. Add spring.mail.host to application.yml
+ * 2. Configure SMTP settings
+ * 3. Replace this service with one that uses JavaMailSender
  */
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "spring.mail.host", matchIfMissing = false)
 public class EmailService {
   
   @Value("${app.invitation.expiration-hours:24}")
@@ -47,8 +47,8 @@ public class EmailService {
       log.info("Successfully logged invitation email to: {}", toEmail);
       
     } catch (Exception e) {
-      log.error("Failed to process invitation email to: {}", toEmail, e);
-      throw new RuntimeException("Failed to process invitation email: " + e.getMessage(), e);
+      log.error("Failed to send invitation email to: {}", toEmail, e);
+      throw new RuntimeException("Failed to send invitation email: " + e.getMessage(), e);
     }
   }
 
@@ -125,8 +125,8 @@ public class EmailService {
       log.info("Successfully logged password reset email to: {}", toEmail);
       
     } catch (Exception e) {
-      log.error("Failed to process password reset email to: {}", toEmail, e);
-      throw new RuntimeException("Failed to process password reset email: " + e.getMessage(), e);
+      log.error("Failed to send password reset email to: {}", toEmail, e);
+      throw new RuntimeException("Failed to send password reset email: " + e.getMessage(), e);
     }
   }
 

@@ -8,6 +8,7 @@ import com.coherentsolutions.pot.insuranceservice.mapper.UserMapper;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,9 @@ public class UserInvitationService {
 
   private final UserManagementService userManagementService;
   private final Auth0InvitationService auth0InvitationService;
+  
+  @Value("${AUTH0_CLIENT_ID:}")
+  private String auth0ClientId;
 
   /**
    * Creates a new user with invitation flow.
@@ -77,6 +81,8 @@ public class UserInvitationService {
     return Auth0InvitationDto.builder()
         .email(userDto.getEmail())
         .name(userDto.getFirstName() + " " + userDto.getLastName())
+        .connection("Username-Password-Authentication") // Required for Auth0 user creation
+        .clientId(auth0ClientId) // Set client ID for invitation URL
         .userMetadata(buildUserMetadata(userDto))
         .build();
   }
