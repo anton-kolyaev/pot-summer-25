@@ -131,20 +131,25 @@ public class Auth0InvitationService {
   private String createPasswordChangeTicket(String userId, Auth0InvitationDto invitationDto) throws com.auth0.exception.Auth0Exception {
     log.info("Creating password change ticket for user: {}", userId);
     
-    // Create a proper invitation URL using Auth0's Universal Login
+    // Create a custom invitation URL that uses our application's email service
+    // This bypasses Auth0's email system and uses our configured SMTP
     String domain = auth0Domain != null && !auth0Domain.isEmpty() ? auth0Domain : "your-domain.auth0.com";
     
-    // Use Auth0's Universal Login with invitation parameters
+    // Use Auth0's Universal Login with custom invitation flow
     String ticketUrl = "https://" + domain + "/authorize?client_id=" + invitationDto.getClientId();
     
-    // Add invitation-specific parameters
+    // Add standard OAuth parameters
     ticketUrl += "&response_type=code";
     ticketUrl += "&redirect_uri=" + (invitationDto.getInvitationUrl() != null ? invitationDto.getInvitationUrl() : "http://localhost:3000/callback");
     ticketUrl += "&scope=openid profile email";
     ticketUrl += "&state=invitation";
-    ticketUrl += "&screen_hint=signup";
     
-    // Add invitation metadata
+    // Add invitation-specific parameters
+    ticketUrl += "&screen_hint=signup";
+    ticketUrl += "&login_hint=" + invitationDto.getEmail();
+    ticketUrl += "&prompt=login";
+    
+    // Add custom invitation metadata
     ticketUrl += "&invitation=true";
     ticketUrl += "&user_id=" + userId;
     
@@ -247,5 +252,42 @@ public class Auth0InvitationService {
       log.error("Failed to check if user exists by email: {}", email, e);
       return false;
     }
+  }
+
+  /**
+   * Sends a password reset email using our application's email service.
+   * 
+   * @param email the user's email address
+   * @param userName the user's name
+   * @throws Auth0Exception if password reset fails
+   */
+  public void sendPasswordResetEmail(String email, String userName) throws Auth0Exception {
+    try {
+      log.info("Sending password reset email to: {}", email);
+      
+      // Create password reset URL
+      String domain = auth0Domain != null && !auth0Domain.isEmpty() ? auth0Domain : "your-domain.auth0.com";
+      String resetUrl = "https://" + domain + "/password/change?client_id=" + getClientId() + 
+                       "&email=" + email + "&redirect_uri=http://localhost:3000/callback";
+      
+      // Send email using our EmailService
+      emailService.sendPasswordResetEmail(email, userName, resetUrl);
+      
+      log.info("Successfully sent password reset email to: {}", email);
+      
+    } catch (Exception e) {
+      log.error("Failed to send password reset email to: {}", email, e);
+      throw new Auth0Exception("Failed to send password reset email: " + e.getMessage(), e, "AUTH0_PASSWORD_RESET_FAILED", 400);
+    }
+  }
+
+  /**
+   * Gets the Auth0 client ID from configuration.
+   * 
+   * @return the client ID
+   */
+  private String getClientId() {
+    // You can inject this from configuration
+    return "your-auth0-client-id"; // Replace with actual client ID
   }
 } 
