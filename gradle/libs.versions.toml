@@ -8,6 +8,8 @@ auth0 = "2.22.0"
 dotenv = "4.0.0"
 byte-buddy-agent = "1.17.6"
 testcontainers = "1.21.3"
+hibernate = "6.4.4.Final"
+hibernatePlugin = "7.0.8.Final"
 
 [libraries]
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
@@ -34,7 +36,11 @@ testcontainers-junit-jupiter = { module = "org.testcontainers:junit-jupiter", ve
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 byte-buddy-agent = { module = "net.bytebuddy:byte-buddy-agent", version.ref = "byte-buddy-agent" }
 
+hibernate-core = { module = "org.hibernate.orm:hibernate-core", version.ref = "hibernate" }
+hibernate-envers = { module = "org.hibernate.orm:hibernate-envers", version.ref = "hibernate" }
+
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 javaagent-test = { id = "com.ryandens.javaagent-test", version.ref = "javaagent-test" }
+hibernate-orm = { id = "org.hibernate.orm", version.ref = "hibernatePlugin" }
