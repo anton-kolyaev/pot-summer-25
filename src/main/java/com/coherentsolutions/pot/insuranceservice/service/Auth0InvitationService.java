@@ -72,6 +72,10 @@ public class Auth0InvitationService {
     user.setEmailVerified(false);
     user.setBlocked(false);
     
+    // Auth0 requires a password, so we set a temporary one
+    // The user will change it via the invitation flow
+    user.setPassword("TempPassword123!".toCharArray());
+    
     // Set user metadata if provided
     if (invitationDto.getUserMetadata() != null) {
       user.setUserMetadata(invitationDto.getUserMetadata());
