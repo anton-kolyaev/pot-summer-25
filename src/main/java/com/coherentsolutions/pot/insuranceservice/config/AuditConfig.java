@@ -31,6 +31,8 @@ public class AuditConfig {
       if (auth instanceof JwtAuthenticationToken) {
         return Optional.of(UUID.fromString(auth.getName()));
       }
+      // Branch is hit when the SecurityContext doesn’t contain a valid JWT-based Authentication,
+      // e.g. during scheduled jobs or anonymous/unauthenticated requests.
       return Optional.of(SYSTEM);
     }
   }
