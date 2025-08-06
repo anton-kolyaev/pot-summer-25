@@ -1,6 +1,8 @@
 package com.coherentsolutions.pot.insuranceservice.integration.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -68,10 +70,10 @@ class AuditConfigIt extends PostgresTestContainer {
 
     Company saved = companies.findAll().getFirst();
 
-    assertThat(saved.getCreatedBy()).isEqualTo(TEST_USER);
-    assertThat(saved.getUpdatedBy()).isEqualTo(TEST_USER);
-    assertThat(saved.getCreatedAt()).isNotNull();
-    assertThat(saved.getUpdatedAt()).isEqualTo(saved.getCreatedAt());
+    assertEquals(TEST_USER, saved.getCreatedBy());
+    assertEquals(TEST_USER, saved.getUpdatedBy());
+    assertNotNull(saved.getCreatedAt());
+    assertEquals(saved.getCreatedAt(), saved.getUpdatedAt());
   }
 
   @Test
@@ -98,8 +100,8 @@ class AuditConfigIt extends PostgresTestContainer {
 
     Company updated = companies.findById(id).orElseThrow();
 
-    assertThat(updated.getUpdatedBy()).isEqualTo(TEST_USER);
-    assertThat(updated.getUpdatedAt()).isAfter(firstUpd);
+    assertEquals(TEST_USER, updated.getUpdatedBy());
+    assertTrue(updated.getUpdatedAt().isAfter(firstUpd));
   }
 
   @Test
@@ -125,9 +127,8 @@ class AuditConfigIt extends PostgresTestContainer {
 
     Company testCompanyAfter = companies.findById(id).orElseThrow();
 
-    assertThat(testCompanyAfter.getUpdatedAt()).isEqualTo(tsBefore);
-
-    assertThat(testCompanyAfter.getUpdatedBy()).isEqualTo(TEST_USER);
+    assertEquals(tsBefore, testCompanyAfter.getUpdatedAt());
+    assertEquals(TEST_USER, testCompanyAfter.getUpdatedBy());
   }
 
 }
