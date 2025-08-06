@@ -1,6 +1,8 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -9,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0InvitationDto;
+import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
@@ -20,23 +24,27 @@ import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
+import com.coherentsolutions.pot.insuranceservice.service.Auth0InvitationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
- * Integration tests for AdminUserManagementController. This test class verifies user management
- * functionality such as deactivation and reactivation of users, including edge cases like already
+ * Integration tests for AdminUserManagementController.
+ * Tests user creation, retrieval, updating, and status management operations.
+ * Includes tests for both active and inactive users, as well as error handling for
  * inactive or non-existent users.
  */
 @ActiveProfiles("test")
@@ -70,6 +78,20 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   static {
     TEST_PHONE.setCode("+1");
     TEST_PHONE.setNumber("00000000");
+  }
+
+  @MockBean
+  private Auth0InvitationService auth0InvitationService;
+
+  @BeforeEach
+  void setUp() {
+    // Mock Auth0InvitationService to return successful response
+    Auth0UserDto mockAuth0User = new Auth0UserDto();
+    mockAuth0User.setUserId("auth0_user_id_123");
+    mockAuth0User.setEmail(TEST_EMAIL);
+    mockAuth0User.setName(TEST_FIRST_NAME + " " + TEST_LAST_NAME);
+    when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class)))
+        .thenReturn(mockAuth0User);
   }
 
   private Company createAndSaveTestCompany() {
