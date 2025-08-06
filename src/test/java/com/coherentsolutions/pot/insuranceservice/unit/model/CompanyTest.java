@@ -8,7 +8,6 @@ import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +30,6 @@ class CompanyTest {
     company.setEmail("test@company.com");
     company.setWebsite("https://testcompany.com");
     company.setStatus(CompanyStatus.ACTIVE);
-    company.setCreatedAt(Instant.now());
-    company.setUpdatedAt(Instant.now());
 
     address = new Address();
     address.setCountry("USA");
@@ -137,26 +134,5 @@ class CompanyTest {
     company.setStatus(CompanyStatus.DEACTIVATED);
     assertEquals(CompanyStatus.DEACTIVATED, company.getStatus());
   }
-
-  @Test
-  @DisplayName("Should handle audit fields")
-  void shouldHandleAuditFields() {
-    // Given
-    UUID createdBy = UUID.randomUUID();
-    UUID updatedBy = UUID.randomUUID();
-    Instant createdAt = Instant.now();
-    Instant updatedAt = Instant.now();
-
-    // When
-    company.setCreatedBy(createdBy);
-    company.setUpdatedBy(updatedBy);
-    company.setCreatedAt(createdAt);
-    company.setUpdatedAt(updatedAt);
-
-    // Then
-    assertEquals(createdBy, company.getCreatedBy());
-    assertEquals(updatedBy, company.getUpdatedBy());
-    assertEquals(createdAt, company.getCreatedAt());
-    assertEquals(updatedAt, company.getUpdatedAt());
-  }
+  
 } 

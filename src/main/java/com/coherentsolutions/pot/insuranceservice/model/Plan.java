@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
+import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,10 +22,6 @@ import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SoftDelete;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
 @NoArgsConstructor
@@ -34,7 +31,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @FilterDef(name = "softDeleteFilter", parameters = @ParamDef(name = "isDeleted", type = Boolean.class))
 @Filter(name = "softDeleteFilter", condition = "deleted_at IS NULL")
 @Table(name = "plans")
-public class Plan {
+public class Plan extends Auditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -56,21 +53,5 @@ public class Plan {
 
   @ManyToMany(mappedBy = "plans")
   private List<InsurancePackage> insurancePackages;
-
-  @CreatedBy
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @LastModifiedBy
-  @Column(name = "updated_by")
-  private UUID updatedBy;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 
 }
