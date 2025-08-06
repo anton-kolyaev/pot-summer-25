@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
+import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,23 +11,18 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "plans")
-public class Plan {
+public class Plan extends Auditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -44,21 +40,5 @@ public class Plan {
 
   @ManyToMany(mappedBy = "plans")
   private List<InsurancePackage> insurancePackages;
-
-  @CreatedBy
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @LastModifiedBy
-  @Column(name = "updated_by")
-  private UUID updatedBy;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 
 }
