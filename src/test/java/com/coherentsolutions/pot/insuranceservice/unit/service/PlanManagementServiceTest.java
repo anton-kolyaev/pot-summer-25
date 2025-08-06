@@ -19,10 +19,13 @@ import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.coherentsolutions.pot.insuranceservice.service.PlanManagementService;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.hibernate.Filter;
+import org.hibernate.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,15 @@ public class PlanManagementServiceTest {
 
   @Mock
   private PlanMapper planMapper;
+
+  @Mock
+  private EntityManager entityManager;
+
+  @Mock
+  private Session session;
+
+  @Mock
+  private Filter filter;
 
   @InjectMocks
   private PlanManagementService planManagementService;
@@ -170,8 +182,8 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should return all plans when no filter is applied")
   void shouldReturnAllPlansWithoutFilter() {
+
     List<Plan> plans = List.of(plan);
-    List<PlanDto> expectedDtos = List.of(planDto);
 
     when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(plans);
     when(planMapper.toDto(plan)).thenReturn(planDto);
@@ -189,17 +201,16 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should return filtered plans by type ID")
   void shouldReturnFilteredPlansByType() {
-    PlanFilter filter = new PlanFilter();
-    filter.setTypeId(3);
+
+    PlanFilter filterDto = new PlanFilter();
+    filterDto.setTypeId(3);
 
     List<Plan> filteredPlans = List.of(plan);
-    List<PlanDto> expectedDtos = List.of(planDto);
 
-    when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(
-        filteredPlans);
+    when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(filteredPlans);
     when(planMapper.toDto(plan)).thenReturn(planDto);
 
-    List<PlanDto> result = planManagementService.getPlansWithFilter(filter);
+    List<PlanDto> result = planManagementService.getPlansWithFilter(filterDto);
 
     assertNotNull(result);
     assertEquals(1, result.size());

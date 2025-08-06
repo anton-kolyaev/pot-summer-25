@@ -13,9 +13,11 @@ import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
+import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +49,9 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
   @Autowired
   private PlanTypeRepository planTypeRepository;
+
+  @Autowired
+  private PlanRepository planRepository;
 
   private Integer dentalTypeId;
 
@@ -325,7 +330,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should soft delete plan successfully")
   void shouldSoftDeletePlanSuccessfully() throws Exception {
 
-    PlanDto createRequest = buildPlanDto("Soft Delete Plan", dentalTypeId, new BigDecimal("199.99"));
+    PlanDto createRequest = buildPlanDto("Soft Delete Plan", dentalTypeId,
+        new BigDecimal("199.99"));
 
     String createResponse = mockMvc.perform(post(ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
@@ -343,6 +349,9 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     mockMvc.perform(get(ENDPOINT))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.id=='" + created.getId() + "')]").doesNotExist());
+
+    Instant deletedAt = planRepository.findDeletedAtById(created.getId());
+    assertNotNull(deletedAt, "deletedAt should be set for soft-deleted plan");
   }
 
   @Test

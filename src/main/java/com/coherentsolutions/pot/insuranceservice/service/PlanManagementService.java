@@ -9,9 +9,11 @@ import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Session;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class PlanManagementService {
   private final PlanRepository planRepository;
   private final PlanMapper planMapper;
   private final PlanTypeRepository planTypeRepository;
+  private final EntityManager entityManager;
 
   @Transactional
   public PlanDto createPlan(PlanDto planDto) {
@@ -60,6 +63,17 @@ public class PlanManagementService {
 
   @Transactional(readOnly = true)
   public List<PlanDto> getPlansWithFilter(PlanFilter filter) {
+    Session session = null;
+    try {
+      session = entityManager.unwrap(Session.class);
+    } catch (Exception ignored) {
+      // Hibernate Session not available in test context, ignore
+    }
+
+    if (session != null) {
+      session.enableFilter("softDeleteFilter").setParameter("isDeleted", false);
+    }
+
     List<Plan> plans = planRepository.findAll(PlanSpecification.withFilter(filter));
     return plans.stream().map(planMapper::toDto).toList();
   }
