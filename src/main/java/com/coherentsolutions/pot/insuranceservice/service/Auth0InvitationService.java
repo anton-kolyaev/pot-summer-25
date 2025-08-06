@@ -131,21 +131,22 @@ public class Auth0InvitationService {
   private String createPasswordChangeTicket(String userId, Auth0InvitationDto invitationDto) throws com.auth0.exception.Auth0Exception {
     log.info("Creating password change ticket for user: {}", userId);
     
-    // For now, we'll use a simplified approach
-    // In a production environment, you would integrate with Auth0's password change ticket API
-    // or use a custom email service to send the invitation
-    
-    // Create a custom invitation URL using the actual Auth0 domain
+    // Create a proper invitation URL using Auth0's Universal Login
     String domain = auth0Domain != null && !auth0Domain.isEmpty() ? auth0Domain : "your-domain.auth0.com";
-    String ticketUrl = "https://" + domain + "/login?client_id=" + invitationDto.getClientId() + 
-                      "&response_type=code&redirect_uri=" + (invitationDto.getInvitationUrl() != null ? invitationDto.getInvitationUrl() : "http://localhost:3000/callback") +
-                      "&scope=openid profile email&state=invitation&user_id=" + userId;
     
-    // Add query parameters to customize the password reset UI
-    ticketUrl += "#type=invite";
-    if (invitationDto.getClientId() != null) {
-      ticketUrl += "&app=" + invitationDto.getClientId();
-    }
+    // Use Auth0's Universal Login with invitation parameters
+    String ticketUrl = "https://" + domain + "/authorize?client_id=" + invitationDto.getClientId();
+    
+    // Add invitation-specific parameters
+    ticketUrl += "&response_type=code";
+    ticketUrl += "&redirect_uri=" + (invitationDto.getInvitationUrl() != null ? invitationDto.getInvitationUrl() : "http://localhost:3000/callback");
+    ticketUrl += "&scope=openid profile email";
+    ticketUrl += "&state=invitation";
+    ticketUrl += "&screen_hint=signup";
+    
+    // Add invitation metadata
+    ticketUrl += "&invitation=true";
+    ticketUrl += "&user_id=" + userId;
     
     log.info("Created invitation URL for user: {}", userId);
     return ticketUrl;
