@@ -1,82 +1,33 @@
 package com.coherentsolutions.pot.insuranceservice.repository;
 
+import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.equal;
+import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.greaterThanOrEqualTo;
+import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.lessThanOrEqualTo;
+import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.like;
+
 import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.InsurancePackageFilter;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.util.StringUtils;
 
 public class InsurancePackageSpecification {
 
   public static Specification<InsurancePackage> withFilters(InsurancePackageFilter filter) {
-    return (root, query, criteriaBuilder) -> {
-      List<Predicate> predicates = Stream.of(
-              companyIdPredicate(filter, root, criteriaBuilder),
-              namePredicate(filter, root, criteriaBuilder),
-              startDatePredicate(filter, root, criteriaBuilder),
-              endDatePredicate(filter, root, criteriaBuilder),
-              payrollFrequencyPredicate(filter, root, criteriaBuilder),
-              statusPredicate(filter, root, criteriaBuilder))
-          .filter(Objects::nonNull)
-          .toList();
+    List<Specification<InsurancePackage>> specs = new ArrayList<>();
 
-      return predicates.isEmpty()
-          ? criteriaBuilder.conjunction()
-          : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-    };
-  }
+    specs.add(equal(filter.getCompanyId(), r -> r.join("company").get("id")));
+    specs.add(like(filter.getName(), r -> r.get("name")));
+    specs.add(greaterThanOrEqualTo(filter.getStartDate(), r -> r.get("startDate")));
+    specs.add(lessThanOrEqualTo(filter.getEndDate(), r -> r.get("endDate")));
+    specs.add(equal(filter.getPayrollFrequency(), r -> r.get("payrollFrequency")));
+    specs.add(equal(filter.getStatus(), r -> r.get("status")));
 
-  private static Predicate companyIdPredicate(InsurancePackageFilter filter, Root<?> root,
-      CriteriaBuilder cb) {
-    return filter.getCompanyId() != null
-        ? cb.equal(
-        root.join("company").get("id"),
-        filter.getCompanyId()
-    )
-        : null;
-  }
-
-  private static Predicate namePredicate(InsurancePackageFilter filter, Root<?> root,
-      CriteriaBuilder cb) {
-    return StringUtils.hasText(filter.getName())
-        ? cb.like(
-        cb.lower(root.get("name")),
-        "%" + filter.getName().toLowerCase() + "%"
-    )
-        : null;
-  }
-
-  private static Predicate startDatePredicate(InsurancePackageFilter filter, Root<?> root,
-      CriteriaBuilder cb) {
-    return filter.getStartDate() != null
-        ? cb.greaterThanOrEqualTo(root.get("startDate"), filter.getStartDate())
-        : null;
-  }
-
-  private static Predicate endDatePredicate(InsurancePackageFilter filter, Root<?> root,
-      CriteriaBuilder cb) {
-    return filter.getEndDate() != null
-        ? cb.lessThanOrEqualTo(root.get("endDate"), filter.getEndDate())
-        : null;
-  }
-
-  private static Predicate payrollFrequencyPredicate(InsurancePackageFilter filter, Root<?> root,
-      CriteriaBuilder cb) {
-    return filter.getPayrollFrequency() != null
-        ? cb.equal(root.get("payrollFrequency"), filter.getPayrollFrequency())
-        : null;
-  }
-
-  private static Predicate statusPredicate(InsurancePackageFilter filter, Root<?> root,
-      CriteriaBuilder cb) {
-    return filter.getStatus() != null
-        ? cb.equal(root.get("status"), filter.getStatus())
-        : null;
+    return specs.stream()
+        .filter(Objects::nonNull)
+        .reduce(Specification::and)
+        .orElse((root, query, cb) -> cb.conjunction());
   }
 
 

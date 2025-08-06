@@ -11,12 +11,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -64,6 +67,14 @@ public class InsurancePackage {
   @Enumerated(EnumType.STRING)
   @Column(name = "payroll_frequency", nullable = false, length = 20)
   private PayrollFrequency payrollFrequency;
+
+  @ManyToMany
+  @JoinTable(
+      name = "insurance_package_plans",
+      joinColumns = @JoinColumn(name = "insurance_package_id"),
+      inverseJoinColumns = @JoinColumn(name = "plan_id")
+  )
+  private List<Plan> plans;
 
   @CreatedBy
   @Column(name = "created_by")
