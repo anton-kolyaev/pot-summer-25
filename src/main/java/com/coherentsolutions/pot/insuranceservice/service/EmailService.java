@@ -1,7 +1,10 @@
 package com.coherentsolutions.pot.insuranceservice.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 /**
@@ -9,15 +12,16 @@ import org.springframework.stereotype.Service;
  * 
  * <p>This service handles email sending functionality for the application,
  * including invitation emails for new user registration.
- * 
- * <p>Note: This implementation logs email content. To enable real email sending:
- * 1. Add spring.mail.host to application.yml
- * 2. Configure SMTP settings
- * 3. Replace this service with one that uses JavaMailSender
  */
 @Slf4j
 @Service
 public class EmailService {
+  
+  @Autowired(required = false)
+  private JavaMailSender mailSender;
+  
+  @Value("${spring.mail.username:}")
+  private String fromEmail;
   
   @Value("${app.invitation.expiration-hours:24}")
   private int invitationExpirationHours;
@@ -37,19 +41,61 @@ public class EmailService {
       String subject = buildInvitationSubject(companyName);
       String content = buildInvitationEmailContent(userName, invitationUrl, companyName);
       
-      // Log the email content (in production, this would be sent via email service)
-      log.info("=== INVITATION EMAIL ===");
-      log.info("To: {}", toEmail);
-      log.info("Subject: {}", subject);
-      log.info("Content:\n{}", content);
-      log.info("=== END INVITATION EMAIL ===");
-      
-      log.info("Successfully logged invitation email to: {}", toEmail);
+      // Send real email using Spring Boot Mail
+      sendRealEmail(toEmail, subject, content);
+      log.info("Successfully sent invitation email to: {}", toEmail);
       
     } catch (Exception e) {
       log.error("Failed to send invitation email to: {}", toEmail, e);
       throw new RuntimeException("Failed to send invitation email: " + e.getMessage(), e);
     }
+  }
+
+  /**
+   * Sends a real email using Spring Boot Mail.
+   * 
+   * @param toEmail the recipient email
+   * @param subject the email subject
+   * @param content the email content
+   */
+  private void sendRealEmail(String toEmail, String subject, String content) {
+    if (mailSender != null && fromEmail != null && !fromEmail.isEmpty()) {
+      try {
+        // Send real email
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(content);
+        
+        mailSender.send(message);
+        log.info("Real email sent successfully to: {}", toEmail);
+      } catch (Exception e) {
+        log.warn("Real email sending failed, falling back to logging: {}", e.getMessage());
+        logEmailContent(toEmail, subject, content, "INVITATION");
+      }
+    } else {
+      // Fallback to logging when email is not configured
+      logEmailContent(toEmail, subject, content, "INVITATION");
+    }
+  }
+
+  /**
+   * Logs email content as fallback when real email sending is not available.
+   * 
+   * @param toEmail the recipient email
+   * @param subject the email subject
+   * @param content the email content
+   * @param type the email type (INVITATION or PASSWORD_RESET)
+   */
+  private void logEmailContent(String toEmail, String subject, String content, String type) {
+    log.info("=== {} EMAIL ===", type);
+    log.info("To: {}", toEmail);
+    log.info("Subject: {}", subject);
+    log.info("Content:\n{}", content);
+    log.info("=== END {} EMAIL ===", type);
+    log.info("Successfully logged {} email to: {}", type.toLowerCase(), toEmail);
+    log.info("To enable real email sending, configure spring.mail.host in application.yml");
   }
 
   /**
@@ -115,14 +161,9 @@ public class EmailService {
       String subject = "Password Reset Request";
       String content = buildPasswordResetEmailContent(userName, resetUrl);
       
-      // Log the email content (in production, this would be sent via email service)
-      log.info("=== PASSWORD RESET EMAIL ===");
-      log.info("To: {}", toEmail);
-      log.info("Subject: {}", subject);
-      log.info("Content:\n{}", content);
-      log.info("=== END PASSWORD RESET EMAIL ===");
-      
-      log.info("Successfully logged password reset email to: {}", toEmail);
+      // Send real email using Spring Boot Mail
+      sendRealEmail(toEmail, subject, content);
+      log.info("Successfully sent password reset email to: {}", toEmail);
       
     } catch (Exception e) {
       log.error("Failed to send password reset email to: {}", toEmail, e);
