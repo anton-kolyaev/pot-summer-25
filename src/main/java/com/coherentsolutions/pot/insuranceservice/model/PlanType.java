@@ -1,26 +1,23 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
 
+import com.coherentsolutions.pot.insuranceservice.model.audit.CreationAudit;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Table(name = "plan_types")
 @Getter
 @Setter
 @NoArgsConstructor
-public class PlanType {
+public class PlanType extends CreationAudit {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,12 +28,5 @@ public class PlanType {
 
   @Column(name = "name", nullable = false)
   private String name;
-
-  @CreatedBy
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
+  
 }

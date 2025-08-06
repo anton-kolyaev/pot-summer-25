@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
+import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,7 +46,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Audited
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "users")
-public class User {
+public class User extends Auditable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -93,21 +94,5 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
       orphanRemoval = true, fetch = FetchType.EAGER)
   private Set<UserFunctionAssignment> functions;
-
-  @CreatedBy
-  @Column(name = "created_by")
-  private UUID createdBy;
-
-  @LastModifiedBy
-  @Column(name = "updated_by")
-  private UUID updatedBy;
-
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdAt;
-
-  @LastModifiedDate
-  @Column(name = "updated_at")
-  private Instant updatedAt;
 
 }
