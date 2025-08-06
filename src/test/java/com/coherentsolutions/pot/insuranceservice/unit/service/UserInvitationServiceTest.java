@@ -116,18 +116,18 @@ public class UserInvitationServiceTest {
   @DisplayName("Should activate user successfully")
   void shouldActivateUserSuccessfully() {
     // Given
-    User pendingUser = new User();
-    pendingUser.setId(userId);
-    pendingUser.setStatus(UserStatus.PENDING);
+    User inactiveUser = new User();
+    inactiveUser.setId(userId);
+    inactiveUser.setStatus(UserStatus.INACTIVE);
 
     UserDto expectedDto = UserDto.builder()
         .id(userId)
         .status(UserStatus.ACTIVE)
         .build();
 
-    when(userRepository.findByIdOrThrow(userId)).thenReturn(pendingUser);
-    when(userRepository.save(pendingUser)).thenReturn(pendingUser);
-    when(userMapper.toDto(pendingUser)).thenReturn(expectedDto);
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(inactiveUser);
+    when(userRepository.save(inactiveUser)).thenReturn(inactiveUser);
+    when(userMapper.toDto(inactiveUser)).thenReturn(expectedDto);
 
     // When
     UserDto result = userInvitationService.activateUser(userId);
@@ -135,13 +135,13 @@ public class UserInvitationServiceTest {
     // Then
     assertNotNull(result);
     assertEquals(UserStatus.ACTIVE, result.getStatus());
-    verify(userRepository).save(pendingUser);
-    verify(userMapper).toDto(pendingUser);
+    verify(userRepository).save(inactiveUser);
+    verify(userMapper).toDto(inactiveUser);
   }
 
   @Test
-  @DisplayName("Should throw exception when activating non-pending user")
-  void shouldThrowExceptionWhenActivatingNonPendingUser() {
+  @DisplayName("Should throw exception when activating non-inactive user")
+  void shouldThrowExceptionWhenActivatingNonInactiveUser() {
     // Given
     User activeUser = new User();
     activeUser.setId(userId);

@@ -48,7 +48,7 @@ public class AdminUserManagementController {
    * Invites a new user via email.
    * 
    * This endpoint:
-   * 1. Saves the user to the local database with PENDING status
+   * 1. Saves the user to the local database with INACTIVE status
    * 2. Creates the user in Auth0 with invitation enabled
    * 3. Auth0 sends an invitation email to the user
    */
@@ -97,7 +97,9 @@ public class AdminUserManagementController {
   }
 
   /**
-   * Activates a user after they complete the invitation process.
+   * Activates a user by changing their status from INACTIVE to ACTIVE.
+   * This endpoint can be used to manually activate users after they complete
+   * the invitation process or for administrative purposes.
    */
   @PutMapping("/{id}/activate")
   public UserDto activateUser(@PathVariable("id") UUID id) {

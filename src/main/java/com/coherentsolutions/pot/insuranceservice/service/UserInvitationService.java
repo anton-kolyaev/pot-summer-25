@@ -35,7 +35,7 @@ public class UserInvitationService {
    * Creates a new user with invitation via email.
    *
    * <p>This method:
-   * 1. Saves the user to the local database with PENDING status
+   * 1. Saves the user to the local database with INACTIVE status
    * 2. Creates the user in Auth0 with invitation enabled
    * 3. Auth0 sends an invitation email to the user
    *
@@ -47,9 +47,9 @@ public class UserInvitationService {
   public UserDto inviteUser(UserDto userDto) throws Auth0Exception {
     log.info("Starting user invitation process for email: {}", userDto.getEmail());
 
-    // Create user in local database with PENDING status
+    // Create user in local database with INACTIVE status
     User user = userMapper.toEntity(userDto);
-    user.setStatus(UserStatus.PENDING);
+    user.setStatus(UserStatus.INACTIVE);
 
     // Set up function assignments
     if (user.getFunctions() != null) {
@@ -86,7 +86,7 @@ public class UserInvitationService {
   }
 
   /**
-   * Activates a user after they complete the invitation process.
+   * Activates a user by changing their status from INACTIVE to ACTIVE.
    *
    * @param userId the local user ID
    * @return the updated user DTO
@@ -95,8 +95,8 @@ public class UserInvitationService {
   public UserDto activateUser(UUID userId) {
     User user = userRepository.findByIdOrThrow(userId);
     
-    if (user.getStatus() != UserStatus.PENDING) {
-      throw new IllegalStateException("User is not in PENDING status");
+    if (user.getStatus() != UserStatus.INACTIVE) {
+      throw new IllegalStateException("User is not in INACTIVE status");
     }
     
     user.setStatus(UserStatus.ACTIVE);
