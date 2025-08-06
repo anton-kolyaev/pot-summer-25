@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
@@ -35,5 +36,8 @@ public class Plan extends Auditable {
 
   @Column(name = "contribution", nullable = false)
   private BigDecimal contribution;
+
+  @ManyToMany(mappedBy = "plans")
+  private List<InsurancePackage> insurancePackages;
 
 }

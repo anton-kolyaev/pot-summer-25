@@ -7,10 +7,13 @@ import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.mapper.InsurancePackageMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
+import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageSpecification;
+import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -27,6 +31,7 @@ public class InsurancePackageManagementService {
   private final InsurancePackageRepository insurancePackageRepository;
   private final InsurancePackageMapper insurancePackageMapper;
   private final CompanyRepository companyRepository;
+  private final PlanRepository planRepository;
 
   private void validateOnUpdate(InsurancePackage insurancePackage,
       InsurancePackageDto insurancePackageDto) {
@@ -41,6 +46,16 @@ public class InsurancePackageManagementService {
         && insurancePackageDto.getStartDate().isBefore(today)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Updated start date cannot be earlier than today");
+    }
+  }
+
+  private void validateAndSetPlans(InsurancePackageDto insurancePackageDto, InsurancePackage insurancePackage) {
+    if (!CollectionUtils.isEmpty(insurancePackageDto.getPlanIds())) {
+      List<Plan> plans = planRepository.findAllById(insurancePackageDto.getPlanIds());
+      if (plans.size() != insurancePackageDto.getPlanIds().size()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some plan IDs are invalid");
+      }
+      insurancePackage.setPlans(plans);
     }
   }
 
@@ -64,6 +79,9 @@ public class InsurancePackageManagementService {
       InsurancePackageDto insurancePackageDto) {
     InsurancePackage insurancePackage = insurancePackageMapper.toInsurancePackage(
         insurancePackageDto);
+
+    validateAndSetPlans(insurancePackageDto, insurancePackage);
+
     Company company = companyRepository.findByIdOrThrow(companyId);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.INITIALIZED);
@@ -92,6 +110,7 @@ public class InsurancePackageManagementService {
     InsurancePackage insurancePackage = insurancePackageRepository.findByIdOrThrow(id);
 
     validateOnUpdate(insurancePackage, insurancePackageDto);
+    validateAndSetPlans(insurancePackageDto, insurancePackage);
 
     insurancePackage.setName(insurancePackageDto.getName());
     insurancePackage.setStartDate(insurancePackageDto.getStartDate());
