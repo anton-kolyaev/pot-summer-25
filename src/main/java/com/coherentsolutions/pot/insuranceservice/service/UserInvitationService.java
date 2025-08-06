@@ -92,7 +92,7 @@ public class UserInvitationService {
     metadata.put("firstName", userDto.getFirstName());
     metadata.put("lastName", userDto.getLastName());
     metadata.put("username", userDto.getUsername());
-    metadata.put("dateOfBirth", userDto.getDateOfBirth());
+    metadata.put("dateOfBirth", userDto.getDateOfBirth() != null ? userDto.getDateOfBirth().toString() : null);
     metadata.put("ssn", userDto.getSsn());
     metadata.put("companyId", userDto.getCompanyId());
     
