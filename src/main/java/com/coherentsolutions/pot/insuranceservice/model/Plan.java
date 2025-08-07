@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
 import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
+import com.coherentsolutions.pot.insuranceservice.model.audit.AuditableSoftDelete;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,7 +32,7 @@ import org.hibernate.annotations.SoftDelete;
 @FilterDef(name = "softDeleteFilter", parameters = @ParamDef(name = "isDeleted", type = Boolean.class))
 @Filter(name = "softDeleteFilter", condition = "deleted_at IS NULL")
 @Table(name = "plans")
-public class Plan extends Auditable {
+public class Plan extends AuditableSoftDelete {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,10 +47,6 @@ public class Plan extends Auditable {
 
   @Column(name = "contribution", nullable = false)
   private BigDecimal contribution;
-
-  @SoftDelete
-  @Column(name = "deleted_at")
-  private Instant deletedAt;
 
   @ManyToMany(mappedBy = "plans")
   private List<InsurancePackage> insurancePackages;
