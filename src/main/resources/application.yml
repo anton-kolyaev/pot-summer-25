@@ -32,18 +32,7 @@ spring:
         jwt:
           issuer-uri: "https://${AUTH0_DOMAIN:}/"
           audiences: ${AUTH0_AUDIENCE:}
-  # Email Configuration
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
 # Auth0 Configuration
 auth0:
   enabled: ${AUTH0_ENABLED:true} # Set to true to enable Auth0 integration

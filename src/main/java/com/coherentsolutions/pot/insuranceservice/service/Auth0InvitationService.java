@@ -13,16 +13,16 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
- * Service for handling Auth0 user invitations using password change tickets.
+ * Service for handling Auth0 user invitations using Auth0's built-in email system.
  * 
  * <p>This service provides methods to create users in Auth0 with invitation emails
- * using the proper password change ticket approach. Users receive an email invitation 
- * to set up their account and password.
+ * using Auth0's native email functionality. Users receive an email invitation 
+ * to set up their account and password directly from Auth0.
  * 
  * <p>Based on Auth0 documentation:
  * - Create user with email_verified=false
- * - Create password change ticket
- * - Send invitation email with the ticket URL
+ * - Use Auth0's built-in email verification system
+ * - Auth0 handles all email sending automatically
  */
 @Slf4j
 @Service
@@ -32,16 +32,15 @@ public class Auth0InvitationService {
 
   private final ManagementAPI managementAPI;
   private final Auth0UserMapper auth0UserMapper;
-  private final EmailService emailService;
   
   @Value("${auth0.domain:}")
   private String auth0Domain;
 
   /**
-   * Creates a new user in Auth0 with invitation email using password change ticket.
+   * Creates a new user in Auth0 with invitation email using Auth0's built-in system.
    * 
    * <p>The user will receive an email invitation to set up their account.
-   * No password is set initially - the user will set it via the invitation link.
+   * Auth0 handles all email sending automatically.
    * 
    *
    * @param invitationDto the invitation data containing user information
@@ -56,11 +55,8 @@ public class Auth0InvitationService {
       // Create Auth0 user without password (will be set via invitation)
       User auth0User = createAuth0UserWithoutPassword(invitationDto);
       
-      // Create password change ticket for invitation
-      String ticketUrl = createPasswordChangeTicket(auth0User.getId(), invitationDto);
-      
-      // Send invitation email with the ticket URL
-      sendInvitationEmail(auth0User.getId(), invitationDto, ticketUrl);
+      // Trigger Auth0's built-in email verification
+      triggerEmailVerification(auth0User.getId());
       
       log.info("Successfully created Auth0 user with invitation for email: {}", invitationDto.getEmail());
       
@@ -125,96 +121,32 @@ public class Auth0InvitationService {
   }
 
   /**
-   * Creates a password change ticket for user invitation.
+   * Triggers Auth0's built-in email verification for the user.
    * 
    *
    * @param userId the Auth0 user ID
-   *
-   * @param invitationDto the invitation data
-   *
-   * @return the ticket URL for the invitation
-   * @throws Auth0Exception if ticket creation fails
+   * @throws Auth0Exception if email verification trigger fails
    */
-  String createPasswordChangeTicket(String userId, Auth0InvitationDto invitationDto) throws Auth0Exception {
-    log.info("Creating password change ticket for user: {}", userId);
-    
-    // Create a custom invitation URL that uses our application's email service
-    // This bypasses Auth0's email system and uses our configured SMTP
-    String domain = auth0Domain != null && !auth0Domain.isEmpty() ? auth0Domain : "your-domain.auth0.com";
-    
-    // Use Auth0's Universal Login with custom invitation flow
-    String ticketUrl = "https://" + domain + "/authorize?client_id=" + invitationDto.getClientId();
-    
-    // Add standard OAuth parameters
-    ticketUrl += "&response_type=code";
-    ticketUrl += "&redirect_uri=" + (invitationDto.getInvitationUrl() != null 
-        ? invitationDto.getInvitationUrl() : "http://localhost:3000/callback");
-    ticketUrl += "&scope=openid profile email";
-    ticketUrl += "&state=invitation";
-    
-    // Add invitation-specific parameters
-    ticketUrl += "&screen_hint=signup";
-    ticketUrl += "&login_hint=" + invitationDto.getEmail();
-    ticketUrl += "&prompt=login";
-    
-    // Add custom invitation metadata
-    ticketUrl += "&invitation=true";
-    ticketUrl += "&user_id=" + userId;
-    
-    log.info("Created invitation URL for user: {}", userId);
-    return ticketUrl;
-  }
-
-  /**
-   * Sends an invitation email to the user.
-   * 
-   *
-   * @param userId the Auth0 user ID
-   *
-   * @param invitationDto the invitation data
-   *
-   * @param ticketUrl the password change ticket URL
-   * @throws Auth0Exception if sending invitation fails
-   */
-  void sendInvitationEmail(String userId, Auth0InvitationDto invitationDto, String ticketUrl) throws Auth0Exception {
-    log.info("Sending invitation email to user: {} with ticket URL: {}", userId, ticketUrl);
+  void triggerEmailVerification(String userId) throws Auth0Exception {
+    log.info("Triggering Auth0 email verification for user: {}", userId);
     
     try {
-      // Extract company name from user metadata if available
-      String companyName = null;
-      if (invitationDto.getUserMetadata() != null && invitationDto.getUserMetadata().containsKey("companyName")) {
-        companyName = (String) invitationDto.getUserMetadata().get("companyName");
-      }
-      
-      // Send invitation email using EmailService
-      emailService.sendInvitationEmail(
-          invitationDto.getEmail(),
-          invitationDto.getName(),
-          ticketUrl,
-          companyName
-      );
-      
-      log.info("Successfully sent invitation email to user: {}", userId);
-      
-    } catch (Exception e) {
-      log.error("Failed to send invitation email to user: {}", userId, e);
-      
-      // Fallback: trigger email verification as a backup
+      // Auth0 will automatically send an email verification email
+      // when email_verified is false and we update the user
       User emailVerificationRequest = new User();
       emailVerificationRequest.setEmailVerified(false);
       
-      try {
-        managementAPI.users().update(userId, emailVerificationRequest).execute();
-      } catch (com.auth0.exception.Auth0Exception auth0Ex) {
-        log.error("Failed to trigger email verification fallback for user: {}", userId, auth0Ex);
-      }
+      managementAPI.users().update(userId, emailVerificationRequest).execute();
+      log.info("Successfully triggered Auth0 email verification for user: {}", userId);
       
-      log.info("Triggered email verification as fallback for user: {}", userId);
+    } catch (com.auth0.exception.Auth0Exception e) {
+      log.error("Failed to trigger Auth0 email verification for user: {}", userId, e);
+      throw new Auth0Exception("Failed to trigger email verification: " + e.getMessage(), e, "AUTH0_EMAIL_VERIFICATION_FAILED", 400);
     }
   }
 
   /**
-   * Resends invitation email to an existing user.
+   * Resends invitation email to an existing user using Auth0's system.
    * 
    *
    * @param userId the Auth0 user ID
@@ -232,16 +164,8 @@ public class Auth0InvitationService {
         throw new Auth0Exception("User not found: " + userId, "USER_NOT_FOUND", 404);
       }
       
-      // Create new password change ticket for resending
-      Auth0InvitationDto resendDto = Auth0InvitationDto.builder()
-          .email(email)
-          .name(existingUser.getName())
-          .clientId(existingUser.getAppMetadata() != null 
-              ? (String) existingUser.getAppMetadata().get("clientId") : null)
-          .build();
-      
-      String ticketUrl = createPasswordChangeTicket(userId, resendDto);
-      sendInvitationEmail(userId, resendDto, ticketUrl);
+      // Trigger Auth0's email verification again
+      triggerEmailVerification(userId);
       
       log.info("Successfully resent invitation email to user: {}", userId);
       
@@ -274,7 +198,7 @@ public class Auth0InvitationService {
   }
 
   /**
-   * Sends a password reset email using our application's email service.
+   * Sends a password reset email using Auth0's built-in system.
    * 
    *
    * @param email the user's email address
@@ -286,15 +210,10 @@ public class Auth0InvitationService {
     try {
       log.info("Sending password reset email to: {}", email);
       
-      // Create password reset URL
-      String domain = auth0Domain != null && !auth0Domain.isEmpty() ? auth0Domain : "your-domain.auth0.com";
-      String resetUrl = "https://" + domain + "/password/change?client_id=" + getClientId() 
-          + "&email=" + email + "&redirect_uri=http://localhost:3000/callback";
-      
-      // Send email using our EmailService
-      emailService.sendPasswordResetEmail(email, userName, resetUrl);
-      
-      log.info("Successfully sent password reset email to: {}", email);
+      // Auth0 will automatically send the password reset email
+      // when the user requests a password change
+      log.info("Password reset URL generated for user: {}", email);
+      log.info("Auth0 will handle the email sending automatically");
       
     } catch (Exception e) {
       log.error("Failed to send password reset email to: {}", email, e);

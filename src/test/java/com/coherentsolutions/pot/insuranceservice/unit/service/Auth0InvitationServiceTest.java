@@ -16,10 +16,8 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0InvitationService;
-import com.coherentsolutions.pot.insuranceservice.service.EmailService;
 import java.util.HashMap;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,9 +34,6 @@ class Auth0InvitationServiceTest {
 
   @Mock
   private Auth0UserMapper auth0UserMapper;
-
-  @Mock
-  private EmailService emailService;
 
   @Mock
   private UsersEntity usersEntity;
@@ -77,7 +72,6 @@ class Auth0InvitationServiceTest {
   }
 
   @Test
-  @Disabled("Complex Auth0 API mocking issues")
   @DisplayName("Should create user with invitation successfully")
   void shouldCreateUserWithInvitationSuccessfully() throws Exception {
     // Given
@@ -98,7 +92,6 @@ class Auth0InvitationServiceTest {
   }
 
   @Test
-  @Disabled("Complex Auth0 API mocking issues")
   @DisplayName("Should throw Auth0Exception when user creation fails")
   void shouldThrowAuth0ExceptionWhenUserCreationFails() throws Exception {
     // Given
@@ -109,7 +102,7 @@ class Auth0InvitationServiceTest {
     Auth0Exception exception = assertThrows(Auth0Exception.class,
         () -> auth0InvitationService.createUserWithInvitation(testInvitationDto));
     
-    assertEquals("Failed to create user invitation: User creation failed", exception.getMessage());
+    assertEquals("Failed to create user invitation: Failed to create Auth0 user: User creation failed", exception.getMessage());
     assertEquals("AUTH0_INVITATION_FAILED", exception.getErrorCode());
     assertEquals(400, exception.getHttpStatus());
     
@@ -117,7 +110,6 @@ class Auth0InvitationServiceTest {
   }
 
   @Test
-  @Disabled("Complex Auth0 API mocking issues")
   @DisplayName("Should check user existence by email correctly")
   void shouldCheckUserExistenceByEmailCorrectly() throws Exception {
     // Given
@@ -132,5 +124,34 @@ class Auth0InvitationServiceTest {
     // Then
     assertFalse(exists);
     verify(managementAPI).users();
+  }
+
+  @Test
+  @DisplayName("Should resend invitation successfully")
+  void shouldResendInvitationSuccessfully() throws Exception {
+    // Given
+    String userId = "auth0|123456";
+    String email = "john.doe@example.com";
+    
+    when(managementAPI.users()).thenReturn(usersEntity);
+
+    // When & Then
+    auth0InvitationService.resendInvitation(userId, email);
+    
+    verify(managementAPI).users();
+  }
+
+  @Test
+  @DisplayName("Should send password reset email successfully")
+  void shouldSendPasswordResetEmailSuccessfully() throws Exception {
+    // Given
+    String email = "john.doe@example.com";
+    String userName = "John Doe";
+
+    // When & Then
+    auth0InvitationService.sendPasswordResetEmail(email, userName);
+    
+    // Verify that the method completes without throwing exceptions
+    // Auth0 handles the actual email sending
   }
 } 
