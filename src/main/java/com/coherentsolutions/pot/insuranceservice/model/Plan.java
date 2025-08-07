@@ -1,6 +1,5 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
-import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
 import com.coherentsolutions.pot.insuranceservice.model.audit.AuditableSoftDelete;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +11,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
@@ -22,7 +20,6 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SoftDelete;
 
 @Entity
 @NoArgsConstructor
