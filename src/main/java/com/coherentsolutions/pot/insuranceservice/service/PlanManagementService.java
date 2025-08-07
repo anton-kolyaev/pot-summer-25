@@ -63,14 +63,7 @@ public class PlanManagementService {
 
   @Transactional(readOnly = true)
   public List<PlanDto> getPlansWithFilter(PlanFilter filter) {
-    Session session = null;
-    try {
-      session = entityManager.unwrap(Session.class);
-    } catch (Exception ignored) {
-      // Hibernate Session not available in test context, ignore
-    }
-
-    if (session != null) {
+    if (entityManager.isOpen() && entityManager.getDelegate() instanceof Session session) {
       session.enableFilter("softDeleteFilter").setParameter("isDeleted", false);
     }
 
