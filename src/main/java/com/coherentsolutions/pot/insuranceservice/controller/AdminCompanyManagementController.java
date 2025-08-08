@@ -9,6 +9,7 @@ import com.coherentsolutions.pot.insuranceservice.service.CompanyManagementServi
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -89,10 +90,14 @@ public class AdminCompanyManagementController {
   /**
    * Retrieves a paginated list of users belonging to a specific company.
    */
+
   @GetMapping("/{id}/users")
-  public Page<UserDto> getUsersOfCompany(@PathVariable UUID id, UserFilter filter,
-      Pageable pageable) {
-    filter.setCompanyId(id);
+  public Page<UserDto> getUsersOfCompany(
+      @PathVariable UUID id,
+      @ParameterObject UserFilter filter,
+      @ParameterObject Pageable pageable
+  ) {
+    filter.setCompanyId(id);  // Still need to set this manually since it's path-based
     return userManagementService.getUsersWithFilters(filter, pageable);
   }
 }
