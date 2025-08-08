@@ -1,10 +1,11 @@
-package com.coherentsolutions.pot.insuranceservice.config;
+package com.coherentsolutions.pot.insuranceservice.unit.config;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.auth0.client.mgmt.ManagementAPI;
+import com.coherentsolutions.pot.insuranceservice.config.Auth0Config;
+import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import org.junit.jupiter.api.Test;
 
 /**

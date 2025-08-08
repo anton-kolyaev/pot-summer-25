@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,10 +18,15 @@ import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestCon
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
+import com.coherentsolutions.pot.insuranceservice.model.Plan;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
+import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
+import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,6 +58,12 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
   @Autowired
   private ObjectMapper objectMapper;
 
+  @Autowired
+  private PlanRepository planRepository;
+
+  @Autowired
+  private PlanTypeRepository planTypeRepository;
+
   private Company createCompany(String name, String email, String website) {
     Company company = new Company();
     company.setName(name);
@@ -59,6 +71,14 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     company.setCountryCode("USA");
     company.setWebsite(website);
     return companyRepository.save(company);
+  }
+
+  private Plan createPlan(String name, BigDecimal contribution) {
+    Plan plan = new Plan();
+    plan.setName(name);
+    plan.setType(planTypeRepository.findByIdOrThrow(1));
+    plan.setContribution(contribution);
+    return planRepository.save(plan);
   }
 
   @Test
@@ -177,11 +197,16 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
   @Test
   @DisplayName("Should create and retrieve Insurance Package successfully")
   void shouldCreateAndRetrieveInsurancePackageSuccessfully() throws Exception {
+
+    Plan plan1 = createPlan("Health Plan A", BigDecimal.valueOf(1000));
+    Plan plan2 = createPlan("Dental Plan B", BigDecimal.valueOf(2000));
+
     InsurancePackageDto insurancePackageDto = InsurancePackageDto.builder()
         .name("Standard Health Package")
         .startDate(LocalDate.of(2025, 8, 1))
         .endDate(LocalDate.of(2025, 12, 31))
         .payrollFrequency(PayrollFrequency.MONTHLY)
+        .planIds(List.of(plan1.getId(), plan2.getId()))
         .build();
 
     Company company = createCompany("Test Company", "test@example.com", "https://test.com");
@@ -195,7 +220,9 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .andExpect(jsonPath("$.startDate").value("2025-08-01"))
         .andExpect(jsonPath("$.endDate").value("2025-12-31"))
         .andExpect(jsonPath("$.payrollFrequency").value("MONTHLY"))
-        .andExpect(jsonPath("$.status").value("INITIALIZED"));
+        .andExpect(jsonPath("$.status").value("INITIALIZED"))
+        .andExpect(jsonPath("$.planIds").isArray())
+        .andExpect(jsonPath("$.planIds", hasSize(2)));
 
 
   }
