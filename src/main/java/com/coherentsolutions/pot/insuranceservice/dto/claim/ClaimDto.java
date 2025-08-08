@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.dto.claim;
 
+import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
 import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
