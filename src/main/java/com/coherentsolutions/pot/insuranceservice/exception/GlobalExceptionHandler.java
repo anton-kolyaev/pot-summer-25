@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * such as validation failures, unsupported media types, missing parameters, and others. It provides
  * structured {@link ErrorResponseDto} responses for all handled exceptions.
  */
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -64,6 +67,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull HttpStatusCode statusCode,
       @NonNull WebRequest request) {
     HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(servletRequest);
     ErrorResponseDto error = new ErrorResponseDto(
         ((HttpStatus) statusCode).name(),
@@ -88,6 +92,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())
         ));
     String summary = "Validation failed for fields: " + String.join(", ", errorFields.keySet());
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(servletRequest,
         entry("validationErrors", errorFields));
     ErrorResponseDto error = new ErrorResponseDto(
@@ -106,6 +111,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull WebRequest request) {
     HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
     String summary = "Malformed JSON request";
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(
         servletRequest,
         entry("cause", ex.getMostSpecificCause().getMessage())
@@ -126,6 +132,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull WebRequest request) {
     HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
     String summary = "Required request parameter '" + ex.getParameterName() + "' is missing";
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(
         servletRequest,
         entry("parameter", ex.getParameterName())
@@ -146,6 +153,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull WebRequest request) {
     HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
     String summary = "Type mismatch for parameter '" + ex.getPropertyName() + "'";
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(
         servletRequest,
         new SimpleImmutableEntry<>("value", ex.getValue()),
@@ -171,6 +179,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull WebRequest request) {
     HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
     String summary = "Unsupported media type '" + ex.getContentType() + "'";
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(
         servletRequest,
         new SimpleImmutableEntry<>("unsupported", ex.getContentType()),
@@ -192,6 +201,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull WebRequest request) {
     HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
     String summary = "HTTP method '" + ex.getMethod() + "' is not supported for this endpoint";
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(
         servletRequest,
         entry("methodUsed", ex.getMethod()),
@@ -213,6 +223,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       @NonNull WebRequest request) {
     HttpServletRequest servletRequest = ((ServletWebRequest) request).getRequest();
     String summary = "No handler found for " + ex.getHttpMethod() + " " + ex.getRequestURL();
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(servletRequest);
     ErrorResponseDto error = new ErrorResponseDto(
         ((HttpStatus) statusCode).name(),
@@ -228,6 +239,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex,
       HttpServletRequest servletRequest) {
+    log.error(ex.getMessage(), ex);
     Map<String, Object> details = buildDetails(servletRequest);
     ErrorResponseDto error = new ErrorResponseDto(
         HttpStatus.INTERNAL_SERVER_ERROR.name(),
