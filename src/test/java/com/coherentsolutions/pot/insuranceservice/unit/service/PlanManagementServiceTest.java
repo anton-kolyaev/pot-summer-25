@@ -19,10 +19,13 @@ import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.coherentsolutions.pot.insuranceservice.service.PlanManagementService;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.hibernate.Filter;
+import org.hibernate.Session;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,15 @@ public class PlanManagementServiceTest {
 
   @Mock
   private PlanMapper planMapper;
+
+  @Mock
+  private EntityManager entityManager;
+
+  @Mock
+  private Session session;
+
+  @Mock
+  private Filter filter;
 
   @InjectMocks
   private PlanManagementService planManagementService;
@@ -110,7 +122,7 @@ public class PlanManagementServiceTest {
     Plan existingPlan = buildPlan(planId, "Vision Plan", sameType, new BigDecimal("123.45"));
     PlanDto updatedDto = buildPlanDto("Updated Vision Plan", 3, new BigDecimal("456.78"));
 
-    when(planRepository.findById(planId)).thenReturn(Optional.of(existingPlan));
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
     when(planRepository.save(existingPlan)).thenReturn(existingPlan);
     when(planMapper.toDto(existingPlan)).thenReturn(updatedDto);
 
@@ -121,7 +133,7 @@ public class PlanManagementServiceTest {
     assertEquals(new BigDecimal("456.78"), result.getContribution());
     assertEquals(3, result.getType());
 
-    verify(planRepository).findById(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planRepository).save(existingPlan);
     verify(planMapper).toDto(existingPlan);
   }
@@ -131,7 +143,8 @@ public class PlanManagementServiceTest {
   void shouldThrowWhenPlanNotFoundForUpdate() {
     UUID planId = UUID.randomUUID();
 
-    when(planRepository.findById(planId)).thenReturn(Optional.empty());
+    when(planRepository.findByIdOrThrow(planId))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
         () -> planManagementService.updatePlan(planId, planDto));
@@ -139,7 +152,7 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     assertEquals("Plan not found", exception.getReason());
 
-    verify(planRepository).findById(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planRepository, never()).save(any());
   }
 
@@ -153,7 +166,7 @@ public class PlanManagementServiceTest {
 
     PlanDto updatedDto = buildPlanDto("Updated Plan", 3, new BigDecimal("999.99")); // new type
 
-    when(planRepository.findById(planId)).thenReturn(Optional.of(existingPlan));
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
         () -> planManagementService.updatePlan(planId, updatedDto));
@@ -161,7 +174,7 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     assertEquals("Changing plan type is not allowed", exception.getReason());
 
-    verify(planRepository).findById(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planTypeRepository, never()).findById(any());
     verify(planRepository, never()).save(any());
   }
@@ -169,8 +182,8 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should return all plans when no filter is applied")
   void shouldReturnAllPlansWithoutFilter() {
+
     List<Plan> plans = List.of(plan);
-    List<PlanDto> expectedDtos = List.of(planDto);
 
     when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(plans);
     when(planMapper.toDto(plan)).thenReturn(planDto);
@@ -188,17 +201,16 @@ public class PlanManagementServiceTest {
   @Test
   @DisplayName("Should return filtered plans by type ID")
   void shouldReturnFilteredPlansByType() {
-    PlanFilter filter = new PlanFilter();
-    filter.setTypeId(3);
+
+    PlanFilter filterDto = new PlanFilter();
+    filterDto.setTypeId(3);
 
     List<Plan> filteredPlans = List.of(plan);
-    List<PlanDto> expectedDtos = List.of(planDto);
 
-    when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(
-        filteredPlans);
+    when(planRepository.findAll(ArgumentMatchers.<Specification<Plan>>any())).thenReturn(filteredPlans);
     when(planMapper.toDto(plan)).thenReturn(planDto);
 
-    List<PlanDto> result = planManagementService.getPlansWithFilter(filter);
+    List<PlanDto> result = planManagementService.getPlansWithFilter(filterDto);
 
     assertNotNull(result);
     assertEquals(1, result.size());
@@ -259,9 +271,9 @@ public class PlanManagementServiceTest {
     PlanType originalType = buildPlanType(3, "VISION");
     Plan existingPlan = buildPlan(planId, "Vision Plan", originalType, new BigDecimal("123.45"));
 
-    PlanDto updatedDto = buildPlanDto("New Plan Name", 2, new BigDecimal("456.78")); // type changed
+    PlanDto updatedDto = buildPlanDto("New Plan Name", 2, new BigDecimal("456.78"));
 
-    when(planRepository.findById(planId)).thenReturn(Optional.of(existingPlan));
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class,
         () -> planManagementService.updatePlan(planId, updatedDto));
@@ -269,8 +281,40 @@ public class PlanManagementServiceTest {
     assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
     assertEquals("Changing plan type is not allowed", exception.getReason());
 
-    verify(planRepository).findById(planId);
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planTypeRepository, never()).findById(any());
+    verify(planRepository, never()).save(any());
+  }
+
+  @Test
+  @DisplayName("Should soft delete plan successfully")
+  void shouldSoftDeletePlanSuccessfully() {
+    UUID planId = UUID.randomUUID();
+    Plan existingPlan = buildPlan(planId, "Test Plan", planType, new BigDecimal("123.45"));
+
+    when(planRepository.findByIdOrThrow(planId)).thenReturn(existingPlan);
+
+    planManagementService.softDeletePlan(planId);
+
+    verify(planRepository).findByIdOrThrow(planId);
+    verify(planRepository).delete(existingPlan);
+  }
+
+  @Test
+  @DisplayName("Should throw NOT_FOUND when soft deleting non-existent plan")
+  void shouldThrowNotFoundWhenSoftDeletingNonExistentPlan() {
+    UUID planId = UUID.randomUUID();
+
+    when(planRepository.findByIdOrThrow(planId))
+        .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> planManagementService.softDeletePlan(planId));
+
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+    assertEquals("Plan not found", exception.getReason());
+
+    verify(planRepository).findByIdOrThrow(planId);
     verify(planRepository, never()).save(any());
   }
 

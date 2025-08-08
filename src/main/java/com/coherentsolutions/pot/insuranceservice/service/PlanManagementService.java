@@ -9,9 +9,11 @@ import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Session;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ public class PlanManagementService {
   private final PlanRepository planRepository;
   private final PlanMapper planMapper;
   private final PlanTypeRepository planTypeRepository;
+  private final EntityManager entityManager;
 
   @Transactional
   public PlanDto createPlan(PlanDto planDto) {
@@ -39,13 +42,9 @@ public class PlanManagementService {
 
   @Transactional
   public PlanDto updatePlan(UUID id, PlanDto planDto) {
-    Plan existing = planRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan not found"));
+    Plan existing = planRepository.findByIdOrThrow(id);
 
-    if (!existing.getType().getId().equals(planDto.getType())) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Changing plan type is not allowed");
-    }
+    validateOnUpdate(existing, planDto);
 
     existing.setName(planDto.getName());
     existing.setContribution(planDto.getContribution());
@@ -54,9 +53,20 @@ public class PlanManagementService {
     return planMapper.toDto(updated);
   }
 
+  private void validateOnUpdate(Plan existing, PlanDto planDto) {
+    if (!existing.getType().getId().equals(planDto.getType())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Changing plan type is not allowed");
+    }
+  }
+
 
   @Transactional(readOnly = true)
   public List<PlanDto> getPlansWithFilter(PlanFilter filter) {
+    if (entityManager.isOpen() && entityManager.getDelegate() instanceof Session session) {
+      session.enableFilter("softDeleteFilter").setParameter("isDeleted", false);
+    }
+
     List<Plan> plans = planRepository.findAll(PlanSpecification.withFilter(filter));
     return plans.stream().map(planMapper::toDto).toList();
   }
@@ -67,5 +77,11 @@ public class PlanManagementService {
         .stream()
         .map(planMapper::toDto)
         .toList();
+  }
+
+  @Transactional
+  public void softDeletePlan(UUID id) {
+    Plan plan = planRepository.findByIdOrThrow(id);
+    planRepository.delete(plan);
   }
 }
