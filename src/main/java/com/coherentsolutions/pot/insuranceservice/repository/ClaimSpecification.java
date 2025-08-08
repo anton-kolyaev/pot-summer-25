@@ -3,6 +3,7 @@ package com.coherentsolutions.pot.insuranceservice.repository;
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.equal;
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.greaterThanOrEqualTo;
 import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.lessThanOrEqualTo;
+
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimFilter;
 import com.coherentsolutions.pot.insuranceservice.model.Claim;
 import java.util.ArrayList;
