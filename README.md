@@ -58,7 +58,38 @@ Swagger UI is wired for the **OAuth2.0 Authorization Code + PKCE** flow, so you 
 
 ### **`.env`** setup
 
-An **`.env.example`** template is available in project root. 
-- Create a file called **.env** in the project root (or **.env.test** for test‑specific overrides).
-- Populate every placeholder with your real Auth0 values before starting the app.
-- These variables are referenced by **application.yml** and **application-test.yml**.
+# .env settings 
+Okay, first of all, use the next command
+```bash 
+cp .env.example .env
+``` 
+This command will create `.env` file for you, based on the example. After that, you can remove all comments.
+ 
+Now, register yourself on [Auth0](https://auth0.com/docs/secure/tokens/access-tokens/get-access-tokens)
+## Follow the next steps:
+1. Create an app
+2. Grats perm for it
+2.1 To grant perms, you need to search for `API`
+2.2 Open a link
+2.3 Press edit and choose your application
+2.4 Choose `Machine to Machine`
+2.5 Set up like on the screenshot ( `read:user`, `update:user`, `create:user`, `delete:user` )
+<img width="2192" height="1912" alt="image" src="https://github.com/user-attachments/assets/bdcc8220-5f4b-4586-9899-198238731c55" />
+
+
+3. Go to the test tab
+3.1 Here you need to copy the `CURL` request
+```bash
+curl --request POST \
+  --url https://dev-urlink.us.auth0.com/oauth/token \
+  --header 'content-type: application/json' \
+  --data '{
+    "client_id":"ur data",
+    "client_secret":"ur data",
+    "audience":"ur data",
+    "grant_type":"ur data"
+  }'
+  ```
+  4. Put all necessary data into the `.env` file in your project
+  
+  **NOTE!** If you are following this guide, before it was merged into main, do not forget to add in your `.env` file AUTH0_API_TOKEN 
