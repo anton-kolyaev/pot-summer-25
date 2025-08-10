@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insuranceservice.dto.claim;
 
 import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
 import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
@@ -21,13 +20,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ClaimDto {
-
+  
   private UUID id;
-
-  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  
   private String claimNumber;
-
-  @NotNull(message = "Status is required")
+  
   private ClaimStatus status;
 
   @PastOrPresent(message = "Service date can’t be in the future")

@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.controller;
 
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimDto;
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimFilter;
+import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
 import com.coherentsolutions.pot.insuranceservice.service.ClaimManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -45,6 +46,7 @@ public class ClaimManagementController {
   )
   @ResponseStatus(HttpStatus.CREATED)
   public ClaimDto createClaim(@Valid @RequestBody ClaimDto request) {
+    request.setStatus(ClaimStatus.PENDING);
     return claimManagementService.createClaim(request);
   }
 }

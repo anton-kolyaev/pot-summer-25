@@ -1,8 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.dto.consumer;
 
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -19,14 +18,13 @@ public class ConsumerDto {
   
   @NotNull(message = "Consumer userId is required")
   private UUID userId;
-  
-  @NotBlank(message = "First name is required")
+
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   private String firstName;
 
-  @NotBlank(message = "Last name is required")
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   private String lastName;
-  
-  @NotNull(message = "Phone is required")
-  @Valid
+
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   private Phone phone;
 }
