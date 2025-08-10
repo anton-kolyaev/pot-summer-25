@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,9 +35,6 @@ public class Claim extends Auditable {
   @Column(name = "claim_number", nullable = false, length = 100, unique = true)
   private String claimNumber;
 
-  @Column(name = "number", nullable = false)
-  private Integer number;
-
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false, length = 20)
   private ClaimStatus status;
@@ -54,4 +52,11 @@ public class Claim extends Auditable {
 
   @Column(name = "amount", nullable = false)
   private BigDecimal amount;
+
+  @PrePersist
+  void assignClaimNumber() {
+    if (claimNumber == null || claimNumber.isBlank()) {
+      claimNumber = id.toString();
+    }
+  }
 }

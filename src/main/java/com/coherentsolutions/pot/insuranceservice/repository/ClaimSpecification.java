@@ -17,7 +17,6 @@ public class ClaimSpecification {
     List<Specification<Claim>> specs = new ArrayList<>();
     
     specs.add(equal(filter.getClaimNumber(), r -> r.get("claimNumber")));
-    specs.add(equal(filter.getNumber(), r -> r.get("number")));
     specs.add(equal(filter.getStatus(), r -> r.get("status")));
     specs.add(greaterThanOrEqualTo(filter.getServiceDateFrom(), r -> r.get("serviceDate")));
     specs.add(lessThanOrEqualTo(filter.getServiceDateTo(), r -> r.get("serviceDate")));

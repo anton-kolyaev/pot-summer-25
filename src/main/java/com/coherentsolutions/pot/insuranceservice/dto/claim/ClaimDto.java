@@ -2,9 +2,9 @@ package com.coherentsolutions.pot.insuranceservice.dto.claim;
 
 import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
 import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
@@ -24,11 +24,8 @@ public class ClaimDto {
 
   private UUID id;
 
-  @NotBlank(message = "Claim number is required")
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   private String claimNumber;
-
-  @NotNull(message = "Number is required")
-  private Integer number;
 
   @NotNull(message = "Status is required")
   private ClaimStatus status;

@@ -18,6 +18,12 @@ public interface ClaimMapper {
   @Mapping(target = "consumer", ignore = true)
   ClaimDto toDto(Claim claim);
 
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "claimNumber", ignore = true)
+  @Mapping(target = "consumer", ignore = true)
+  @Mapping(target = "plan", ignore = true)
+  Claim toEntity(ClaimDto dto);
+
   default ConsumerDto toConsumerDto(User user) {
     if (user == null) {
       return null;

@@ -13,7 +13,6 @@ import lombok.Setter;
 public class ClaimFilter {
 
   private String claimNumber;
-  private Integer number;
   private ClaimStatus status;
   private LocalDate serviceDateFrom;
   private LocalDate serviceDateTo;
