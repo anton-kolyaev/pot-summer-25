@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimDto;
 import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
 import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
