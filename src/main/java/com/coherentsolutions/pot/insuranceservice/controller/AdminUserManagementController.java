@@ -6,6 +6,7 @@ import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,9 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * REST controller for managing users by admin.
- * Provides endpoints to create users, update users, and query users with
- * filters.
+ * REST controller for managing users by admin. Provides endpoints to create users, update users,
+ * and query users with filters.
  */
 @RestController
 @RequiredArgsConstructor
@@ -45,7 +45,10 @@ public class AdminUserManagementController {
    * Retrieves a paginated list of users filtered by given criteria.
    */
   @GetMapping
-  public Page<UserDto> getUsersWithFilters(UserFilter filter, Pageable pageable) {
+  public Page<UserDto> getUsersWithFilters(
+      @ParameterObject UserFilter filter,
+      @ParameterObject Pageable pageable
+  ) {
     return userManagementService.getUsersWithFilters(filter, pageable);
   }
 
@@ -75,8 +78,8 @@ public class AdminUserManagementController {
   }
 
   /**
-   * Retrieves user details by ID. If the user does not exist, throws {@link
-   * ResponseStatusException} with 404 NOT FOUND.
+   * Retrieves user details by ID. If the user does not exist, throws
+   * {@link ResponseStatusException} with 404 NOT FOUND.
    */
   @GetMapping("/{id}")
   public UserDto viewUsersDetails(@PathVariable("id") UUID id) {
