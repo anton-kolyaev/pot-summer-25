@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.dto.user;
 
 import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
+import io.swagger.v3.oas.annotations.Parameter;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class UserFilter {
 
+  @Parameter(hidden = true)
   private UUID companyId;
   private String name;
   private String email;
