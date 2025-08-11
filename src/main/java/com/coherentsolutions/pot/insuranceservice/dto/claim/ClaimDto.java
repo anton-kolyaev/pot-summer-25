@@ -38,7 +38,7 @@ public class ClaimDto {
 
   @NotNull(message = "Amount is required")
   @Positive(message = "Amount must be positive")
-  @Digits(integer = 12, fraction = 2, message = "Amount must have max 2 decimals")
+  @Digits(integer = 17, fraction = 2, message = "Amount must have max 2 decimals")
   private BigDecimal amount;
 
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
