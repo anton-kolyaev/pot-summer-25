@@ -29,3 +29,30 @@ class YourTestClass extends PostgresTestContainer {
 By extending PostgresTestContainer, your test class automatically starts a fresh
 PostgreSQL container and wires Spring Boot’s datasource properties to use it.
 
+## Running Unit and Integration Tests Separately
+
+This project separates unit and integration tests for better control and faster builds.
+
+### Test Structure
+
+- **Unit tests** are located in:  
+  `src/test/java/com/coherentsolutions/pot/insuranceservice/unit`
+
+- **Integration tests** are located in:  
+  `src/test/java/com/coherentsolutions/pot/insuranceservice/integration`
+
+### Gradle Tasks
+
+Use the following Gradle commands to run tests:
+
+- Run only **unit tests**:
+  ```bash
+  ./gradlew unitTest
+
+- Run only **integration tests**:
+  ```bash
+  ./gradlew integrationTest
+
+- Run **both tests**:
+  ```bash
+  ./gradlew check

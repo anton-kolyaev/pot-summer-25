@@ -63,23 +63,59 @@ dependencies {
 }
 
 tasks.named('test') {
+    enabled = false
+}
+
+tasks.register('unitTest', Test) {
+    description = 'Runs only unit tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
     useJUnitPlatform()
-    finalizedBy jacocoTestReport
+    include '**/unit/**/*.class'
+
 }
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs only integration tests.'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform()
+    include '**/integration/**/*.class'
+
+    shouldRunAfter tasks.named('unitTest')
+}
+
 jacocoTestReport {
-    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    executionData.setFrom(fileTree(rootProject.layout.buildDirectory).include("/jacoco/*.exec"))
 }
+
 jacocoTestCoverageVerification {
-    dependsOn test
+    mustRunAfter tasks.named('unitTest'), tasks.named('integrationTest')
+
     violationRules {
         rule {
-            limit{
+            limit {
                 minimum = 0.8
             }
         }
     }
+
+    executionData.setFrom(fileTree(rootProject.layout.buildDirectory).include("/jacoco/*.exec"))
 }
 
 check {
-    dependsOn jacocoTestCoverageVerification
+    dependsOn tasks.named('unitTest')
+    dependsOn tasks.named('integrationTest')
+    dependsOn tasks.named('jacocoTestCoverageVerification')
 }

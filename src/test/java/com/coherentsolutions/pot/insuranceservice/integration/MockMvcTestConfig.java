@@ -10,9 +10,16 @@ import org.springframework.context.annotation.Bean;
 @TestConfiguration
 public class MockMvcTestConfig {
 
+  private static final String TEST_UUID = "11111111-2222-3333-4444-555555555555";
+
   @Bean
   public MockMvcBuilderCustomizer defaultAuthHeader() {
     return builder -> builder.defaultRequest(
-        get("/").with(jwt().jwt(jwt -> jwt.claim("sub", "test-user"))));
+        get("/").with(
+            jwt().jwt(jwt -> jwt
+                .subject(TEST_UUID)
+            )
+        )
+    );
   }
 }
