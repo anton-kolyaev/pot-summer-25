@@ -19,16 +19,20 @@ class Auth0PropertiesTest {
     String domain = "test.auth0.com";
     String apiToken = "test-token";
     String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
     int timeout = 5000;
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
     assertEquals(domain, properties.domain());
     assertEquals(apiToken, properties.apiToken());
     assertEquals(audience, properties.audience());
+    assertEquals(clientId, properties.clientId());
+    assertEquals(connection, properties.connection());
     assertEquals(timeout, properties.timeout());
     assertEquals(enabled, properties.enabled());
   }
@@ -40,11 +44,13 @@ class Auth0PropertiesTest {
     String domain = "test.auth0.com";
     String apiToken = "test-token";
     String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
     int timeout = 0;
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
     assertEquals(10000, properties.timeout());
@@ -57,11 +63,13 @@ class Auth0PropertiesTest {
     String domain = "test.auth0.com";
     String apiToken = "test-token";
     String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
     int timeout = -1000;
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
     assertEquals(10000, properties.timeout());
@@ -74,11 +82,13 @@ class Auth0PropertiesTest {
     String domain = "test.auth0.com";
     String apiToken = "test-token";
     String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
     int timeout = 15000;
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
     assertEquals(15000, properties.timeout());
@@ -91,16 +101,20 @@ class Auth0PropertiesTest {
     String domain = "test.auth0.com";
     String apiToken = "test-token";
     String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
     int timeout = 5000;
     boolean enabled = false;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
     assertEquals(domain, properties.domain());
     assertEquals(apiToken, properties.apiToken());
     assertEquals(audience, properties.audience());
+    assertEquals(clientId, properties.clientId());
+    assertEquals(connection, properties.connection());
     assertEquals(timeout, properties.timeout());
     assertFalse(properties.enabled());
   }
@@ -112,16 +126,20 @@ class Auth0PropertiesTest {
     String domain = null;
     String apiToken = null;
     String audience = null;
+    String clientId = null;
+    String connection = null;
     int timeout = 5000;
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
     assertNull(properties.domain());
     assertNull(properties.apiToken());
     assertNull(properties.audience());
+    assertNull(properties.clientId());
+    assertNull(properties.connection());
     assertEquals(timeout, properties.timeout());
     assertTrue(properties.enabled());
   }
@@ -133,16 +151,20 @@ class Auth0PropertiesTest {
     String domain = "";
     String apiToken = "";
     String audience = "";
+    String clientId = "";
+    String connection = "";
     int timeout = 5000;
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
     assertEquals("", properties.domain());
     assertEquals("", properties.apiToken());
     assertEquals("", properties.audience());
+    assertEquals("", properties.clientId());
+    assertEquals("", properties.connection());
     assertEquals(timeout, properties.timeout());
     assertTrue(properties.enabled());
   }
