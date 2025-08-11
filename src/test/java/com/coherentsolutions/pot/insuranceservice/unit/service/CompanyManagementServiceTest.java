@@ -23,7 +23,6 @@ import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.repository.CompanyRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.service.CompanyManagementService;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -78,8 +77,6 @@ class CompanyManagementServiceTest {
     testCompany.setStatus(CompanyStatus.ACTIVE);
     testCompany.setAddressData(List.of(testAddress));
     testCompany.setPhoneData(List.of(testPhone));
-    testCompany.setCreatedAt(Instant.now());
-    testCompany.setUpdatedAt(Instant.now());
 
     testCompanyDto = CompanyDto.builder()
         .id(companyId)
@@ -88,8 +85,6 @@ class CompanyManagementServiceTest {
         .email("test@company.com")
         .website("https://testcompany.com")
         .status(CompanyStatus.ACTIVE)
-        .createdAt(Instant.now())
-        .updatedAt(Instant.now())
         .build();
   }
 
