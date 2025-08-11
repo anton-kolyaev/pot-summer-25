@@ -9,13 +9,24 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  liquibase:
-    enabled: true
-    change-log: classpath:/db/changelog/db.changelog-master.yaml
+      org:
+        hibernate:
+          envers:
+            audit_table_suffix: _AUD
+            store_data_at_delete: true
+            global_with_modified_flag: true
+      org.hibernate.envers.store_data_at_delete: true
+      org.hibernate.envers.global_with_modified_flag: true
+    liquibase:
+      enabled: true
+      change-log: classpath:/db/changelog/db.changelog-master.yaml
   logging:
     level:
       liquibase: INFO
+      org.hibernate.SQL: DEBUG
+      org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   security:
     oauth2:
       client:
