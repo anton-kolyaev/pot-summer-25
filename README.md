@@ -1,5 +1,12 @@
 # pot-summer-25
 
+# Setup guides
+
+- [.env Setup](#env-settings)
+- [SMTP Setup](#how-to-configure-it-in-your-auth0)
+- [How to authorize with Auth0](#how-to-authorize-with-auth0)
+
+
 ## Authors:
 
 - Edgar Miloš
@@ -55,8 +62,6 @@ Swagger UI is wired for the **OAuth2.0 Authorization Code + PKCE** flow, so you 
 5. Back in Swagger UI, a green padlock appears.
 6. Endpoints marked with a green padlock icon automatically include Authorization: Bearer <access_token> in the request.
 7. Expand an endpoint, set parameters if needed, and press Execute - expect 200 OK if your user is allowed.
-
-# Setup guides
 
 ## `.env` settings 
 Okay, first of all, use the next command
@@ -115,3 +120,54 @@ MAIL_PASSWORD=your pass
 3. Choose "SMTP" as the email provider
 4. Fill out the form
 5. ✅ Click Save
+
+## How to Authorize with Auth0
+
+**If you don`t have authorized users**, you should:
+- in `SecurityConfig.java` change from `.anyRequest().authenticated())` to `.anyRequest().permitAll())`
+- After that build and app `./gradlew bootRun`
+- Use Swagger or Curl to execute request on `POST /v1/users/` endpoint
+> With Curl (bash/zsh):
+```bash
+curl -X 'POST' \
+  'http://localhost:8080/v1/users' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "firstName": "mykyta",
+  "lastName": "tishkin",
+  "username": "mkts26",
+  "email": "nikita.tishkin.13+new26@gmail.com",
+  "dateOfBirth": "2025-01-25",
+  "ssn": "725-13-1666",
+  "addressData": [
+    {
+      "country": "Lithuania",
+      "city": "Vilnius",
+      "state": "Vilniaus",
+      "street": "Sauletekio",
+      "building": "25",
+      "room": "506"
+    }
+  ],
+  "phoneData": [
+    {
+      "code": "370",
+      "number": "63206723"
+    }
+  ],
+  "functions": [
+    "COMPANY_MANAGER"
+  ],
+  "companyId": "641e4c9d-e897-4c91-830e-c1daae443bee"
+}'
+```
+- Check your email and setup password
+- After that check in your Auth0 Dashboard, is your user active?
+- If **yes**,
+- - rollback `SecurityConfig.java` changes, and relaunch app with `./gradlew bootRun`
+- - Go to Swagger and press `Authorize`, enter your `client_id` and `client_secret`, you can take it from your `.env` file, press `Authorize`
+- - Enter your user's email and password 
+- - Try execute any endpoint in swagger
+- If **no**
+- - Probably, there are some errors in previous steps
