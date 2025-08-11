@@ -60,13 +60,8 @@ public class PlanManagementService {
     }
   }
 
-
   @Transactional(readOnly = true)
   public List<PlanDto> getPlansWithFilter(PlanFilter filter) {
-    if (entityManager.isOpen() && entityManager.getDelegate() instanceof Session session) {
-      session.enableFilter("softDeleteFilter").setParameter("isDeleted", false);
-    }
-
     List<Plan> plans = planRepository.findAll(PlanSpecification.withFilter(filter));
     return plans.stream().map(planMapper::toDto).toList();
   }
