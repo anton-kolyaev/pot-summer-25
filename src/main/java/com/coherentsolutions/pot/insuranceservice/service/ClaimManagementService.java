@@ -35,6 +35,7 @@ public class ClaimManagementService {
     return page.map(claimMapper::toDto);
   }
 
+  //TODO: Do not allow creating claims for soft deleted Plans
   @Transactional
   public ClaimDto createClaim(ClaimDto request) {
     UUID userId = request.getConsumer() != null ? request.getConsumer().getUserId() : null;

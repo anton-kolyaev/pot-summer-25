@@ -27,8 +27,9 @@ public class ClaimManagementController {
   @GetMapping
   @Operation(
       summary = "Get claims",
-      description = "Returns a list of claims filtered by claimNumber, status, "
-          + "service date range, userId, and companyId. Supports page/size/sort."
+      description = "Filters: claimId, status, planName (contains, case-insensitive), " +
+          "amountMin/amountMax (inclusive), serviceDateFrom/serviceDateTo, userId, companyId. " +
+          "Supports page/size/sort."
   )
   public Page<ClaimDto> getClaims(ClaimFilter filter, Pageable pageable) {
     return claimManagementService.getClaimsWithFilters(filter, pageable);
@@ -46,7 +47,6 @@ public class ClaimManagementController {
   )
   @ResponseStatus(HttpStatus.CREATED)
   public ClaimDto createClaim(@Valid @RequestBody ClaimDto request) {
-    request.setStatus(ClaimStatus.PENDING);
     return claimManagementService.createClaim(request);
   }
 }
