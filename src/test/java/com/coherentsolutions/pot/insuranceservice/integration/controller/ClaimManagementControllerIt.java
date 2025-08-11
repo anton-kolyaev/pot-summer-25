@@ -88,14 +88,21 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     req.setClaimNumber("client-should-not-set");
 
     // When
-    String response = mockMvc.perform(
+    var result = mockMvc.perform(
             post(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
+                .content(createClaimJson(
+                    req.getConsumer().getUserId(),
+                    req.getPlanId(),
+                    req.getServiceDate(),
+                    req.getAmount(),
+                    req.getStatus(),
+                    req.getClaimNumber()
+                )))
         .andExpect(status().isCreated())
-        .andReturn()
-        .getResponse()
-        .getContentAsString();
+        .andExpect(jsonPath("$.planName").value(plan.getName()));
+
+    String response = result.andReturn().getResponse().getContentAsString();
     ClaimDto created = objectMapper.readValue(response, ClaimDto.class);
 
     // Then
@@ -106,39 +113,38 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     assertEquals(req.getServiceDate(), created.getServiceDate());
     assertEquals(req.getAmount(), created.getAmount());
     assertEquals(user.getId(), created.getConsumer().getUserId());
-    assertEquals(plan.getId(), created.getPlanId());
   }
+
 
   @Test
   @DisplayName("POST /v1/claims — should return 400 when consumer.userId is missing")
   void shouldReturnBadRequestWhenConsumerMissing() throws Exception {
-    // Given
-    ClaimDto req = ClaimDto.builder()
-        .serviceDate(LocalDate.now())
-        .amount(new BigDecimal("10.00"))
-        .planId(plan.getId())
-        .build();
-
     // When / Then
     mockMvc.perform(
             post(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
+                .content(createClaimJson(
+                    null,
+                    plan.getId(),
+                    LocalDate.now(),
+                    new BigDecimal("10.00")
+                )))
         .andExpect(status().isBadRequest());
   }
 
   @Test
   @DisplayName("POST /v1/claims — should return 404 when plan not found")
   void shouldReturnNotFoundWhenPlanMissing() throws Exception {
-    // Given
-    ClaimDto req = buildClaimDto(user.getId(), UUID.randomUUID(), LocalDate.now(),
-        new BigDecimal("10.00"));
-
     // When / Then
     mockMvc.perform(
             post(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
+                .content(createClaimJson(
+                    user.getId(),
+                    UUID.randomUUID(),
+                    LocalDate.now(),
+                    new BigDecimal("10.00")
+                )))
         .andExpect(status().isNotFound());
   }
 
@@ -170,9 +176,8 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   @DisplayName("GET /v1/claims — filter by status, serviceDate range, userId")
   void shouldFilterByStatusDateAndUser() throws Exception {
     // Given
-    ClaimDto c1 = createClaimViaApi(
-        buildClaimDto(user.getId(), plan.getId(), LocalDate.now().minusDays(10),
-            new BigDecimal("10.00")));
+    createClaimViaApi(buildClaimDto(user.getId(), plan.getId(), LocalDate.now().minusDays(10),
+        new BigDecimal("10.00")));
     ClaimDto c2 = createClaimViaApi(
         buildClaimDto(user.getId(), plan.getId(), LocalDate.now().minusDays(2),
             new BigDecimal("20.00")));
@@ -203,13 +208,19 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     // Given
     ClaimDto req = buildClaimDto(user.getId(), plan.getId(), LocalDate.now(),
         new BigDecimal("12.34"));
-    req.setStatus(ClaimStatus.APPROVED);
 
     // When
     String response = mockMvc.perform(
             post(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
+                .content(createClaimJson(
+                    req.getConsumer().getUserId(),
+                    req.getPlanId(),
+                    req.getServiceDate(),
+                    req.getAmount(),
+                    ClaimStatus.APPROVED, // client tries to set it
+                    null
+                )))
         // Then
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.status").value("PENDING"))
@@ -220,6 +231,48 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     // Then
     ClaimDto created = objectMapper.readValue(response, ClaimDto.class);
     assertEquals(ClaimStatus.PENDING, created.getStatus());
+  }
+
+  @Test
+  @DisplayName("GET /v1/claims — filter by planName (case-insensitive contains)")
+  void shouldFilterByPlanName() throws Exception {
+    // Given
+    createClaimViaApi(
+        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("10.00")));
+    PlanType dental = ensurePlanType("DENTAL", "Dental");
+    Plan otherPlan = planRepository.save(
+        buildPlan("Vision Premium", dental, new BigDecimal("299.99")));
+    createClaimViaApi(
+        buildClaimDto(user.getId(), otherPlan.getId(), LocalDate.now(), new BigDecimal("15.00")));
+
+    // When / Then
+    mockMvc.perform(get(ENDPOINT)
+            .param("planName", "dental")
+            .param("page", "0").param("size", "10"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.content[0].planName").value(plan.getName()));
+  }
+
+  @Test
+  @DisplayName("GET /v1/claims — filter by amountMin/amountMax (inclusive)")
+  void shouldFilterByAmountRangeInclusive() throws Exception {
+    // Given
+    createClaimViaApi(
+        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("10.00")));
+    ClaimDto mid = createClaimViaApi(
+        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("20.00")));
+    createClaimViaApi(
+        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("30.00")));
+
+    // When / Then
+    mockMvc.perform(get(ENDPOINT)
+            .param("amountMin", "20.00")
+            .param("amountMax", "20.00")
+            .param("page", "0").param("size", "10"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(1))
+        .andExpect(jsonPath("$.content[0].id").value(mid.getId().toString()));
   }
 
   private ClaimDto buildClaimDto(UUID userId, UUID planId, LocalDate serviceDate,
@@ -233,14 +286,18 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   }
 
   private ClaimDto createClaimViaApi(ClaimDto req) throws Exception {
-    // Given
-    // When
     String response = mockMvc.perform(
             post(ENDPOINT).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(req)))
+                .content(createClaimJson(
+                    req.getConsumer().getUserId(),
+                    req.getPlanId(),
+                    req.getServiceDate(),
+                    req.getAmount(),
+                    req.getStatus(),
+                    req.getClaimNumber()
+                )))
         .andExpect(status().isCreated())
         .andReturn().getResponse().getContentAsString();
-    // Then
     return objectMapper.readValue(response, ClaimDto.class);
   }
 
@@ -286,5 +343,31 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   private PlanType ensurePlanType(String code, String name) {
     return planTypeRepository.findByCode(code)
         .orElseGet(() -> planTypeRepository.save(buildPlanType(code, name)));
+  }
+
+  private String createClaimJson(
+      UUID userId, UUID planId, LocalDate serviceDate, BigDecimal amount,
+      ClaimStatus status, String claimNumber
+  ) throws Exception {
+    var root = objectMapper.createObjectNode();
+    root.put("serviceDate", serviceDate.toString());
+    root.put("amount", amount);
+    root.put("planId", planId.toString());
+    if (status != null) {
+      root.put("status", status.name());
+    }
+    if (claimNumber != null) {
+      root.put("claimNumber", claimNumber);
+    }
+    if (userId != null) {
+      var consumer = root.putObject("consumer");
+      consumer.put("userId", userId.toString());
+    }
+    return objectMapper.writeValueAsString(root);
+  }
+
+  private String createClaimJson(UUID userId, UUID planId, LocalDate serviceDate, BigDecimal amount)
+      throws Exception {
+    return createClaimJson(userId, planId, serviceDate, amount, null, null);
   }
 }

@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.dto.claim;
 
 import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
 import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
@@ -20,11 +21,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ClaimDto {
-  
+
   private UUID id;
-  
+
   private String claimNumber;
-  
+
   private ClaimStatus status;
 
   @PastOrPresent(message = "Service date can’t be in the future")
@@ -40,6 +41,10 @@ public class ClaimDto {
   @Digits(integer = 12, fraction = 2, message = "Amount must have max 2 decimals")
   private BigDecimal amount;
 
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @NotNull(message = "Plan ID is required")
   private UUID planId;
+
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private String planName;
 }

@@ -14,7 +14,8 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ClaimMapper {
 
-  @Mapping(source = "plan.id", target = "planId")
+  @Mapping(target = "planId", ignore = true)
+  @Mapping(target = "planName", source = "plan.name")
   @Mapping(target = "consumer", ignore = true)
   ClaimDto toDto(Claim claim);
 

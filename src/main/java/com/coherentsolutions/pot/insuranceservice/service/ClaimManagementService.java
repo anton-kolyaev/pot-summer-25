@@ -47,9 +47,7 @@ public class ClaimManagementService {
     Claim entity = claimMapper.toEntity(request);
     entity.setConsumer(consumer);
     entity.setPlan(plan);
-    if (entity.getStatus() == null) {
-      entity.setStatus(ClaimStatus.PENDING);
-    }
+    entity.setStatus(ClaimStatus.PENDING);
     Claim saved = claimRepository.save(entity);
     return claimMapper.toDto(saved);
   }
