@@ -82,7 +82,7 @@ Now, register yourself on [Auth0](https://auth0.com/docs/secure/tokens/access-to
 2.6 Grant access for `read:user`, `update:user`, `create:user`, `delete:user` (you can use this for search)
 
 1. Go to the test tab
-3.1 Here you need to copy the `CURL` request
+3.1 Here, you need to copy the `CURL` request
 ```bash
 curl --request POST \
   --url https://dev-urlink.us.auth0.com/oauth/token \
@@ -125,8 +125,8 @@ MAIL_PASSWORD=your pass
 
 **If you don`t have authorized users**, you should:
 - in `SecurityConfig.java` change from `.anyRequest().authenticated())` to `.anyRequest().permitAll())`
-- After that build and app `./gradlew bootRun`
-- Use Swagger or Curl to execute request on `POST /v1/users/` endpoint
+- After that, build and app `./gradlew bootRun`
+- Use Swagger or Curl to execute a request on `POST /v1/users/` endpoint
 > With Curl (bash/zsh):
 ```bash
 curl -X 'POST' \
@@ -162,12 +162,12 @@ curl -X 'POST' \
   "companyId": "641e4c9d-e897-4c91-830e-c1daae443bee"
 }'
 ```
-- Check your email and setup password
-- After that check in your Auth0 Dashboard, is your user active?
+- Check your email and set upa  password
+- After that, check in your Auth0 Dashboard, is your user active?
 - If **yes**,
 - - rollback `SecurityConfig.java` changes, and relaunch app with `./gradlew bootRun`
 - - Go to Swagger and press `Authorize`, enter your `client_id` and `client_secret`, you can take it from your `.env` file, press `Authorize`
 - - Enter your user's email and password 
-- - Try execute any endpoint in swagger
+- - Try to execute any endpoint in Swagger
 - If **no**
-- - Probably, there are some errors in previous steps
+- - Probably, there are some errors in the previous steps
