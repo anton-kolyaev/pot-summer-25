@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.javaagent.test)
+    alias(libs.plugins.hibernate.orm)
 }
 
 group = 'com.coherentsolutions.pot'
@@ -51,6 +52,8 @@ dependencies {
     implementation libs.auth0
     implementation libs.dotenv
     implementation libs.spring.boot.starter.oauth2.resource.server
+    implementation libs.hibernate.core
+    implementation libs.hibernate.envers
     compileOnly libs.lombok
     annotationProcessor libs.lombok
     annotationProcessor libs.mapstruct.processor

@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.envers.Audited;
 import org.hibernate.type.SqlTypes;
 
 /**
@@ -29,6 +30,7 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @Getter
 @Setter
+@Audited
 @Table(name = "companies")
 public class Company extends Auditable {
 

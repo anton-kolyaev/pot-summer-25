@@ -4,6 +4,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyDto;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 /**
  * Mapper interface for converting between {@link Company} entities and {@link CompanyDto} objects.
@@ -17,15 +18,25 @@ public interface CompanyMapper {
    * Maps a {@link CompanyDto} to a {@link Company} entity. Ignores fields: id, createdAt,
    * updatedAt; maps status directly.
    */
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "createdAt", ignore = true)
-  @Mapping(target = "updatedAt", ignore = true)
-  @Mapping(target = "status", source = "status")
+  @Mappings({
+      @Mapping(target = "createdBy", ignore = true),
+      @Mapping(target = "updatedBy", ignore = true),
+      @Mapping(target = "createdAt", ignore = true),
+      @Mapping(target = "updatedAt", ignore = true),
+      @Mapping(target = "status", source = "status"),
+      @Mapping(target = "id", ignore = true)
+  })
   Company toEntity(CompanyDto dto);
 
 
   /**
    * Maps a {@link Company} entity to a {@link CompanyDto}.
    */
+  @Mappings({
+      @Mapping(target = "createdBy", ignore = true),
+      @Mapping(target = "updatedBy", ignore = true),
+      @Mapping(target = "createdAt", ignore = true),
+      @Mapping(target = "updatedAt", ignore = true)
+  })
   CompanyDto toCompanyDto(Company company);
 }
