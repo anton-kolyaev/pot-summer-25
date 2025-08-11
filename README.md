@@ -73,7 +73,8 @@ Now, register yourself on [Auth0](https://auth0.com/docs/secure/tokens/access-to
 2.2 Open a link
 2.3 Press edit and choose your application
 2.4 Choose `Machine to Machine`
-2.5 Grant access for `read:user`, `update:user`, `create:user`, `delete:user` 
+2.5 Authorize your application
+2.6 Grant access for `read:user`, `update:user`, `create:user`, `delete:user` (you can use this for search)
 
 1. Go to the test tab
 3.1 Here you need to copy the `CURL` request
