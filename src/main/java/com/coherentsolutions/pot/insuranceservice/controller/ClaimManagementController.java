@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insuranceservice.controller;
 
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimDto;
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimFilter;
-import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
 import com.coherentsolutions.pot.insuranceservice.service.ClaimManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -27,9 +26,9 @@ public class ClaimManagementController {
   @GetMapping
   @Operation(
       summary = "Get claims",
-      description = "Filters: claimId, status, planName (contains, case-insensitive), " +
-          "amountMin/amountMax (inclusive), serviceDateFrom/serviceDateTo, userId, companyId. " +
-          "Supports page/size/sort."
+      description = "Filters: claimId, status, planName (contains, case-insensitive), "
+          + "amountMin/amountMax (inclusive), serviceDateFrom/serviceDateTo, userId, companyId. "
+          + "Supports page/size/sort."
   )
   public Page<ClaimDto> getClaims(ClaimFilter filter, Pageable pageable) {
     return claimManagementService.getClaimsWithFilters(filter, pageable);
