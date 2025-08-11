@@ -147,13 +147,13 @@ curl -X 'POST' \
       "state": "Vilniaus",
       "street": "Sauletekio",
       "building": "25",
-      "room": "506"
+      "room": "29"
     }
   ],
   "phoneData": [
     {
       "code": "370",
-      "number": "63206723"
+      "number": "66606733"
     }
   ],
   "functions": [
