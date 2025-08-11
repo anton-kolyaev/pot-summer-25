@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
  * - Create user with email_verified=false
  * - Use Auth0's built-in email verification system
  * - Auth0 handles all email sending automatically
+ * - Automatically sends password reset email after user creation
  */
 @Slf4j
 @Service
@@ -32,6 +33,7 @@ public class Auth0InvitationService {
 
   private final ManagementAPI managementAPI;
   private final Auth0UserMapper auth0UserMapper;
+  private final Auth0PasswordService auth0PasswordService;
   
   @Value("${auth0.domain:}")
   private String auth0Domain;
@@ -41,6 +43,7 @@ public class Auth0InvitationService {
    * 
    * <p>The user will receive an email invitation to set up their account.
    * Auth0 handles all email sending automatically.
+   * After successful user creation, automatically sends password reset email.
    * 
    *
    * @param invitationDto the invitation data containing user information
@@ -57,6 +60,9 @@ public class Auth0InvitationService {
       
       // Trigger Auth0's built-in email verification
       triggerEmailVerification(auth0User.getId());
+      
+      // Automatically send password reset email after successful user creation
+      sendPasswordResetEmailAfterCreation(invitationDto.getEmail());
       
       log.info("Successfully created Auth0 user with invitation for email: {}", invitationDto.getEmail());
       
@@ -146,6 +152,31 @@ public class Auth0InvitationService {
   }
 
   /**
+   * Automatically sends password reset email after successful user creation.
+   * This ensures the user receives a password reset email immediately after being created.
+   * 
+   *
+   * @param email the user's email address
+   * @throws Auth0Exception if password reset email sending fails
+   */
+  void sendPasswordResetEmailAfterCreation(String email) throws Auth0Exception {
+    try {
+      log.info("Automatically sending password reset email to newly created user: {}", email);
+      
+      // Use Auth0PasswordService to send password reset email via /dbconnections/change_password
+      String response = auth0PasswordService.sendPasswordChangeEmail(email);
+      
+      log.info("Successfully sent password reset email to user: {}. Auth0 response: {}", email, response);
+      
+    } catch (Exception e) {
+      log.error("Failed to send password reset email to newly created user: {}", email, e);
+      // Don't throw exception here to avoid breaking the user creation flow
+      // The user creation was successful, only the password reset email failed
+      log.warn("User creation succeeded but password reset email failed for: {}", email);
+    }
+  }
+
+  /**
    * Resends invitation email to an existing user using Auth0's system.
    * 
    *
@@ -166,6 +197,9 @@ public class Auth0InvitationService {
       
       // Trigger Auth0's email verification again
       triggerEmailVerification(userId);
+      
+      // Also send password reset email
+      sendPasswordResetEmailAfterCreation(email);
       
       log.info("Successfully resent invitation email to user: {}", userId);
       
@@ -210,10 +244,10 @@ public class Auth0InvitationService {
     try {
       log.info("Sending password reset email to: {}", email);
       
-      // Auth0 will automatically send the password reset email
-      // when the user requests a password change
-      log.info("Password reset URL generated for user: {}", email);
-      log.info("Auth0 will handle the email sending automatically");
+      // Use Auth0PasswordService to send password reset email
+      String response = auth0PasswordService.sendPasswordChangeEmail(email);
+      
+      log.info("Successfully sent password reset email to: {}. Auth0 response: {}", email, response);
       
     } catch (Exception e) {
       log.error("Failed to send password reset email to: {}", email, e);
