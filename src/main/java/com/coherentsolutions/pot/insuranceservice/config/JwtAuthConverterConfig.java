@@ -1,24 +1,51 @@
 package com.coherentsolutions.pot.insuranceservice.config;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 @Configuration
 public class JwtAuthConverterConfig {
 
-  private static final String ROLES_CLAIM = "role";
+  @Value("${AUTH0_AUDIENCE}")
+  private String authAudience;
+
   private static final String PRINCIPAL_CLAIM = "user_uuid";
 
   @Bean
   public JwtAuthenticationConverter jwtAuthenticationConverter() {
-    JwtGrantedAuthoritiesConverter rolesConverter = new JwtGrantedAuthoritiesConverter();
-    rolesConverter.setAuthoritiesClaimName(ROLES_CLAIM);
-    rolesConverter.setAuthorityPrefix("ROLE_");
-    JwtAuthenticationConverter authConverter = new JwtAuthenticationConverter();
-    authConverter.setJwtGrantedAuthoritiesConverter(rolesConverter);
-    authConverter.setPrincipalClaimName(PRINCIPAL_CLAIM);
-    return authConverter;
+    JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
+
+    jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+      Collection<GrantedAuthority> authorities = new ArrayList<>();
+
+      String systemRolesClaim = authAudience + "/system_roles";
+      List<String> systemRoles = jwt.getClaim(systemRolesClaim);
+      if (systemRoles != null) {
+        systemRoles.forEach(role ->
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+      }
+
+      String functionalRolesClaim = authAudience + "/functional_roles";
+      List<String> functionalRoles = jwt.getClaim(functionalRolesClaim);
+      if (functionalRoles != null) {
+        functionalRoles.forEach(role ->
+            authorities.add(new SimpleGrantedAuthority("ROLE_FUNC_" + role))
+        );
+      }
+
+      return authorities;
+    });
+
+    jwtConverter.setPrincipalClaimName(PRINCIPAL_CLAIM);
+
+    return jwtConverter;
   }
 }
