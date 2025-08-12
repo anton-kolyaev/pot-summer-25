@@ -98,7 +98,7 @@ public class UserInvitationService {
    * @return the user metadata map
    */
   private java.util.Map<String, Object> buildUserMetadata(UserDto userDto) {
-    java.util.Map<String, Object> metadata = new java.util.HashMap<>();
+    var metadata = new HashMap<String, Object>();
     metadata.put("firstName", userDto.getFirstName());
     metadata.put("lastName", userDto.getLastName());
     metadata.put("username", userDto.getUsername());
