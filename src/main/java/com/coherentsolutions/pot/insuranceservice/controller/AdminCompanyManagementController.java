@@ -4,7 +4,6 @@ import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyDto;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyFilter;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyReactivationRequest;
 import com.coherentsolutions.pot.insuranceservice.service.CompanyManagementService;
-import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminCompanyManagementController {
 
   private final CompanyManagementService companyManagementService;
-  private final UserManagementService userManagementService;
 
   /**
    * Retrieves a paginated list of companies filtered by given criteria.
@@ -57,7 +55,7 @@ public class AdminCompanyManagementController {
   /**
    * Retrieves details of a specific company by ID.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyManagement(#id)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @GetMapping("/{id}")
   public CompanyDto viewCompanyDetails(@PathVariable UUID id) {
     return companyManagementService.getCompanyDetails(id);
@@ -66,7 +64,7 @@ public class AdminCompanyManagementController {
   /**
    * Updates an existing company.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyManagement(#id)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @PutMapping("/{id}")
   public CompanyDto updateCompany(@PathVariable UUID id, @RequestBody CompanyDto request) {
     return companyManagementService.updateCompany(id, request);
@@ -75,7 +73,7 @@ public class AdminCompanyManagementController {
   /**
    * Deactivates a company with users by company ID.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyManagement(#id)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @DeleteMapping("/{id}")
   public CompanyDto deactivateCompany(@PathVariable UUID id) {
     return companyManagementService.deactivateCompany(id);
@@ -84,7 +82,7 @@ public class AdminCompanyManagementController {
   /**
    * Reactivates a deactivated company with users.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyManagement(#id)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @PostMapping("/{id}/reactivate")
   public CompanyDto reactivateCompany(@PathVariable UUID id,
       @RequestBody CompanyReactivationRequest request) {

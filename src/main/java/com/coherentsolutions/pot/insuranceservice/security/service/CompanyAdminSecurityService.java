@@ -9,35 +9,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class CompanyAdminSecurityService {
 
-  public boolean canAccessCompanyUsers(UUID companyId) {
-    return canAccessCompany(companyId, "ROLE_FUNC_COMPANY_USER_MANAGER");
-  }
-
-  public boolean canAccessCompanyPlans(UUID companyId) {
-    return canAccessCompany(companyId, "ROLE_FUNC_COMPANY_PLAN_MANAGER");
-  }
-
-  public boolean canAccessCompanyInsurancePackages(UUID companyId) {
-    return canAccessCompany(companyId, "ROLE_FUNC_COMPANY_INSURANCE_PACKAGE_MANAGER");
-  }
-
-  public boolean canAccessCompanyManagement(UUID companyId) {
-    return canAccessCompany(companyId, "ROLE_FUNC_COMPANY_MANAGER");
-  }
-
-  public boolean canAccessCompany(UUID companyId, String requiredRole) {
+  public boolean canAccessCompanyResource(UUID companyId, String requiredRole) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
     if (authentication == null) {
       return false;
     }
-
-    boolean belongsToCompany = checkIfBelongsToCompany(authentication, companyId);
 
     if (isAppAdmin(authentication)) {
       return true;
     }
 
+    boolean belongsToCompany = checkIfBelongsToCompany(authentication, companyId);
     boolean hasRequiredRole = authentication.getAuthorities().stream()
         .anyMatch(a -> a.getAuthority().equals(requiredRole));
 

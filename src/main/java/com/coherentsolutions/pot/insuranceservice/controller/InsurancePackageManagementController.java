@@ -28,7 +28,7 @@ public class InsurancePackageManagementController {
 
   private final InsurancePackageManagementService insurancePackageManagementService;
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyInsurancePackages(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_INSURANCE_PACKAGE_MANAGER')")
   @GetMapping
   public Page<InsurancePackageDto> getInsurancePackages(@PathVariable UUID companyId,
       InsurancePackageFilter filter, Pageable pageable) {
@@ -36,13 +36,13 @@ public class InsurancePackageManagementController {
     return insurancePackageManagementService.getInsurancePackagesWithFilters(filter, pageable);
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyInsurancePackages(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_INSURANCE_PACKAGE_MANAGER')")
   @GetMapping("/{id}")
-  public InsurancePackageDto getInsurancePackage(@PathVariable UUID id) {
+  public InsurancePackageDto getInsurancePackage(@PathVariable UUID companyId, @PathVariable UUID id) {
     return insurancePackageManagementService.getInsurancePackageById(id);
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyInsurancePackages(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_INSURANCE_PACKAGE_MANAGER')")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public InsurancePackageDto createInsurancePackage(
@@ -51,15 +51,15 @@ public class InsurancePackageManagementController {
     return insurancePackageManagementService.createInsurancePackage(companyId, insurancePackageDto);
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyInsurancePackages(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_INSURANCE_PACKAGE_MANAGER')")
   @DeleteMapping("/{id}")
-  public InsurancePackageDto deactivateInsurancePackage(@PathVariable UUID id) {
+  public InsurancePackageDto deactivateInsurancePackage(@PathVariable UUID companyId, @PathVariable UUID id) {
     return insurancePackageManagementService.deactivateInsurancePackage(id);
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyInsurancePackages(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_INSURANCE_PACKAGE_MANAGER')")
   @PutMapping("/{id}")
-  public InsurancePackageDto updateInsurancePackage(@PathVariable UUID id,
+  public InsurancePackageDto updateInsurancePackage(@PathVariable UUID companyId, @PathVariable UUID id,
       @Valid @RequestBody InsurancePackageDto insurancePackageDto) {
     return insurancePackageManagementService.updateInsurancePackage(id, insurancePackageDto);
   }

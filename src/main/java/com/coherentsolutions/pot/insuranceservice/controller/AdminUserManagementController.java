@@ -35,7 +35,7 @@ public class AdminUserManagementController {
   /**
    * Creates a new user.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public UserDto createUser(@PathVariable UUID companyId, @Valid @RequestBody UserDto userDto) {
@@ -46,7 +46,7 @@ public class AdminUserManagementController {
    * Retrieves a paginated list of users belonging to a specific company filtered by given
    * criteria.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @GetMapping
   public Page<UserDto> getUsersOfCompany(@PathVariable UUID companyId, UserFilter filter,
       Pageable pageable) {
@@ -57,7 +57,7 @@ public class AdminUserManagementController {
   /**
    * Updates an existing user.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.ACCEPTED)
   public UserDto updateUser(@PathVariable UUID companyId, @PathVariable("id") UUID id,
@@ -68,7 +68,7 @@ public class AdminUserManagementController {
   /**
    * Deactivates the user with the given ID.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @DeleteMapping("/{id}")
   public UserDto deactivateUser(@PathVariable UUID companyId, @PathVariable("id") UUID id) {
     return userManagementService.deactivateUser(id);
@@ -77,7 +77,7 @@ public class AdminUserManagementController {
   /**
    * Reactivates the user with the given ID.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @PutMapping("/{id}/reactivation")
   public UserDto reactivateUser(@PathVariable UUID companyId, @PathVariable("id") UUID id) {
     return userManagementService.reactivateUser(id);
@@ -87,7 +87,7 @@ public class AdminUserManagementController {
    * Retrieves user details by ID. If the user does not exist, throws
    * {@link ResponseStatusException} with 404 NOT FOUND.
    */
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @GetMapping("/{id}")
   public UserDto viewUsersDetails(@PathVariable UUID companyId, @PathVariable("id") UUID id) {
     return userManagementService.getUsersDetails(id);

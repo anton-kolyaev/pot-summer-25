@@ -28,32 +28,32 @@ public class AdminPlanManagementController {
 
   private final PlanManagementService planManagementService;
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyPlans(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_PLAN_MANAGER')")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public PlanDto createPlan(@PathVariable UUID companyId, @Valid @RequestBody PlanDto planDto) {
     return planManagementService.createPlan(planDto);
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyPlans(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_PLAN_MANAGER')")
   @PutMapping("/{id}")
   public PlanDto updatePlan(@PathVariable UUID companyId, @PathVariable UUID id, @Valid @RequestBody PlanDto planDto) {
     return planManagementService.updatePlan(id, planDto);
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyPlans(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_PLAN_MANAGER')")
   @GetMapping
   public List<PlanDto> getPlans(@PathVariable UUID companyId, PlanFilter filter) {
     return planManagementService.getPlansWithFilter(filter);
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyPlans(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_PLAN_MANAGER')")
   @GetMapping("/plan-types")
   public List<PlanTypeDto> getPlanTypes(@PathVariable UUID companyId) {
     return planManagementService.getAllPlanTypes();
   }
 
-  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyPlans(#companyId)")
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_PLAN_MANAGER')")
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void softDeletePlan(@PathVariable UUID companyId, @PathVariable UUID id) {
