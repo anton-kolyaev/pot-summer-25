@@ -1,6 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.model;
 
-import com.coherentsolutions.pot.insuranceservice.model.audit.Auditable;
+import com.coherentsolutions.pot.insuranceservice.model.audit.AuditableSoftDelete;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,16 +16,18 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Setter
+@SQLDelete(sql = "UPDATE plans SET deleted_at = now() WHERE id = ?")
 @Table(name = "plans")
-public class Plan extends Auditable {
+public class Plan extends AuditableSoftDelete {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(name = "name", length = 100, nullable = false)
