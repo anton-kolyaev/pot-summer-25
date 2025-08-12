@@ -6,7 +6,6 @@ import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -44,7 +43,8 @@ public class AdminUserManagementController {
   }
 
   /**
-   * Retrieves a paginated list of users belonging to a specific company filtered by given criteria.
+   * Retrieves a paginated list of users belonging to a specific company filtered by given
+   * criteria.
    */
   @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
   @GetMapping
@@ -60,7 +60,8 @@ public class AdminUserManagementController {
   @PreAuthorize("@companyAdminSecurityService.canAccessCompanyUsers(#companyId)")
   @PutMapping("/{id}")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  public UserDto updateUser(@PathVariable UUID companyId, @PathVariable("id") UUID id, @Valid @RequestBody UserDto request) {
+  public UserDto updateUser(@PathVariable UUID companyId, @PathVariable("id") UUID id,
+      @Valid @RequestBody UserDto request) {
     return userManagementService.updateUser(id, request);
   }
 

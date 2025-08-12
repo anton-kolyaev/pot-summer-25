@@ -7,7 +7,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CompanyAdminSecurityService{
+public class CompanyAdminSecurityService {
 
   public boolean canAccessCompanyUsers(UUID companyId) {
     return canAccessCompany(companyId, "ROLE_FUNC_COMPANY_USER_MANAGER");
@@ -50,14 +50,12 @@ public class CompanyAdminSecurityService{
   }
 
   private boolean checkIfBelongsToCompany(Authentication authentication, UUID companyId) {
-    if (authentication.getPrincipal() instanceof Jwt) {
-      Jwt jwt = (Jwt) authentication.getPrincipal();
+    if (authentication.getPrincipal() instanceof Jwt jwt) {
       String tokenCompanyId = jwt.getClaimAsString("company_id");
       return tokenCompanyId != null && tokenCompanyId.equals(companyId.toString());
     }
     return false;
   }
-
 
 
 }
