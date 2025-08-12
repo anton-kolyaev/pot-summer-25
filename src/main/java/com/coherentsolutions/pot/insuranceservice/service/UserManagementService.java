@@ -147,8 +147,8 @@ public class UserManagementService {
     }
 
     user.setStatus(targetStatus);
-    userRepository.save(user);
+    User savedUser = userRepository.save(user);
 
-    return userMapper.toDto(user);
+    return userMapper.toDto(savedUser);
   }
 }

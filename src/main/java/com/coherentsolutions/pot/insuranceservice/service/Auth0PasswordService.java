@@ -4,13 +4,11 @@ import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 /**
  * Service for handling Auth0 password change operations.
@@ -22,11 +20,11 @@ import org.springframework.web.client.RestTemplate;
 public class Auth0PasswordService {
 
   private final Auth0Properties auth0Properties;
-  private final RestTemplate restTemplate;
+  private final RestClient restClient;
 
-  public Auth0PasswordService(Auth0Properties auth0Properties, RestTemplate restTemplate) {
+  public Auth0PasswordService(Auth0Properties auth0Properties, RestClient restClient) {
     this.auth0Properties = auth0Properties;
-    this.restTemplate = restTemplate;
+    this.restClient = restClient;
   }
 
   /**
@@ -49,15 +47,14 @@ public class Auth0PasswordService {
     body.put("email", userEmail);
     body.put("connection", auth0Properties.connection());
 
-    // Headers
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
-
     try {
-      // Make POST request
-      ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+      // Make POST request using RestClient
+      ResponseEntity<String> response = restClient.post()
+          .uri(url)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(body)
+          .retrieve()
+          .toEntity(String.class);
 
       if (response.getStatusCode() == HttpStatus.OK) {
         return response.getBody(); // Auth0 will return a message like "We've just sent you an email..."
