@@ -1,10 +1,8 @@
 package com.coherentsolutions.pot.insuranceservice.dto.enrollment;
 
-import com.coherentsolutions.pot.insuranceservice.enums.EnrollmentStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,13 +30,5 @@ public class EnrollmentDto {
   @NotNull(message = "Plan contribution is required")
   @Positive(message = "Plan contribution must be positive")
   private BigDecimal planContribution;
-
-  private EnrollmentStatus status;
-
-  @NotNull(message = "Start date is required")
-  private LocalDate startDate;
-
-  private LocalDate endDate;
-
 
 }
