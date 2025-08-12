@@ -56,7 +56,6 @@ public class Enrollment extends Auditable {
   @Column(name = "start_date", nullable = false)
   private LocalDate startDate;
 
-  @NotNull
   @Column(name = "end_date")
   private LocalDate endDate;
 }

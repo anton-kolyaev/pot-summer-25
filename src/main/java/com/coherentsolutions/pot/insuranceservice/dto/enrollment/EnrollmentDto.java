@@ -38,7 +38,6 @@ public class EnrollmentDto {
   @NotNull(message = "Start date is required")
   private LocalDate startDate;
 
-  @NotNull(message = "End date is required")
   private LocalDate endDate;
 
 
