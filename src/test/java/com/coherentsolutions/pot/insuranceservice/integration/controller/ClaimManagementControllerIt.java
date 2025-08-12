@@ -313,31 +313,31 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
 
   private User createTestUser(String firstName, String lastName, String username, String email,
       Company c, String ssn) {
-    User u = new User();
-    u.setFirstName(firstName);
-    u.setLastName(lastName);
-    u.setUsername(username);
-    u.setEmail(email);
-    u.setCompany(c);
-    u.setStatus(UserStatus.ACTIVE);
-    u.setDateOfBirth(LocalDate.of(1990, 1, 1));
-    u.setSsn(ssn);
-    return userRepository.save(u);
+    var user = new User();
+    user.setFirstName(firstName);
+    user.setLastName(lastName);
+    user.setUsername(username);
+    user.setEmail(email);
+    user.setCompany(c);
+    user.setStatus(UserStatus.ACTIVE);
+    user.setDateOfBirth(LocalDate.of(1990, 1, 1));
+    user.setSsn(ssn);
+    return userRepository.save(user);
   }
 
   private PlanType buildPlanType(String code, String name) {
-    PlanType t = new PlanType();
-    t.setCode(code);
-    t.setName(name);
-    return t;
+    var planType = new PlanType();
+    planType.setCode(code);
+    planType.setName(name);
+    return planType;
   }
 
   private Plan buildPlan(String name, PlanType type, BigDecimal contribution) {
-    Plan p = new Plan();
-    p.setName(name);
-    p.setType(type);
-    p.setContribution(contribution);
-    return p;
+    var plan = new Plan();
+    plan.setName(name);
+    plan.setType(type);
+    plan.setContribution(contribution);
+    return plan;
   }
 
   private PlanType ensurePlanType(String code, String name) {
