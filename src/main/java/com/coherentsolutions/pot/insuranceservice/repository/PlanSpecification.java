@@ -1,12 +1,10 @@
 package com.coherentsolutions.pot.insuranceservice.repository;
 
-import static com.coherentsolutions.pot.insuranceservice.repository.SpecificationBuilder.equal;
-
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanFilter;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
+import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import org.springframework.data.jpa.domain.Specification;
 
 public class PlanSpecification {
@@ -15,13 +13,18 @@ public class PlanSpecification {
    * Builds a specification based on the provided filter criteria.
    */
   public static Specification<Plan> withFilter(PlanFilter filter) {
-    List<Specification<Plan>> specs = new ArrayList<>();
+    return (root, query, cb) -> {
+      List<Predicate> predicates = new ArrayList<>();
 
-    specs.add(equal(filter.getTypeId(), r -> r.join("type").get("id")));
+      if (filter.getTypeId() != null) {
+        predicates.add(cb.equal(root.get("type").get("id"), filter.getTypeId()));
+      }
 
-    return specs.stream()
-        .filter(Objects::nonNull)
-        .reduce(Specification::and)
-        .orElse((root, query, cb) -> cb.conjunction());
+      predicates.add(cb.isNull(root.get("deletedAt")));
+
+      return predicates.isEmpty()
+          ? cb.conjunction()
+          : cb.and(predicates.toArray(new Predicate[0]));
+    };
   }
 }
