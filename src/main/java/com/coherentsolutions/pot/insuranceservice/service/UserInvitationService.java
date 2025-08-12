@@ -4,6 +4,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0InvitationDto;
 import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

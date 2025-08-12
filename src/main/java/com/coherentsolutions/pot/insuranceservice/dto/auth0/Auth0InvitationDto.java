@@ -49,6 +49,7 @@ public class Auth0InvitationDto {
   private String clientId;
 
   @JsonProperty("connection")
+  @Builder.Default
   private String connection = "Username-Password-Authentication";
 
   // Constructor for required fields
