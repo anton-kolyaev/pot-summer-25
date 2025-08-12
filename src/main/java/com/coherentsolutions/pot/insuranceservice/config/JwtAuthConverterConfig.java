@@ -49,3 +49,4 @@ public class JwtAuthConverterConfig {
     return jwtConverter;
   }
 }
+

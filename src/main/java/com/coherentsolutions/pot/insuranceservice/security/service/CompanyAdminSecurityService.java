@@ -57,5 +57,5 @@ public class CompanyAdminSecurityService {
     return false;
   }
 
-
 }
+
