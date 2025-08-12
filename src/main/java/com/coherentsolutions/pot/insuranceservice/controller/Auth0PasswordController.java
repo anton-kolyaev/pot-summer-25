@@ -5,6 +5,7 @@ import com.coherentsolutions.pot.insuranceservice.service.Auth0PasswordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,15 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
  * using Auth0's password change functionality.
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Auth0 Password Management", description = "Endpoints for Auth0 password change operations")
 public class Auth0PasswordController {
 
   private final Auth0PasswordService auth0PasswordService;
-
-  public Auth0PasswordController(Auth0PasswordService auth0PasswordService) {
-    this.auth0PasswordService = auth0PasswordService;
-  }
 
   /**
    * Sends a password change email to the specified user.
