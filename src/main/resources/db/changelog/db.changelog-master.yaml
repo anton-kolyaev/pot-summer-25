@@ -14,8 +14,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/create-table-plan.sql
   - include:
-      file: db/changelog/create-table-claims.sql
-  - include:
       file: db/changelog/changeset/insert-plan-types.sql
   - include:
       file: db/changelog/on-delete-cascade-insurance-packages.sql
@@ -23,4 +21,6 @@ databaseChangeLog:
       file: db/changelog/create-table-insurance-package-plans.sql
   - include:
       file: db/changelog/create-deleted-at-column.sql
+  - include:
+      file: db/changelog/create-table-claims.sql
 
