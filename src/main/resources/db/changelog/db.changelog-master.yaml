@@ -20,4 +20,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/create-table-insurance-package-plans.sql
   - include:
+      file: db/changelog/create-deleted-at-column.sql
+  - include:
       file: db/changelog/create-table-enrollment.sql
