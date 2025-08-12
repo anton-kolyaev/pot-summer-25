@@ -25,7 +25,7 @@ public class JwtAuthConverterConfig {
     jwtConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
       Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-      String systemRolesClaim = authAudience + "/system_roles";
+      String systemRolesClaim = authAudience + "/roles";
       List<String> systemRoles = jwt.getClaim(systemRolesClaim);
       if (systemRoles != null) {
         systemRoles.forEach(role ->
@@ -33,7 +33,7 @@ public class JwtAuthConverterConfig {
         );
       }
 
-      String functionalRolesClaim = authAudience + "/functional_roles";
+      String functionalRolesClaim = authAudience + "/functions";
       List<String> functionalRoles = jwt.getClaim(functionalRolesClaim);
       if (functionalRoles != null) {
         functionalRoles.forEach(role ->
