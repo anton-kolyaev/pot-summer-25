@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/company/{companyId}/plan-package")
+@RequestMapping("/v1/companies/{companyId}/plan-package")
 public class InsurancePackageManagementController {
 
   private final InsurancePackageManagementService insurancePackageManagementService;

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/{companyId}/plans")
+@RequestMapping("/v1/companies/{companyId}/plans")
 public class AdminPlanManagementController {
 
   private final PlanManagementService planManagementService;
@@ -53,9 +53,10 @@ public class AdminPlanManagementController {
     return planManagementService.getAllPlanTypes();
   }
 
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyPlans(#companyId)")
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void softDeletePlan(@PathVariable UUID id) {
+  public void softDeletePlan(@PathVariable UUID companyId, @PathVariable UUID id) {
     planManagementService.softDeletePlan(id);
   }
 

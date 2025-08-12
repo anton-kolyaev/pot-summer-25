@@ -27,7 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/{companyId}/users")
+@RequestMapping("/v1/companies/{companyId}/users")
 public class AdminUserManagementController {
 
   private final UserManagementService userManagementService;
