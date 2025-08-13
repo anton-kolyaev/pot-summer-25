@@ -13,6 +13,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
+import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityUtils;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
@@ -47,7 +48,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
   // Constants
-  private static final String BASE_URL = "/v1/users";
+  private static final String BASE_URL = "/v1/companies/{companyId}/users";
   private static final String APPLICATION_JSON = MediaType.APPLICATION_JSON_VALUE;
   private static final String TEST_EMAIL = "jane.doe@example.com";
   private static final String TEST_USERNAME = "jane.doe";
@@ -72,6 +73,15 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     TEST_PHONE.setNumber("00000000");
   }
 
+  @Autowired
+  private MockMvc mockMvc;
+  @Autowired
+  private UserRepository userRepository;
+  @Autowired
+  private CompanyRepository companyRepository;
+  @Autowired
+  private ObjectMapper objectMapper;
+
   private Company createAndSaveTestCompany() {
     Company company = new Company();
     company.setName("Test Company");
@@ -94,15 +104,6 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user.setStatus(UserStatus.ACTIVE);
     return userRepository.save(user);
   }
-
-  @Autowired
-  private MockMvc mockMvc;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private CompanyRepository companyRepository;
-  @Autowired
-  private ObjectMapper objectMapper;
 
   @Test
   @DisplayName("Should create a user successfully")
@@ -128,7 +129,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
         .build();
 
     try {
-      mockMvc.perform(post(BASE_URL)
+      mockMvc.perform(post(BASE_URL, company.getId())
+              .with(TestSecurityUtils.adminUser())
               .contentType(APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(userDto)))
           .andExpect(status().isCreated())
@@ -163,7 +165,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(get(BASE_URL)
+      mockMvc.perform(get(BASE_URL, company.getId())
+              .with(TestSecurityUtils.adminUser())
               .param("page", "0")
               .param("size", "10")
               .param("status", "ACTIVE")
@@ -184,7 +187,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return bad request for missing all domain fields")
   void shouldReturnBadRequestForInvalidUserDto() throws Exception {
     UserDto invalidUserDto = new UserDto(); // all fields null
-    mockMvc.perform(post(BASE_URL).contentType(APPLICATION_JSON)
+    mockMvc.perform(post(BASE_URL, UUID.randomUUID())
+            .with(TestSecurityUtils.adminUser())
+            .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidUserDto)))
         .andExpect(status().isBadRequest());
   }
@@ -211,7 +216,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
         .build();
 
     try {
-      mockMvc.perform(put(BASE_URL + "/" + user.getId())
+      mockMvc.perform(put(BASE_URL + "/" + user.getId(), UUID.randomUUID())
+              .with(TestSecurityUtils.adminUser())
               .contentType(APPLICATION_JSON)
               .content(objectMapper.writeValueAsString(updateDto)))
           .andExpect(status().isAccepted())
@@ -231,7 +237,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     UUID userId = UUID.randomUUID();
     UserDto invalidDto = new UserDto(); // all fields null
 
-    mockMvc.perform(put(BASE_URL + "/" + userId)
+    mockMvc.perform(put(BASE_URL + "/" + userId, UUID.randomUUID())
+            .with(TestSecurityUtils.adminUser())
             .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest());
@@ -260,7 +267,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
     try {
       mockMvc
-          .perform(delete("/v1/users/{id}", user.getId()))
+          .perform(delete(BASE_URL + "/" + user.getId(), UUID.randomUUID())
+              .with(TestSecurityUtils.adminUser()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.INACTIVE.name()));
     } finally {
@@ -291,7 +299,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     user = userRepository.save(user);
 
     try {
-      mockMvc.perform(delete("/v1/users/{id}", user.getId())).andExpect(status().isBadRequest());
+      mockMvc.perform(delete(BASE_URL + "/" + user.getId(), UUID.randomUUID())
+              .with(TestSecurityUtils.adminUser()))
+          .andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
       companyRepository.deleteById(company.getId());
@@ -302,7 +312,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 404 when deactivating a non-existent user")
   void shouldReturn404WhenDeactivatingNonExistentUser() throws Exception {
     UUID fakeId = UUID.randomUUID();
-    mockMvc.perform(delete("/v1/users/{id}", fakeId)).andExpect(status().isNotFound());
+    mockMvc.perform(delete("/v1/users/{id}", fakeId)
+            .with(TestSecurityUtils.adminUser()))
+        .andExpect(status().isNotFound());
   }
 
   @Test
@@ -328,7 +340,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
     try {
       mockMvc
-          .perform(put("/v1/users/{id}/reactivation", user.getId()))
+          .perform(put(BASE_URL + "/" + user.getId() + "/reactivation", UUID.randomUUID())
+              .with(TestSecurityUtils.adminUser()))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.status").value(UserStatus.ACTIVE.name()));
     } finally {
@@ -360,7 +373,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
     try {
       mockMvc
-          .perform(put("/v1/users/{id}/reactivation", user.getId()))
+          .perform(put(BASE_URL + "/" + user.getId() + "/reactivation", UUID.randomUUID())
+              .with(TestSecurityUtils.adminUser()))
           .andExpect(status().isBadRequest());
     } finally {
       userRepository.deleteById(user.getId());
@@ -372,7 +386,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 404 when reactivating a non-existent user")
   void shouldReturn404WhenReactivatingNonExistentUser() throws Exception {
     UUID fakeId = UUID.randomUUID();
-    mockMvc.perform(put("/v1/users/{id}/reactivation", fakeId)).andExpect(status().isNotFound());
+    mockMvc.perform(put("/v1/users/{id}/reactivation", fakeId)
+            .with(TestSecurityUtils.adminUser()))
+        .andExpect(status().isNotFound());
   }
 
 
@@ -413,7 +429,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
     try {
       mockMvc.perform(
-              get("/v1/companies/{id}/users", companyId).param("page", "0").param("size", "10")
+              get("/v1/companies/{id}/users", companyId)
+                  .with(TestSecurityUtils.adminUser())
+                  .param("page", "0").param("size", "10")
                   .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
           .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
           .andExpect(jsonPath("$.content").isArray())
@@ -443,6 +461,7 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
 
     try {
       mockMvc.perform(get("/v1/companies/{id}/users", emptyCompany.getId())
+              .with(TestSecurityUtils.adminUser())
               .param("page", "0")
               .param("size", "10").contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk())
@@ -460,7 +479,9 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   void shouldReturnBadRequestForInvalidCompanyId() throws Exception {
     String invalidCompanyId = "invalid-company-id";
     mockMvc.perform(
-        get("/v1/companies/{id}/users", invalidCompanyId).param("page", "0").param("size", "10")
+        get("/v1/companies/{id}/users", invalidCompanyId)
+            .with(TestSecurityUtils.adminUser())
+            .param("page", "0").param("size", "10")
             .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
   }
 
@@ -471,7 +492,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
     User user = createAndSaveTestUser(company);
 
     try {
-      mockMvc.perform(get(BASE_URL + "/" + user.getId())
+      mockMvc.perform(get(BASE_URL + "/" + user.getId(), UUID.randomUUID())
+              .with(TestSecurityUtils.adminUser())
               .contentType(APPLICATION_JSON))
           .andExpect(status().isOk())
           .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
@@ -491,7 +513,8 @@ public class AdminUserManagementControllerIt extends PostgresTestContainer {
   void shouldReturn404WhenUserNotFound() throws Exception {
     UUID nonExistentUserId = UUID.randomUUID();
 
-    mockMvc.perform(get(BASE_URL + "/" + nonExistentUserId)
+    mockMvc.perform(get(BASE_URL + "/" + nonExistentUserId, UUID.randomUUID())
+            .with(TestSecurityUtils.adminUser())
             .contentType(APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }

@@ -15,6 +15,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.insurancepackage.Insurance
 import com.coherentsolutions.pot.insuranceservice.enums.PackageStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.PayrollFrequency;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
+import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityUtils;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
@@ -112,7 +113,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
     UUID companyId = company.getId();
 
-    mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+    mockMvc.perform(get("/v1/companies/{companyId}/plan-package", companyId)
+            .with(TestSecurityUtils.adminUser())
             .param("name", "standard")
             .param("payrollFrequency", "MONTHLY")
             .contentType(APPLICATION_JSON))
@@ -142,7 +144,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     filter.setPayrollFrequency(PayrollFrequency.WEEKLY);
     filter.setCompanyId(companyId);
 
-    mockMvc.perform(get("/v1/company/{companyId}/plan-package", companyId)
+    mockMvc.perform(get("/v1/companies/{companyId}/plan-package", companyId)
+            .with(TestSecurityUtils.adminUser())
             .param("name", "nonexistent")
             .param("payrollFrequency", "WEEKLY")
             .contentType(APPLICATION_JSON))
@@ -170,7 +173,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID companyId = company.getId();
     UUID packageId = insurancePackage.getId();
 
-    mockMvc.perform(get("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+    mockMvc.perform(get("/v1/companies/{companyId}/plan-package/{id}", companyId, packageId)
+            .with(TestSecurityUtils.adminUser())
             .contentType(APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(packageId.toString()))
@@ -188,7 +192,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID nonExistentPackageId = UUID.randomUUID();
 
     mockMvc.perform(
-            get("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+            get("/v1/companies/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+                .with(TestSecurityUtils.adminUser())
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isNotFound());
 
@@ -212,7 +217,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     Company company = createCompany("Test Company", "test@example.com", "https://test.com");
     UUID companyId = company.getId();
 
-    mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
+    mockMvc.perform(post("/v1/companies/{companyId}/plan-package", companyId)
+            .with(TestSecurityUtils.adminUser())
             .contentType(String.valueOf(APPLICATION_JSON))
             .content(objectMapper.writeValueAsString(insurancePackageDto)))
         .andExpect(status().isCreated())
@@ -240,7 +246,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
     UUID companyId = company.getId();
 
-    mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
+    mockMvc.perform(post("/v1/companies/{companyId}/plan-package", companyId)
+            .with(TestSecurityUtils.adminUser())
             .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(insurancePackageDto)))
         .andExpect(status().isBadRequest());
@@ -261,7 +268,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
 
     UUID companyId = company.getId();
 
-    mockMvc.perform(post("/v1/company/{companyId}/plan-package", companyId)
+    mockMvc.perform(post("/v1/companies/{companyId}/plan-package", companyId)
+            .with(TestSecurityUtils.adminUser())
             .contentType(APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(insurancePackageDto)))
         .andExpect(status().isBadRequest())
@@ -288,7 +296,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID packageId = insurancePackage.getId();
     UUID companyId = company.getId();
 
-    mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+    mockMvc.perform(delete("/v1/companies/{companyId}/plan-package/{id}", companyId, packageId)
+            .with(TestSecurityUtils.adminUser())
             .contentType(APPLICATION_JSON))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.status").value("DEACTIVATED"));
@@ -312,7 +321,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID packageId = insurancePackage.getId();
     UUID companyId = company.getId();
 
-    mockMvc.perform(delete("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+    mockMvc.perform(delete("/v1/companies/{companyId}/plan-package/{id}", companyId, packageId)
+            .with(TestSecurityUtils.adminUser())
             .contentType(APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
@@ -325,7 +335,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     UUID nonExistentPackageId = UUID.randomUUID();
 
     mockMvc.perform(
-            delete("/v1/company/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+            delete("/v1/companies/{companyId}/plan-package/{id}", companyId, nonExistentPackageId)
+                .with(TestSecurityUtils.adminUser())
                 .contentType(APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
@@ -359,7 +370,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .build();
 
     mockMvc.perform(
-            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+            put("/v1/companies/{companyId}/plan-package/{id}", companyId, packageId)
+                .with(TestSecurityUtils.adminUser())
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedDto)))
         .andExpect(status().isOk())
@@ -399,7 +411,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .build();
 
     mockMvc.perform(
-            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+            put("/v1/companies/{companyId}/plan-package/{id}", companyId, packageId)
+                .with(TestSecurityUtils.adminUser())
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidDto)))
         .andExpect(status().isBadRequest())
@@ -435,7 +448,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .build();
 
     mockMvc.perform(
-            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+            put("/v1/companies/{companyId}/plan-package/{id}", companyId, packageId)
+                .with(TestSecurityUtils.adminUser())
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedDto)))
         .andExpect(status().isBadRequest())
@@ -471,7 +485,8 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
         .build();
 
     mockMvc.perform(
-            put("/v1/company/{companyId}/plan-package/{id}", companyId, packageId)
+            put("/v1/companies/{companyId}/plan-package/{id}", companyId, packageId)
+                .with(TestSecurityUtils.adminUser())
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(invalidUpdateDto)))
         .andExpect(status().isBadRequest())
