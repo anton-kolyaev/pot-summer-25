@@ -1,6 +1,7 @@
 package com.coherentsolutions.pot.insuranceservice.repository;
 
 import com.coherentsolutions.pot.insuranceservice.model.Enrollment;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
@@ -17,4 +18,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
 
   boolean existsByUserIdAndPlanIdAndDeletedAtIsNull(UUID userId, UUID planId);
 
+  List<Enrollment> findAllByDeletedAtIsNull();
 }

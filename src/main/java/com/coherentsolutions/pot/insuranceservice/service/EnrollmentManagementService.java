@@ -5,6 +5,7 @@ import com.coherentsolutions.pot.insuranceservice.mapper.EnrollmentMapper;
 import com.coherentsolutions.pot.insuranceservice.repository.EnrollmentRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,5 +39,13 @@ public class EnrollmentManagementService {
 
     var saved = enrollmentRepository.save(entity);
     return enrollmentMapper.toDto(saved);
+  }
+
+  @Transactional(readOnly = true)
+  public List<EnrollmentDto> getAll() {
+    return enrollmentRepository.findAllByDeletedAtIsNull()
+        .stream()
+        .map(enrollmentMapper::toDto)
+        .toList();
   }
 }
