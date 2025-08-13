@@ -112,7 +112,8 @@ public class Auth0InvitationService {
     if (user.getAppMetadata() == null) {
       user.setAppMetadata(new java.util.HashMap<>());
     }
-    user.getAppMetadata().put("invitedToMyApp", true);
+    final String INVITED_TO_MY_APP_KEY = "invitedToMyApp";
+    user.getAppMetadata().put(INVITED_TO_MY_APP_KEY, true);
     
     try {
       User createdUser = managementAPI.users().create(user).execute().getBody();
