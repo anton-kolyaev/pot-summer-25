@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
 import org.hibernate.type.SqlTypes;
 
 /**
@@ -30,6 +32,8 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 @Table(name = "companies")
+@Audited
+@AuditTable(value = "companies_aud")
 public class Company extends Auditable {
 
   @GeneratedValue(strategy = GenerationType.UUID)
