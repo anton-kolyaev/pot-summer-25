@@ -1,5 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,6 +37,7 @@ class Auth0PasswordControllerIt extends PostgresTestContainer {
 
     // When & Then
     mockMvc.perform(post("/api/v1/auth/change-password")
+            .with(jwt().jwt(jwt -> jwt.subject("test-user")))
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -48,6 +50,7 @@ class Auth0PasswordControllerIt extends PostgresTestContainer {
 
     // When & Then
     mockMvc.perform(post("/api/v1/auth/change-password")
+            .with(jwt().jwt(jwt -> jwt.subject("test-user")))
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -60,6 +63,7 @@ class Auth0PasswordControllerIt extends PostgresTestContainer {
 
     // When & Then
     mockMvc.perform(post("/api/v1/auth/change-password")
+            .with(jwt().jwt(jwt -> jwt.subject("test-user")))
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -72,6 +76,7 @@ class Auth0PasswordControllerIt extends PostgresTestContainer {
 
     // When & Then
     mockMvc.perform(post("/api/v1/auth/change-password")
+            .with(jwt().jwt(jwt -> jwt.subject("test-user")))
             .content(requestBody)
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
