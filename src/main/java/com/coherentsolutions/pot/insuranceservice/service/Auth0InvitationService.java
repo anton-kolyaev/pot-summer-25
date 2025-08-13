@@ -255,15 +255,4 @@ public class Auth0InvitationService {
       throw new Auth0Exception("Failed to send password reset email: " + e.getMessage(), e, "AUTH0_PASSWORD_RESET_FAILED", 400);
     }
   }
-
-  /**
-   * Gets the Auth0 client ID from configuration.
-   * 
-   *
-   * @return the client ID
-   */
-  private String getClientId() {
-    // You can inject this from configuration
-    return "your-auth0-client-id"; // Replace with actual client ID
-  }
 } 
