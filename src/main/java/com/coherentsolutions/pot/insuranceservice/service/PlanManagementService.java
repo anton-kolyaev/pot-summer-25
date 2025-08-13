@@ -25,7 +25,6 @@ public class PlanManagementService {
   private final PlanRepository planRepository;
   private final PlanMapper planMapper;
   private final PlanTypeRepository planTypeRepository;
-  private final EntityManager entityManager;
 
   @Transactional
   public PlanDto createPlan(PlanDto planDto) {
