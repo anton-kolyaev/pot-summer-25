@@ -9,7 +9,6 @@ import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
-import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
