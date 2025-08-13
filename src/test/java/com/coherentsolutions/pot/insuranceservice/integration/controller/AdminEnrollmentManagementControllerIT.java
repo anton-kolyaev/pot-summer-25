@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,6 +21,8 @@ import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -86,7 +89,6 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
   @Test
   @DisplayName("Should create enrollment successfully")
   void shouldCreateEnrollmentSuccessfully() throws Exception {
-    // You can reuse baseRequest directly or clone it if you prefer immutability
     EnrollmentDto createRequest = copy(baseRequest);
 
     String response = mockMvc.perform(post(ENDPOINT)
@@ -167,6 +169,59 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
         .andExpect(status().isUnsupportedMediaType());
   }
 
+  @Test
+  @DisplayName("Should return empty list when no enrollments")
+  void shouldReturnEmptyListWhenNoEnrollments() throws Exception {
+    String json = mockMvc.perform(get(ENDPOINT))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    EnrollmentDto[] array = objectMapper.readValue(json, EnrollmentDto[].class);
+    List<EnrollmentDto> list = Arrays.asList(array);
+
+    assertEquals(0, list.size());
+  }
+
+  @Test
+  @DisplayName("Should list all active enrollments")
+  void shouldListAllActiveEnrollments() throws Exception {
+
+    String createdJson1 = mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(baseRequest)))
+        .andExpect(status().isCreated())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    UUID anotherPlanId = seedPlan();
+    EnrollmentDto req2 = new EnrollmentDto();
+    req2.setUserId(userId);
+    req2.setPlanId(anotherPlanId);
+    req2.setElectionAmount(new BigDecimal("50.00"));
+
+    String createdJson2 = mockMvc.perform(post(ENDPOINT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(toJson(req2)))
+        .andExpect(status().isCreated())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    String json = mockMvc.perform(get(ENDPOINT))
+        .andExpect(status().isOk())
+        .andReturn()
+        .getResponse()
+        .getContentAsString();
+
+    EnrollmentDto[] array = objectMapper.readValue(json, EnrollmentDto[].class);
+    List<EnrollmentDto> list = Arrays.asList(array);
+
+    assertNotNull(list);
+    assertEquals(2, list.size());
+  }
 
   private UUID seedUser() {
     Company c = new Company();
@@ -183,7 +238,7 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
     u.setSsn("123-45-6789");
     u.setDateOfBirth(LocalDate.of(1990, 1, 1));
     u.setStatus(UserStatus.ACTIVE);
-    u.setCompany(c);                        // FK not-null satisfied
+    u.setCompany(c);
     return userRepository.saveAndFlush(u).getId();
   }
 
