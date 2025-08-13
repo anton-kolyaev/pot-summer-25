@@ -103,27 +103,34 @@ public class EnrollmentManagementServiceTest {
   }
 
   private Enrollment buildEnrollment(
-      UUID id, UUID uId, UUID pId, BigDecimal electionAmount, BigDecimal contribution) {
+      UUID id, UUID userIdParam, UUID planIdParam,
+      BigDecimal electionAmount, BigDecimal contribution) {
+
     Enrollment e = new Enrollment();
     e.setId(id);
+
     User u = new User();
-    u.setId(uId);
+    u.setId(userIdParam);
     e.setUser(u);
+
     Plan p = new Plan();
-    p.setId(pId);
+    p.setId(planIdParam);
     p.setContribution(contribution);
     e.setPlan(p);
+
     e.setElectionAmount(electionAmount);
     e.setPlanContribution(contribution);
     return e;
   }
 
   private EnrollmentDto buildEnrollmentDto(
-      UUID id, UUID uId, UUID pId, BigDecimal electionAmount, BigDecimal contribution) {
+      UUID id, UUID userIdParam, UUID planIdParam,
+      BigDecimal electionAmount, BigDecimal contribution) {
+
     return EnrollmentDto.builder()
         .id(id)
-        .userId(uId)
-        .planId(pId)
+        .userId(userIdParam)
+        .planId(planIdParam)
         .electionAmount(electionAmount)
         .planContribution(contribution)
         .build();
