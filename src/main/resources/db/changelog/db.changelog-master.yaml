@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/changelog/create-table-enrollment.sql
   - include:
       file: db/changelog/create-table-claims.sql
+  - include:
+      file: db/changelog/create-table-revinfo.sql
