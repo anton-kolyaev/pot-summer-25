@@ -51,6 +51,7 @@ dependencies {
     implementation libs.auth0
     implementation libs.dotenv
     implementation libs.spring.boot.starter.oauth2.resource.server
+    implementation libs.hibernate.envers
     compileOnly libs.lombok
     annotationProcessor libs.lombok
     annotationProcessor libs.mapstruct.processor

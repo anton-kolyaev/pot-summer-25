@@ -25,6 +25,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.type.SqlTypes;
 
 /**
@@ -36,6 +39,8 @@ import org.hibernate.type.SqlTypes;
 @Getter
 @Setter
 @Table(name = "users")
+@Audited
+@AuditTable(value = "users_aud")
 public class User extends Auditable {
 
   @Id
@@ -83,6 +88,7 @@ public class User extends Auditable {
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
       orphanRemoval = true, fetch = FetchType.EAGER)
+  @NotAudited
   private Set<UserFunctionAssignment> functions;
-  
+
 }
