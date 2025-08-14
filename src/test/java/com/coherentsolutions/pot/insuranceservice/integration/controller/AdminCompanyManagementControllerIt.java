@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -667,6 +669,23 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
         .andExpect(status().isBadRequest());
   }
 
+  @Test
+  @DisplayName("Should return 403 forbidden status when trying to access secured endpoint")
+  void shouldReturn403Forbidden() throws Exception {
+    mockMvc
+        .perform(
+            get("/v1/companies")
+                .with(user("123e4567-e89b-12d3-a456-426614174000"))
+                .param("name", "Alpha")
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+        .andExpect(jsonPath("$.error.code").value("FORBIDDEN"))
+        .andExpect(jsonPath("$.error.message").value("Access Denied"));
+
+  }
   // ========== PRIVATE HELPER METHODS ==========
 
   private CompanyDto createCompany(CompanyDto createRequest) throws Exception {
