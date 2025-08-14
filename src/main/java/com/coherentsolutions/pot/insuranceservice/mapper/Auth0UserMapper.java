@@ -27,6 +27,19 @@ public interface Auth0UserMapper {
   @Mapping(target = "connection", source = "connection")
   @Mapping(target = "password", 
            expression = "java(dto.getPassword() != null ? dto.getPassword().toCharArray() : null)")
+  @Mapping(target = "username", ignore = true)
+  @Mapping(target = "phoneNumber", ignore = true)
+  @Mapping(target = "phoneVerified", ignore = true)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "givenName", ignore = true)
+  @Mapping(target = "familyName", ignore = true)
+  @Mapping(target = "clientId", ignore = true)
+  @Mapping(target = "verifyPassword", ignore = true)
+  @Mapping(target = "verifyEmail", ignore = true)
+  @Mapping(target = "verifyPhoneNumber", ignore = true)
+  @Mapping(target = "identities", ignore = true)
+  @Mapping(target = "multifactor", ignore = true)
+  @Mapping(target = "values", ignore = true)
   User toAuth0User(Auth0UserDto dto);
 
   /**
@@ -37,6 +50,7 @@ public interface Auth0UserMapper {
    */
   @Mapping(target = "password", ignore = true) // Don't map password from Auth0 response
   @Mapping(target = "userId", expression = "java(user.getId())")
+  @Mapping(target = "connection", ignore = true)
   Auth0UserDto toDto(User user);
 
   /**
@@ -51,5 +65,18 @@ public interface Auth0UserMapper {
   @Mapping(target = "connection", source = "connection")
   @Mapping(target = "password", 
            expression = "java(dto.getPassword() != null ? dto.getPassword().toCharArray() : null)")
+  @Mapping(target = "username", ignore = true)
+  @Mapping(target = "phoneNumber", ignore = true)
+  @Mapping(target = "phoneVerified", ignore = true)
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "givenName", ignore = true)
+  @Mapping(target = "familyName", ignore = true)
+  @Mapping(target = "clientId", ignore = true)
+  @Mapping(target = "verifyPassword", ignore = true)
+  @Mapping(target = "verifyEmail", ignore = true)
+  @Mapping(target = "verifyPhoneNumber", ignore = true)
+  @Mapping(target = "identities", ignore = true)
+  @Mapping(target = "multifactor", ignore = true)
+  @Mapping(target = "values", ignore = true)
   void updateUserFromDto(Auth0UserDto dto, @MappingTarget User user);
 } 

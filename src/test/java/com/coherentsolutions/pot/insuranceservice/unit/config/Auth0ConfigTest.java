@@ -32,6 +32,8 @@ class Auth0ConfigTest {
         "test-domain.auth0.com",
         "test-api-token",
         "test-audience",
+        "test-client-id",
+        "Username-Password-Authentication",
         10000,
         true
     );
@@ -51,6 +53,8 @@ class Auth0ConfigTest {
         null,
         "test-api-token",
         "test-audience",
+        "test-client-id",
+        "Username-Password-Authentication",
         10000,
         true
     );
@@ -67,6 +71,8 @@ class Auth0ConfigTest {
         "",
         "test-api-token",
         "test-audience",
+        "test-client-id",
+        "Username-Password-Authentication",
         10000,
         true
     );
@@ -83,6 +89,8 @@ class Auth0ConfigTest {
         "test-domain.auth0.com",
         null,
         "test-audience",
+        "test-client-id",
+        "Username-Password-Authentication",
         10000,
         true
     );
@@ -99,6 +107,8 @@ class Auth0ConfigTest {
         "test-domain.auth0.com",
         "",
         "test-audience",
+        "test-client-id",
+        "Username-Password-Authentication",
         10000,
         true
     );

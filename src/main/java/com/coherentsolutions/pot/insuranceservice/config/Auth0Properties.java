@@ -13,6 +13,8 @@ public record Auth0Properties(
     String domain,
     String apiToken,
     String audience,
+    String clientId,
+    String connection,
     int timeout,
     boolean enabled
 ) {
