@@ -2,6 +2,7 @@ package com.coherentsolutions.pot.insuranceservice.integration;
 
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0InvitationService;
+import com.coherentsolutions.pot.insuranceservice.service.Auth0UserMetadataService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,6 +20,9 @@ class InsuranceServiceApplicationTests extends PostgresTestContainer {
 
   @MockBean
   private Auth0InvitationService auth0InvitationService;
+
+  @MockBean
+  private Auth0UserMetadataService auth0UserMetadataService;
 
   @Test
   void contextLoads() {

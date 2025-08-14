@@ -84,5 +84,8 @@ public class User extends Auditable {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,
       orphanRemoval = true, fetch = FetchType.EAGER)
   private Set<UserFunctionAssignment> functions;
+
+  @Column(name = "auth0_user_id", length = 255, unique = true)
+  private String auth0UserId;
   
 }
