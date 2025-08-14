@@ -6,6 +6,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0InvitationDto;
 import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
+import com.coherentsolutions.pot.insuranceservice.util.PasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,9 +95,10 @@ public class Auth0InvitationService {
     user.setEmailVerified(false); // Important: email is not verified initially
     user.setBlocked(false);
     
-    // Auth0 requires a password, so we set a secure temporary one
+    // Auth0 requires a password, so we generate a secure temporary one
     // The user will change it via the invitation flow
-    user.setPassword("SecurePassword123!".toCharArray());
+    String generatedPassword = PasswordGenerator.generateSecurePassword();
+    user.setPassword(generatedPassword.toCharArray());
     
     // Set user metadata if provided
     if (invitationDto.getUserMetadata() != null) {
