@@ -16,6 +16,7 @@ public interface PlanMapper {
   PlanTypeDto toDto(PlanType planType);
 
   @Mapping(target = "type", ignore = true)
+  @Mapping(target = "insurancePackages", ignore = true)
   Plan toEntity(PlanDto planDto);
 
 }

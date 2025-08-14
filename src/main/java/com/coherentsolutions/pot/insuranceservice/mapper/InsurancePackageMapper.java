@@ -14,6 +14,7 @@ public interface InsurancePackageMapper {
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "company", ignore = true)
+  @Mapping(target = "plans", ignore = true)
   InsurancePackage toInsurancePackage(InsurancePackageDto insurancePackageDto);
 
   @Mapping(target = "planIds", source = "plans", qualifiedByName = "mapPlansToPlanIds")

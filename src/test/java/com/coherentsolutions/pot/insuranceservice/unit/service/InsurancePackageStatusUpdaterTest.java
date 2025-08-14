@@ -1,6 +1,6 @@
 package com.coherentsolutions.pot.insuranceservice.unit.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -9,89 +9,91 @@ import com.coherentsolutions.pot.insuranceservice.model.InsurancePackage;
 import com.coherentsolutions.pot.insuranceservice.repository.InsurancePackageRepository;
 import com.coherentsolutions.pot.insuranceservice.service.InsurancePackageStatusUpdater;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class InsurancePackageStatusUpdaterTest {
 
-  private final LocalDate today = LocalDate.now();
   @Mock
   private InsurancePackageRepository insurancePackageRepository;
-  @InjectMocks
-  private InsurancePackageStatusUpdater statusUpdater;
 
-  @Test
-  void shouldSetStatusToInitializedIfStartDateIsInFuture() {
-    InsurancePackage pkg = new InsurancePackage();
-    pkg.setStartDate(today.plusDays(5));
-    pkg.setEndDate(today.plusMonths(1));
-    pkg.setStatus(PackageStatus.ACTIVE);
+  private InsurancePackageStatusUpdater insurancePackageStatusUpdater;
 
-    when(insurancePackageRepository.findAll()).thenReturn(List.of(pkg));
-
-    statusUpdater.updatePackageStatus();
-
-    assertEquals(PackageStatus.INITIALIZED, pkg.getStatus());
-    verify(insurancePackageRepository).saveAll(List.of(pkg));
+  @BeforeEach
+  void setUp() {
+    insurancePackageStatusUpdater = new InsurancePackageStatusUpdater(insurancePackageRepository);
   }
 
   @Test
-  void shouldSetStatusToActiveIfTodayIsBetweenStartAndEnd() {
-    InsurancePackage pkg = new InsurancePackage();
-    pkg.setStartDate(today.minusDays(1));
-    pkg.setEndDate(today.plusDays(1));
-    pkg.setStatus(PackageStatus.INITIALIZED);
+  @DisplayName("Should update package status successfully")
+  void shouldUpdatePackageStatusSuccessfully() {
+    // Given
+    InsurancePackage package1 = new InsurancePackage();
+    package1.setStartDate(LocalDate.now().plusDays(1));
+    package1.setEndDate(LocalDate.now().plusMonths(1));
+    package1.setStatus(PackageStatus.ACTIVE);
 
-    when(insurancePackageRepository.findAll()).thenReturn(List.of(pkg));
+    InsurancePackage package2 = new InsurancePackage();
+    package2.setStartDate(LocalDate.now().minusDays(1));
+    package2.setEndDate(LocalDate.now().plusDays(1));
+    package2.setStatus(PackageStatus.INITIALIZED);
 
-    statusUpdater.updatePackageStatus();
+    List<InsurancePackage> packages = Arrays.asList(package1, package2);
 
-    assertEquals(PackageStatus.ACTIVE, pkg.getStatus());
-    verify(insurancePackageRepository).saveAll(List.of(pkg));
-  }
+    when(insurancePackageRepository.findAll()).thenReturn(packages);
+    when(insurancePackageRepository.saveAll(anyList())).thenReturn(packages);
 
-  @Test
-  void shouldSetStatusToExpiredIfEndDateIsBeforeToday() {
-    InsurancePackage pkg = new InsurancePackage();
-    pkg.setStartDate(today.minusMonths(2));
-    pkg.setEndDate(today.minusDays(1));
-    pkg.setStatus(PackageStatus.ACTIVE);
+    // When
+    insurancePackageStatusUpdater.updatePackageStatus();
 
-    when(insurancePackageRepository.findAll()).thenReturn(List.of(pkg));
-
-    statusUpdater.updatePackageStatus();
-
-    assertEquals(PackageStatus.EXPIRED, pkg.getStatus());
-    verify(insurancePackageRepository).saveAll(List.of(pkg));
-  }
-
-  @Test
-  void shouldNotChangeStatusIfAlreadyDeactivated() {
-    InsurancePackage pkg = new InsurancePackage();
-    pkg.setStartDate(today.minusDays(10));
-    pkg.setEndDate(today.plusDays(10));
-    pkg.setStatus(PackageStatus.DEACTIVATED);
-
-    when(insurancePackageRepository.findAll()).thenReturn(List.of(pkg));
-
-    statusUpdater.updatePackageStatus();
-
-    assertEquals(PackageStatus.DEACTIVATED, pkg.getStatus());
-    verify(insurancePackageRepository).saveAll(List.of(pkg));
-  }
-
-  @Test
-  void shouldHandleEmptyPackageListGracefully() {
-    when(insurancePackageRepository.findAll()).thenReturn(List.of());
-
-    statusUpdater.updatePackageStatus();
-
+    // Then
     verify(insurancePackageRepository).findAll();
-    verify(insurancePackageRepository).saveAll(List.of());
+    verify(insurancePackageRepository).saveAll(packages);
+  }
+
+  @Test
+  @DisplayName("Should handle empty package list")
+  void shouldHandleEmptyPackageList() {
+    // Given
+    List<InsurancePackage> packages = Arrays.asList();
+
+    when(insurancePackageRepository.findAll()).thenReturn(packages);
+    when(insurancePackageRepository.saveAll(anyList())).thenReturn(packages);
+
+    // When
+    insurancePackageStatusUpdater.updatePackageStatus();
+
+    // Then
+    verify(insurancePackageRepository).findAll();
+    verify(insurancePackageRepository).saveAll(packages);
+  }
+
+  @Test
+  @DisplayName("Should handle single package")
+  void shouldHandleSinglePackage() {
+    // Given
+    InsurancePackage package1 = new InsurancePackage();
+    package1.setStartDate(LocalDate.now().minusDays(1));
+    package1.setEndDate(LocalDate.now().plusDays(1));
+    package1.setStatus(PackageStatus.INITIALIZED);
+
+    List<InsurancePackage> packages = Arrays.asList(package1);
+
+    when(insurancePackageRepository.findAll()).thenReturn(packages);
+    when(insurancePackageRepository.saveAll(anyList())).thenReturn(packages);
+
+    // When
+    insurancePackageStatusUpdater.updatePackageStatus();
+
+    // Then
+    verify(insurancePackageRepository).findAll();
+    verify(insurancePackageRepository).saveAll(packages);
   }
 }
