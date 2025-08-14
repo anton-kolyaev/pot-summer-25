@@ -35,6 +35,7 @@ public class Auth0InvitationService {
   private final ManagementAPI managementAPI;
   private final Auth0UserMapper auth0UserMapper;
   private final Auth0PasswordService auth0PasswordService;
+  private final Auth0TicketService auth0TicketService;
   
   @Value("${auth0.domain:}")
   private String auth0Domain;
@@ -63,7 +64,7 @@ public class Auth0InvitationService {
       triggerEmailVerification(auth0User.getId());
       
       // Automatically send password reset email after successful user creation
-      sendPasswordResetEmailAfterCreation(invitationDto.getEmail());
+      sendPasswordResetEmailAfterCreation(auth0User.getId(), invitationDto.getEmail());
       
       log.info("Successfully created Auth0 user with invitation for email: {}", invitationDto.getEmail());
       
@@ -155,21 +156,22 @@ public class Auth0InvitationService {
   }
 
   /**
-   * Automatically sends password reset email after successful user creation.
+   * Automatically sends password reset email after successful user creation using Auth0 Tickets API.
    * This ensures the user receives a password reset email immediately after being created.
    * 
    *
+   * @param userId the Auth0 user ID
    * @param email the user's email address
    * @throws Auth0Exception if password reset email sending fails
    */
-  void sendPasswordResetEmailAfterCreation(String email) throws Auth0Exception {
+  void sendPasswordResetEmailAfterCreation(String userId, String email) throws Auth0Exception {
     try {
-      log.info("Automatically sending password reset email to newly created user: {}", email);
+      log.info("Automatically sending password reset email to newly created user: {} with ID: {}", email, userId);
       
-      // Use Auth0PasswordService to send password reset email via /dbconnections/change_password
-      String response = auth0PasswordService.sendPasswordChangeEmail(email);
+      // Use Auth0TicketService directly with userId to avoid search issues
+      String ticketUrl = auth0TicketService.createPasswordChangeTicket(userId, email);
       
-      log.info("Successfully sent password reset email to user: {}. Auth0 response: {}", email, response);
+      log.info("Successfully created password reset ticket for user: {}. Ticket URL: {}", email, ticketUrl);
       
     } catch (Exception e) {
       log.error("Failed to send password reset email to newly created user: {}", email, e);
@@ -202,7 +204,7 @@ public class Auth0InvitationService {
       triggerEmailVerification(userId);
       
       // Also send password reset email
-      sendPasswordResetEmailAfterCreation(email);
+      sendPasswordResetEmailAfterCreation(userId, email);
       
       log.info("Successfully resent invitation email to user: {}", userId);
       

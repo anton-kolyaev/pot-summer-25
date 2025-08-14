@@ -2,33 +2,31 @@ package com.coherentsolutions.pot.insuranceservice.service;
 
 import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
-import java.util.HashMap;
-import java.util.Map;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 /**
  * Service for handling Auth0 password change operations.
  *
  * <p>This service provides functionality to send password change emails
- * using Auth0's /dbconnections/change_password endpoint.
+ * using Auth0's Tickets API /api/v2/tickets/password-change endpoint.
  */
+@Slf4j
 @Service
+@ConditionalOnProperty(name = "auth0.enabled", havingValue = "true", matchIfMissing = false)
 public class Auth0PasswordService {
 
   private final Auth0Properties auth0Properties;
-  private final RestClient restClient;
+  private final Auth0TicketService auth0TicketService;
 
-  public Auth0PasswordService(Auth0Properties auth0Properties, RestClient restClient) {
+  public Auth0PasswordService(Auth0Properties auth0Properties, Auth0TicketService auth0TicketService) {
     this.auth0Properties = auth0Properties;
-    this.restClient = restClient;
+    this.auth0TicketService = auth0TicketService;
   }
 
   /**
-   * Sends a password change email to the specified user.
+   * Sends a password change email to the specified user using Auth0 Tickets API.
    *
    * @param userEmail the email address of the user
    * @return the response message from Auth0
@@ -39,29 +37,20 @@ public class Auth0PasswordService {
       throw new Auth0Exception("Auth0 integration is disabled");
     }
 
-    String url = "https://" + auth0Properties.domain() + "/dbconnections/change_password";
-
-    // Request body
-    Map<String, String> body = new HashMap<>();
-    body.put("client_id", auth0Properties.clientId());
-    body.put("email", userEmail);
-    body.put("connection", auth0Properties.connection());
-
     try {
-      // Make POST request using RestClient
-      ResponseEntity<String> response = restClient.post()
-          .uri(url)
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(body)
-          .retrieve()
-          .toEntity(String.class);
-
-      if (response.getStatusCode() == HttpStatus.OK) {
-        return response.getBody(); // Auth0 will return a message like "We've just sent you an email..."
-      } else {
-        throw new Auth0Exception("Failed to send change password email: " + response.getStatusCode());
-      }
+      log.info("Creating password change ticket for user with email: {}", userEmail);
+      
+      // Create password change ticket using Auth0 Tickets API
+      String ticketUrl = auth0TicketService.createPasswordChangeTicketByEmail(userEmail);
+      
+      log.info("Successfully created password change ticket for user: {}. Ticket URL: {}", userEmail, ticketUrl);
+      
+      // Auth0 will automatically send the email with the ticket URL
+      // We return a success message similar to the old API
+      return "We've just sent you an email to change your password.";
+      
     } catch (Exception e) {
+      log.error("Failed to send password change email to user: {}", userEmail, e);
       throw new Auth0Exception("Error sending password change email: " + e.getMessage(), e);
     }
   }

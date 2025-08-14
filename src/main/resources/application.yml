@@ -41,6 +41,7 @@ auth0:
   audience: ${AUTH0_AUDIENCE:} # https://your-domain.auth0.com/api/v2/
   client-id: ${AUTH0_CLIENT_ID:} # your-client-id
   connection: ${AUTH0_CONNECTION:Username-Password-Authentication} # your-connection-name
+  connection-id: ${AUTH0_CONNECTION_ID:} # your-connection-id (required for Tickets API)
   timeout: ${AUTH0_TIMEOUT:10000} # Default timeout in milliseconds
 
 # Application Configuration

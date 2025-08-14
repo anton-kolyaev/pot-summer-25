@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0PasswordService;
+import com.coherentsolutions.pot.insuranceservice.service.Auth0TicketService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,13 +23,13 @@ class Auth0PasswordServiceTest {
   private Auth0Properties auth0Properties;
 
   @Mock
-  private RestClient restClient;
+  private Auth0TicketService auth0TicketService;
 
   private Auth0PasswordService auth0PasswordService;
 
   @BeforeEach
   void setUp() {
-    auth0PasswordService = new Auth0PasswordService(auth0Properties, restClient);
+    auth0PasswordService = new Auth0PasswordService(auth0Properties, auth0TicketService);
   }
 
   @Test
@@ -45,19 +46,19 @@ class Auth0PasswordServiceTest {
   }
 
   @Test
-  @DisplayName("Should validate Auth0 properties when enabled")
-  void shouldValidateAuth0PropertiesWhenEnabled() {
+  @DisplayName("Should send password change email successfully")
+  void shouldSendPasswordChangeEmailSuccessfully() throws Exception {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenReturn("https://test-domain.auth0.com/lo/reset?ticket=abc123");
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    // but we can verify that the service attempts to make the request when Auth0 is enabled
-    assertThrows(Exception.class, 
-        () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
+    // When
+    String result = auth0PasswordService.sendPasswordChangeEmail(userEmail);
+
+    // Then
+    assertEquals("We've just sent you an email to change your password.", result);
   }
 
   @Test
