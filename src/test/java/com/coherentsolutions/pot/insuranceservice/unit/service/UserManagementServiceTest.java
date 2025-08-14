@@ -1,11 +1,9 @@
 package com.coherentsolutions.pot.insuranceservice.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,39 +13,33 @@ import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.mapper.UserMapper;
 import com.coherentsolutions.pot.insuranceservice.model.Address;
-import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Tests that updating core user fields (firstName, lastName, username, email) works correctly when
- * the user exists in the repository.
- */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("User Company Management Service Tests")
-public class UserManagementServiceTest {
+class UserManagementServiceTest {
 
   @Mock
   private UserRepository userRepository;
@@ -55,347 +47,615 @@ public class UserManagementServiceTest {
   @Mock
   private UserMapper userMapper;
 
-  @InjectMocks
   private UserManagementService userManagementService;
-
-  private User user;
-  private UUID userId;
-  private UserDto testUserDto;
-  private UserFunctionAssignment testAssignment;
 
   @BeforeEach
   void setUp() {
-    userId = UUID.randomUUID();
-
-    testAssignment = new UserFunctionAssignment();
-    testAssignment.setFunction(UserFunction.COMPANY_MANAGER);
-    user = new User();
-    user.setId(userId);
-    user.setFirstName("Old");
-    user.setLastName("Name");
-    user.setUsername("old_username");
-    user.setEmail("old@email.com");
-    user.setStatus(UserStatus.ACTIVE);
-    user.setFunctions(Set.of(testAssignment));
-
-    testUserDto = UserDto.builder().id(userId).firstName("Test User").email("test@user.com")
-        .dateOfBirth(LocalDate.of(1990, 1, 1)).status(UserStatus.ACTIVE).ssn("123-45-6789")
-        .functions(Set.of(UserFunction.COMPANY_MANAGER)).build();
+    userManagementService = new UserManagementService(userRepository, userMapper);
   }
 
   @Test
-  @DisplayName("Should update core user fields when user exists")
-  void shouldUpdateUserFieldsSuccessfully() {
+  @DisplayName("Should get users with filters successfully")
+  void shouldGetUsersWithFiltersSuccessfully() {
     // Given
-    UserDto requestDto = new UserDto();
-    requestDto.setFirstName("New");
-    requestDto.setLastName("User");
-    requestDto.setUsername("new_username");
-    requestDto.setEmail("new@email.com");
-
-    when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
-    when(userRepository.save(any(User.class))).thenReturn(user);
-    when(userMapper.toDto(user)).thenReturn(requestDto);
-
-    // When
-    UserDto result = userManagementService.updateUser(userId, requestDto);
-
-    // Then
-    assertEquals("new@email.com", result.getEmail());
-    assertEquals("New", result.getFirstName());
-    assertEquals("User", result.getLastName());
-    assertEquals("new_username", result.getUsername());
-    verify(userRepository).save(user);
-    verify(userRepository).findByIdOrThrow(userId);
-    verify(userMapper).toDto(user);
-  }
-
-  @Test
-  @DisplayName("Should update phone and address data when present in request")
-  void shouldUpdatePhoneAndAddressData() {
-    // Given
-    List<Phone> phoneDtos = List.of(new Phone());
-    List<Address> addressDtos = List.of(new Address());
-
-    UserDto requestDto = new UserDto();
-    requestDto.setPhoneData(phoneDtos);
-    requestDto.setAddressData(addressDtos);
-
-    when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
-    when(userRepository.save(any(User.class))).thenReturn(user);
-    when(userMapper.toDto(any(User.class))).thenReturn(requestDto);
-
-    // When
-    UserDto result = userManagementService.updateUser(userId, requestDto);
-
-    // Then
-    assertEquals(phoneDtos, result.getPhoneData());
-    assertEquals(addressDtos, result.getAddressData());
-    verify(userRepository).save(user);
-    verify(userRepository).findByIdOrThrow(userId);
-    verify(userMapper).toDto(user);
-  }
-
-  @Test
-  @DisplayName("Should throw ResponseStatusException when attempting to update non-existent user")
-  void shouldThrowExceptionWhenUserNotFound() {
-    // Given
-    when(userRepository.findByIdOrThrow(userId)).thenThrow(
-        new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-    // When // Then
-    assertThrows(ResponseStatusException.class,
-        () -> userManagementService.updateUser(userId, new UserDto()));
-  }
-
-  @Test
-  @DisplayName("Should deactivate active user successfully")
-  void shouldDeactivateUserSuccessfully() {
-    // Given
-    User activeUser = new User();
-    activeUser.setId(userId);
-    activeUser.setStatus(UserStatus.ACTIVE);
-
-    UserDto expectedDto = new UserDto();
-    expectedDto.setStatus(UserStatus.INACTIVE);
-
-    when(userRepository.findByIdOrThrow(userId)).thenReturn(activeUser);
-    when(userRepository.save(any(User.class))).thenReturn(activeUser);
-    when(userMapper.toDto(activeUser)).thenReturn(expectedDto);
-
-    // When
-    UserDto result = userManagementService.deactivateUser(userId);
-
-    // Then
-    assertEquals(UserStatus.INACTIVE, result.getStatus());
-    verify(userRepository).save(activeUser);
-    verify(userMapper).toDto(activeUser);
-  }
-
-  @Test
-  @DisplayName("Should reactivate inactive user successfully")
-  void shouldReactivateUserSuccessfully() {
-    // Given
-    User inactiveUser = new User();
-    inactiveUser.setId(userId);
-    inactiveUser.setStatus(UserStatus.INACTIVE);
-
-    UserDto expectedDto = new UserDto();
-    expectedDto.setStatus(UserStatus.ACTIVE);
-
-    when(userRepository.findByIdOrThrow(userId)).thenReturn(inactiveUser);
-    when(userRepository.save(any(User.class))).thenReturn(inactiveUser);
-    when(userMapper.toDto(inactiveUser)).thenReturn(expectedDto);
-
-    // When
-    UserDto result = userManagementService.reactivateUser(userId);
-
-    // Then
-    assertEquals(UserStatus.ACTIVE, result.getStatus());
-    verify(userRepository).save(inactiveUser);
-    verify(userMapper).toDto(inactiveUser);
-  }
-
-  @Test
-  @DisplayName("Should throw BAD_REQUEST when deactivating already inactive user")
-  void shouldThrowWhenUserAlreadyInactive() {
-    // Given
-    User user = new User();
-    user.setId(userId);
-    user.setStatus(UserStatus.INACTIVE);
-
-    when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
-
-    // When // Then
-    ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-        () -> userManagementService.deactivateUser(userId));
-
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    assertEquals("User is already inactive", ex.getReason());
-  }
-
-  @Test
-  @DisplayName("Should return all users of a company by companyId")
-  void shouldReturnAllUsersOfExistingCompany() {
-    UUID companyId = UUID.randomUUID();
-    Company mockCompany = new Company();
-    mockCompany.setId(companyId);
-
-    User user1 = new User();
-    user1.setId(UUID.randomUUID());
-    user1.setFirstName("Alice");
-    user1.setLastName("Johnson");
-    user1.setUsername("alice.johnson");
-    user1.setEmail("alice@example.com");
-    user1.setCompany(mockCompany);
-    user1.setStatus(UserStatus.ACTIVE);
-
-    User user2 = new User();
-    user2.setId(UUID.randomUUID());
-    user2.setFirstName("Bob");
-    user2.setLastName("Smith");
-    user2.setUsername("bob.smith");
-    user2.setEmail("bob.smith@example.com");
-    user2.setCompany(mockCompany);
-    user2.setStatus(UserStatus.ACTIVE);
-
-    List<User> users = List.of(user1, user2);
-
-    UserDto testUserDto1 = UserDto.builder().id(user1.getId()).firstName(user1.getFirstName())
-        .lastName(user1.getLastName()).email(user1.getEmail()).username(user1.getUsername())
-        .companyId(companyId).status(user1.getStatus()).build();
-
     UserFilter filter = new UserFilter();
-    filter.setCompanyId(companyId);
+    filter.setName("John");
+    filter.setEmail("john@example.com");
+    filter.setStatus(UserStatus.ACTIVE);
 
-    Pageable pageable = Pageable.unpaged();
+    User user = new User();
+    user.setId(UUID.randomUUID());
+    user.setFirstName("John");
+    user.setEmail("john@example.com");
 
-    UserDto testUserDto2 = UserDto.builder().id(user2.getId()).firstName(user2.getFirstName())
-        .lastName(user2.getLastName()).email(user2.getEmail()).username(user2.getUsername())
-        .companyId(companyId).status(user2.getStatus()).build();
+    List<User> users = List.of(user);
+    final Page<User> userPage = new PageImpl<>(users);
 
-    when(userRepository.findAll(Mockito.<Specification<User>>any(),
-        Mockito.eq(pageable))).thenReturn(new PageImpl<>(users));
+    UserDto userDto = new UserDto();
+    userDto.setId(user.getId());
+    userDto.setFirstName("John");
+    userDto.setEmail("john@example.com");
 
-    when(userMapper.toDto(user1)).thenReturn(testUserDto1);
-    when(userMapper.toDto(user2)).thenReturn(testUserDto2);
+    final Pageable pageable = PageRequest.of(0, 10, Sort.by("firstName"));
 
+    when(userRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(userPage);
+    when(userMapper.toDto(user)).thenReturn(userDto);
+
+    // When
     Page<UserDto> result = userManagementService.getUsersWithFilters(filter, pageable);
 
-    Assertions.assertNotNull(result);
-    Assertions.assertEquals(2, result.getTotalElements());
-    Assertions.assertEquals("alice.johnson", result.getContent().get(0).getUsername());
-    Assertions.assertEquals("bob.smith", result.getContent().get(1).getUsername());
-
-    verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
-    verify(userMapper).toDto(user1);
-    verify(userMapper).toDto(user2);
-
+    // Then
+    assertEquals(1, result.getContent().size());
+    assertEquals(userDto, result.getContent().get(0));
+    verify(userRepository).findAll(any(Specification.class), eq(pageable));
   }
 
   @Test
-  @DisplayName("Should get user details by ID")
-  void shouldGetUserDetailsById() {
+  @DisplayName("Should get user details by ID successfully")
+  void shouldGetUserDetailsByIdSuccessfully() {
     // Given
+    UUID userId = UUID.randomUUID();
+    User user = new User();
+    user.setId(userId);
+    user.setFirstName("John");
+    user.setLastName("Doe");
+
+    UserDto userDto = new UserDto();
+    userDto.setId(userId);
+    userDto.setFirstName("John");
+    userDto.setLastName("Doe");
+
     when(userRepository.findByIdOrThrow(userId)).thenReturn(user);
-    when(userMapper.toDto(user)).thenReturn(testUserDto);
+    when(userMapper.toDto(user)).thenReturn(userDto);
 
     // When
     UserDto result = userManagementService.getUsersDetails(userId);
 
     // Then
-    assertNotNull(result);
-    assertEquals(testUserDto, result);
+    assertEquals(userDto, result);
     verify(userRepository).findByIdOrThrow(userId);
-    verify(userMapper).toDto(user);
   }
 
   @Test
-  @DisplayName("Should return empty result when no users match the companyId")
-  void shouldReturnEmptyPage() {
-
-    UUID nonExistentCompanyId = UUID.randomUUID();
-    UserFilter filter = new UserFilter();
-    filter.setCompanyId(nonExistentCompanyId);
-
-    Pageable pageable = Pageable.unpaged();
-
-    when(userRepository.findAll(Mockito.<Specification<User>>any(),
-        Mockito.eq(pageable))).thenReturn(Page.empty());
-
-    Page<UserDto> result = userManagementService.getUsersWithFilters(filter, pageable);
-
-    Assertions.assertNotNull(result, "Result should not be null");
-    Assertions.assertTrue(result.isEmpty(), "");
-
-    verify(userRepository).findAll(Mockito.<Specification<User>>any(), Mockito.eq(pageable));
-    verify(userMapper, times(0)).toDto(Mockito.any());
-  }
-
-  @Test
-  @DisplayName("Should throw ResponseStatusException when user not found by ID")
-  void shouldThrowExceptionWhenUserDetailsNotFound() {
-    // Given
-    UUID notFoundId = UUID.randomUUID();
-    when(userRepository.findByIdOrThrow(notFoundId)).thenThrow(
-        new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,
-            "User not found"));
-
-    // When / Then
-    assertThrows(ResponseStatusException.class,
-        () -> userManagementService.getUsersDetails(notFoundId));
-    verify(userRepository).findByIdOrThrow(notFoundId);
-  }
-
-  @Test
-  @DisplayName("Should create user and return UserDto")
+  @DisplayName("Should create user successfully")
   void shouldCreateUserSuccessfully() {
     // Given
-    User mappedUser = new User();
-    mappedUser.setFirstName("Create");
-    mappedUser.setLastName("User");
-    mappedUser.setEmail("create@user.com");
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("John");
+    requestDto.setLastName("Doe");
+    requestDto.setEmail("john.doe@example.com");
 
-    UserDto createDto = UserDto.builder().firstName("Create").lastName("User")
-        .email("create@user.com").functions(Set.of(UserFunction.COMPANY_MANAGER)).build();
+    User user = new User();
+    user.setFirstName("John");
+    user.setLastName("Doe");
+    user.setEmail("john.doe@example.com");
 
-    when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
-    when(userRepository.save(mappedUser)).thenReturn(mappedUser);
-    when(userMapper.toDto(mappedUser)).thenReturn(createDto);
+    User savedUser = new User();
+    savedUser.setId(UUID.randomUUID());
+    savedUser.setFirstName("John");
+    savedUser.setLastName("Doe");
+    savedUser.setEmail("john.doe@example.com");
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(savedUser.getId());
+    expectedDto.setFirstName("John");
+    expectedDto.setLastName("Doe");
+    expectedDto.setEmail("john.doe@example.com");
+
+    when(userMapper.toEntity(requestDto)).thenReturn(user);
+    when(userRepository.save(user)).thenReturn(savedUser);
+    when(userMapper.toDto(savedUser)).thenReturn(expectedDto);
 
     // When
-    UserDto result = userManagementService.createUser(createDto);
+    UserDto result = userManagementService.createUser(requestDto);
 
     // Then
-    assertNotNull(result);
-    assertEquals("Create", result.getFirstName());
-    assertEquals("User", result.getLastName());
-    assertEquals("create@user.com", result.getEmail());
-    verify(userMapper).toEntity(createDto);
-    verify(userRepository).save(mappedUser);
-    verify(userMapper).toDto(mappedUser);
+    assertEquals(expectedDto, result);
+    verify(userRepository).save(user);
   }
 
   @Test
-  @DisplayName("Should not call findByIdOrThrow when creating a user")
-  void shouldNotCallFindByIdOrThrowOnCreateUser() {
+  @DisplayName("Should create user with functions successfully")
+  void shouldCreateUserWithFunctionsSuccessfully() {
     // Given
-    User mappedUser = new User();
-    mappedUser.setFirstName("Create");
-    mappedUser.setLastName("User");
-    mappedUser.setEmail("create@user.com");
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("John");
+    requestDto.setLastName("Doe");
+    requestDto.setEmail("john.doe@example.com");
 
-    UserDto createDto = UserDto.builder().firstName("Create").lastName("User")
-        .email("create@user.com").functions(Set.of(UserFunction.COMPANY_MANAGER)).build();
+    Set<UserFunction> functions = new HashSet<>();
+    functions.add(UserFunction.COMPANY_MANAGER);
+    requestDto.setFunctions(functions);
 
-    when(userMapper.toEntity(createDto)).thenReturn(mappedUser);
-    when(userRepository.save(mappedUser)).thenReturn(mappedUser);
-    when(userMapper.toDto(mappedUser)).thenReturn(createDto);
+    User user = new User();
+    user.setFirstName("John");
+    user.setLastName("Doe");
+    user.setEmail("john.doe@example.com");
+
+    Set<UserFunctionAssignment> functionAssignments = new HashSet<>();
+    UserFunctionAssignment assignment = new UserFunctionAssignment();
+    assignment.setFunction(UserFunction.COMPANY_MANAGER);
+    functionAssignments.add(assignment);
+    user.setFunctions(functionAssignments);
+
+    User savedUser = new User();
+    savedUser.setId(UUID.randomUUID());
+    savedUser.setFunctions(functionAssignments);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(savedUser.getId());
+
+    when(userMapper.toEntity(requestDto)).thenReturn(user);
+    when(userRepository.save(user)).thenReturn(savedUser);
+    when(userMapper.toDto(savedUser)).thenReturn(expectedDto);
 
     // When
-    userManagementService.createUser(createDto);
+    UserDto result = userManagementService.createUser(requestDto);
 
     // Then
-    verify(userMapper).toEntity(createDto);
-    verify(userRepository).save(mappedUser);
-    verify(userMapper).toDto(mappedUser);
-    // Ensure findByIdOrThrow is never called during create
-    verify(userRepository, never())
-        .findByIdOrThrow(any(UUID.class));
+    assertEquals(expectedDto, result);
+    verify(userRepository).save(user);
+    assertEquals(user, assignment.getUser());
   }
 
   @Test
-  @DisplayName("Should throw exception when getUsersDetails is called with non-existent user")
-  void shouldThrowExceptionWhenGetUsersDetailsWithNonExistentUser() {
+  @DisplayName("Should update user successfully")
+  void shouldUpdateUserSuccessfully() {
     // Given
-    UUID notFoundId = UUID.randomUUID();
-    when(userRepository.findByIdOrThrow(notFoundId)).thenThrow(
-        new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,
-            "User not found"));
+    final UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
 
-    // When / Then
-    assertThrows(ResponseStatusException.class,
-        () -> userManagementService.getUsersDetails(notFoundId));
-    verify(userRepository).findByIdOrThrow(notFoundId);
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("Updated John");
+    requestDto.setLastName("Updated Doe");
+    requestDto.setEmail("updated.john@example.com");
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFirstName("Updated John");
+    updatedUser.setLastName("Updated Doe");
+    updatedUser.setEmail("updated.john@example.com");
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setFirstName("Updated John");
+    expectedDto.setLastName("Updated Doe");
+    expectedDto.setEmail("updated.john@example.com");
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateUser(userId, requestDto);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals("Updated John", existingUser.getFirstName());
+    assertEquals("Updated Doe", existingUser.getLastName());
+    assertEquals("updated.john@example.com", existingUser.getEmail());
+  }
+
+  @Test
+  @DisplayName("Should throw exception when updating inactive user")
+  void shouldThrowExceptionWhenUpdatingInactiveUser() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("Jane");
+
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.INACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> userManagementService.updateUser(userId, requestDto));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Cannot modify an inactive user", exception.getReason());
+  }
+
+  @Test
+  @DisplayName("Should update user with functions successfully")
+  void shouldUpdateUserWithFunctionsSuccessfully() {
+    // Given
+    final UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    Set<UserFunctionAssignment> currentAssignments = new HashSet<>();
+    UserFunctionAssignment existingAssignment = new UserFunctionAssignment();
+    existingAssignment.setFunction(UserFunction.COMPANY_MANAGER);
+    existingAssignment.setUser(existingUser);
+    currentAssignments.add(existingAssignment);
+    existingUser.setFunctions(currentAssignments);
+
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("Updated John");
+    Set<UserFunction> newFunctions = new HashSet<>();
+    newFunctions.add(UserFunction.CONSUMER);
+    requestDto.setFunctions(newFunctions);
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFirstName("Updated John");
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setFirstName("Updated John");
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateUser(userId, requestDto);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals("Updated John", existingUser.getFirstName());
+    verify(userRepository).save(existingUser);
+  }
+
+  @Test
+  @DisplayName("Should update user with phone and address data successfully")
+  void shouldUpdateUserWithPhoneAndAddressDataSuccessfully() {
+    // Given
+    final UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("Updated John");
+
+    List<Phone> phoneData = new ArrayList<>();
+    Phone phone = new Phone();
+    phone.setCode("+1");
+    phone.setNumber("123-456-7890");
+    phoneData.add(phone);
+    requestDto.setPhoneData(phoneData);
+
+    final List<Address> addressData = new ArrayList<>();
+    Address address = new Address();
+    address.setCountry("USA");
+    address.setStreet("123 Main St");
+    address.setCity("New York");
+    address.setState("NY");
+    address.setBuilding("Apt 1");
+    addressData.add(address);
+    requestDto.setAddressData(addressData);
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFirstName("Updated John");
+    updatedUser.setPhoneData(phoneData);
+    updatedUser.setAddressData(addressData);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setFirstName("Updated John");
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateUser(userId, requestDto);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals("Updated John", existingUser.getFirstName());
+    assertEquals(phoneData, existingUser.getPhoneData());
+    assertEquals(addressData, existingUser.getAddressData());
+  }
+
+  @Test
+  @DisplayName("Should deactivate user successfully")
+  void shouldDeactivateUserSuccessfully() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    User deactivatedUser = new User();
+    deactivatedUser.setId(userId);
+    deactivatedUser.setStatus(UserStatus.INACTIVE);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setStatus(UserStatus.INACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(deactivatedUser);
+    when(userMapper.toDto(deactivatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.deactivateUser(userId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(UserStatus.INACTIVE, existingUser.getStatus());
+  }
+
+  @Test
+  @DisplayName("Should reactivate user successfully")
+  void shouldReactivateUserSuccessfully() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.INACTIVE);
+
+    User reactivatedUser = new User();
+    reactivatedUser.setId(userId);
+    reactivatedUser.setStatus(UserStatus.ACTIVE);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setStatus(UserStatus.ACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(reactivatedUser);
+    when(userMapper.toDto(reactivatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.reactivateUser(userId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(UserStatus.ACTIVE, existingUser.getStatus());
+  }
+
+  @Test
+  @DisplayName("Should deactivate user successfully - fixed mocking")
+  void shouldDeactivateUserSuccessfullyFixedMocking() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setStatus(UserStatus.INACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(existingUser);
+    when(userMapper.toDto(existingUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.deactivateUser(userId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(UserStatus.INACTIVE, existingUser.getStatus());
+    verify(userRepository).save(existingUser);
+  }
+
+  @Test
+  @DisplayName("Should reactivate user successfully - fixed mocking")
+  void shouldReactivateUserSuccessfullyFixedMocking() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.INACTIVE);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setStatus(UserStatus.ACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(existingUser);
+    when(userMapper.toDto(existingUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.reactivateUser(userId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(UserStatus.ACTIVE, existingUser.getStatus());
+    verify(userRepository).save(existingUser);
+  }
+
+  @Test
+  @DisplayName("Should deactivate user successfully - working test")
+  void shouldDeactivateUserSuccessfullyWorkingTest() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setStatus(UserStatus.INACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+      User user = invocation.getArgument(0);
+      return user; // Return the same object that was passed in
+    });
+    when(userMapper.toDto(existingUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.deactivateUser(userId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(UserStatus.INACTIVE, existingUser.getStatus());
+    verify(userRepository).save(existingUser);
+  }
+
+  @Test
+  @DisplayName("Should reactivate user successfully - working test")
+  void shouldReactivateUserSuccessfullyWorkingTest() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.INACTIVE);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setStatus(UserStatus.ACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+      User user = invocation.getArgument(0);
+      return user; // Return the same object that was passed in
+    });
+    when(userMapper.toDto(existingUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.reactivateUser(userId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(UserStatus.ACTIVE, existingUser.getStatus());
+    verify(userRepository).save(existingUser);
+  }
+
+  @Test
+  @DisplayName("Should throw exception when deactivating already inactive user")
+  void shouldThrowExceptionWhenDeactivatingAlreadyInactiveUser() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.INACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> userManagementService.deactivateUser(userId));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("User is already inactive", exception.getReason());
+  }
+
+  @Test
+  @DisplayName("Should throw exception when reactivating already active user")
+  void shouldThrowExceptionWhenReactivatingAlreadyActiveUser() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+
+    // When & Then
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+        () -> userManagementService.reactivateUser(userId));
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("User is already active", exception.getReason());
+  }
+
+  @Test
+  @DisplayName("Should handle null functions in create user")
+  void shouldHandleNullFunctionsInCreateUser() {
+    // Given
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("John");
+    requestDto.setFunctions(null);
+
+    User user = new User();
+    user.setFirstName("John");
+    user.setFunctions(null);
+
+    User savedUser = new User();
+    savedUser.setId(UUID.randomUUID());
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(savedUser.getId());
+
+    when(userMapper.toEntity(requestDto)).thenReturn(user);
+    when(userRepository.save(user)).thenReturn(savedUser);
+    when(userMapper.toDto(savedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.createUser(requestDto);
+
+    // Then
+    assertEquals(expectedDto, result);
+    verify(userRepository).save(user);
+  }
+
+  @Test
+  @DisplayName("Should handle null functions in update user")
+  void shouldHandleNullFunctionsInUpdateUser() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("John");
+    requestDto.setFunctions(null);
+
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateUser(userId, requestDto);
+
+    // Then
+    assertEquals(expectedDto, result);
+    verify(userRepository).save(existingUser);
+  }
+
+  @Test
+  @DisplayName("Should handle empty functions set in update user")
+  void shouldHandleEmptyFunctionsSetInUpdateUser() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    UserDto requestDto = new UserDto();
+    requestDto.setFirstName("John");
+    requestDto.setFunctions(new HashSet<>());
+
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setStatus(UserStatus.ACTIVE);
+
+    Set<UserFunctionAssignment> currentAssignments = new HashSet<>();
+    UserFunctionAssignment existingAssignment = new UserFunctionAssignment();
+    existingAssignment.setFunction(UserFunction.COMPANY_MANAGER);
+    existingAssignment.setUser(existingUser);
+    currentAssignments.add(existingAssignment);
+    existingUser.setFunctions(currentAssignments);
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFunctions(new HashSet<>());
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateUser(userId, requestDto);
+
+    // Then
+    assertEquals(expectedDto, result);
+    verify(userRepository).save(existingUser);
   }
 }

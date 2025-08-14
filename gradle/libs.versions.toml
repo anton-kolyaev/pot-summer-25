@@ -16,7 +16,6 @@ spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-start
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-boot-starter-oauth2-resource-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
-
 postgresql = { module = "org.postgresql:postgresql" }
 liquibase-core = { module = "org.liquibase:liquibase-core" }
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
