@@ -3,16 +3,13 @@ package com.coherentsolutions.pot.insuranceservice.controller;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyDto;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyFilter;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyReactivationRequest;
-import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
-import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
 import com.coherentsolutions.pot.insuranceservice.service.CompanyManagementService;
-import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,11 +32,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminCompanyManagementController {
 
   private final CompanyManagementService companyManagementService;
-  private final UserManagementService userManagementService;
 
   /**
    * Retrieves a paginated list of companies filtered by given criteria.
    */
+  @PreAuthorize("hasAuthority('ROLE_APPLICATION_ADMIN')")
   @GetMapping
   public Page<CompanyDto> getCompanies(CompanyFilter filter, Pageable pageable) {
     return companyManagementService.getCompaniesWithFilters(filter, pageable);
@@ -48,6 +45,7 @@ public class AdminCompanyManagementController {
   /**
    * Creates a new company.
    */
+  @PreAuthorize("hasAuthority('ROLE_APPLICATION_ADMIN')")
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
@@ -57,6 +55,7 @@ public class AdminCompanyManagementController {
   /**
    * Retrieves details of a specific company by ID.
    */
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @GetMapping("/{id}")
   public CompanyDto viewCompanyDetails(@PathVariable UUID id) {
     return companyManagementService.getCompanyDetails(id);
@@ -65,6 +64,7 @@ public class AdminCompanyManagementController {
   /**
    * Updates an existing company.
    */
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @PutMapping("/{id}")
   public CompanyDto updateCompany(@PathVariable UUID id, @RequestBody CompanyDto request) {
     return companyManagementService.updateCompany(id, request);
@@ -73,6 +73,7 @@ public class AdminCompanyManagementController {
   /**
    * Deactivates a company with users by company ID.
    */
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @DeleteMapping("/{id}")
   public CompanyDto deactivateCompany(@PathVariable UUID id) {
     return companyManagementService.deactivateCompany(id);
@@ -81,23 +82,11 @@ public class AdminCompanyManagementController {
   /**
    * Reactivates a deactivated company with users.
    */
+  @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#id, 'ROLE_FUNC_COMPANY_MANAGER')")
   @PostMapping("/{id}/reactivate")
   public CompanyDto reactivateCompany(@PathVariable UUID id,
       @RequestBody CompanyReactivationRequest request) {
     return companyManagementService.reactivateCompany(id, request);
   }
 
-  /**
-   * Retrieves a paginated list of users belonging to a specific company.
-   */
-
-  @GetMapping("/{id}/users")
-  public Page<UserDto> getUsersOfCompany(
-      @PathVariable UUID id,
-      @ParameterObject UserFilter filter,
-      @ParameterObject Pageable pageable
-  ) {
-    filter.setCompanyId(id);  // Still need to set this manually since it's path-based
-    return userManagementService.getUsersWithFilters(filter, pageable);
-  }
 }

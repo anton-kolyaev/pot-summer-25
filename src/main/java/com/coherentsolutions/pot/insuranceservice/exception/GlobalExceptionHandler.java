@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -246,5 +248,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         details
     );
     return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+  public ResponseEntity<ErrorResponseDto> handleAccessDenied(Exception ex,
+      HttpServletRequest servletRequest) {
+    log.error(ex.getMessage(), ex);
+    Map<String, Object> details = buildDetails(servletRequest);
+    ErrorResponseDto error = new ErrorResponseDto(
+        HttpStatus.FORBIDDEN.name(),
+        "Access Denied",
+        details
+    );
+    return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
   }
 }

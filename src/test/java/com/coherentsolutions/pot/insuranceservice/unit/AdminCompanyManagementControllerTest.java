@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.coherentsolutions.pot.insuranceservice.controller.AdminCompanyManagementController;
 import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyDto;
 import com.coherentsolutions.pot.insuranceservice.service.CompanyManagementService;
-import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -24,15 +23,12 @@ import org.springframework.http.MediaType;
 class AdminCompanyManagementControllerTest extends AbstractControllerTest {
 
   private static CompanyManagementService companyManagementService;
-  private static UserManagementService userManagementService;
   private static AdminCompanyManagementController controller;
 
   @BeforeAll
   static void setUpClass() {
     companyManagementService = mock(CompanyManagementService.class);
-    userManagementService = mock(UserManagementService.class);
-    controller = new AdminCompanyManagementController(companyManagementService,
-        userManagementService);
+    controller = new AdminCompanyManagementController(companyManagementService);
     initializeCommonObjects(controller);
   }
 

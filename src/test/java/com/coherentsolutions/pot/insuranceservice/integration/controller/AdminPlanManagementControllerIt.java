@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.coherentsolutions.pot.insuranceservice.dto.plan.PlanDto;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
+import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityUtils;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.PlanType;
 import com.coherentsolutions.pot.insuranceservice.repository.PlanRepository;
@@ -39,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DisplayName("Integration Test for AdminPlanManagementController")
 public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
-  private static final String ENDPOINT = "/v1/plans";
+  private static final String ENDPOINT = "/v1/companies/2655936b-bfa1-4e6b-981a-223f82b92231/plans";
 
   @Autowired
   private MockMvc mockMvc;
@@ -94,6 +95,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
         new BigDecimal("199.99"));
 
     String response = mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isCreated())
@@ -115,6 +117,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto createRequest = buildPlanDto("Invalid Type Plan", 9999, new BigDecimal("123.45"));
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isBadRequest());
@@ -127,6 +130,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
         new BigDecimal("-10.00"));
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isBadRequest());
@@ -141,6 +145,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
         .build();
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isBadRequest());
@@ -150,6 +155,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @DisplayName("Should return 400 for null body")
   void shouldReturnBadRequestForNullBody() throws Exception {
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
@@ -160,6 +166,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     String invalidJson = "{ name: }";
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(invalidJson))
         .andExpect(status().isBadRequest());
@@ -171,6 +178,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto createRequest = buildPlanDto("No Content Type", dentalTypeId, new BigDecimal("99.99"));
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .content(toJson(createRequest)))
         .andExpect(status().isUnsupportedMediaType());
   }
@@ -182,6 +190,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto createRequest = buildPlanDto("Original Plan", dentalTypeId, new BigDecimal("150.00"));
 
     String createResponse = mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isCreated())
@@ -194,6 +203,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto updateRequest = buildPlanDto("Updated Plan", dentalTypeId, new BigDecimal("299.99"));
 
     String updateResponse = mockMvc.perform(put(ENDPOINT + "/" + created.getId())
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(updateRequest)))
         .andExpect(status().isOk())
@@ -217,6 +227,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto updateRequest = buildPlanDto("Ghost Plan", dentalTypeId, new BigDecimal("123.45"));
 
     mockMvc.perform(put(ENDPOINT + "/" + nonExistentId)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(updateRequest)))
         .andExpect(status().isNotFound());
@@ -229,6 +240,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto createRequest = buildPlanDto("Temporary Plan", dentalTypeId, new BigDecimal("150.00"));
 
     String createResponse = mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isCreated())
@@ -241,6 +253,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     created.setType(9999);
 
     mockMvc.perform(put(ENDPOINT + "/" + created.getId())
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(created)))
         .andExpect(status().isBadRequest());
@@ -254,6 +267,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto invalidDto = new PlanDto();
 
     mockMvc.perform(put(ENDPOINT + "/" + id)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(invalidDto)))
         .andExpect(status().isBadRequest());
@@ -267,17 +281,20 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto plan2 = buildPlanDto("Dental Plan B", dentalTypeId, new BigDecimal("200.00"));
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(plan1)))
         .andExpect(status().isCreated());
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(plan2)))
         .andExpect(status().isCreated());
 
     // When / Then
     mockMvc.perform(get(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .param("typeId", String.valueOf(dentalTypeId)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2))
@@ -293,16 +310,19 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanDto plan2 = buildPlanDto("Generic Plan B", dentalTypeId, new BigDecimal("250.00"));
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(plan1)))
         .andExpect(status().isCreated());
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(plan2)))
         .andExpect(status().isCreated());
 
-    mockMvc.perform(get(ENDPOINT))
+    mockMvc.perform(get(ENDPOINT)
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(2));
   }
@@ -310,7 +330,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return all plan types")
   void shouldReturnAllPlanTypes() throws Exception {
-    mockMvc.perform(get(ENDPOINT + "/plan-types"))
+    mockMvc.perform(get(ENDPOINT + "/plan-types")
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.code=='DENTAL')]").exists())
         .andExpect(jsonPath("$[?(@.code=='MEDICAL')]").exists());
@@ -321,7 +342,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   void shouldReturnEmptyListWhenNoPlanTypesExist() throws Exception {
     planTypeRepository.deleteAll();
 
-    mockMvc.perform(get(ENDPOINT + "/plan-types"))
+    mockMvc.perform(get(ENDPOINT + "/plan-types")
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.length()").value(0));
   }
@@ -334,6 +356,7 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
         new BigDecimal("199.99"));
 
     String createResponse = mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isCreated())
@@ -343,10 +366,12 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
 
     PlanDto created = objectMapper.readValue(createResponse, PlanDto.class);
 
-    mockMvc.perform(delete(ENDPOINT + "/" + created.getId()))
+    mockMvc.perform(delete(ENDPOINT + "/" + created.getId())
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isNoContent());
 
-    mockMvc.perform(get(ENDPOINT))
+    mockMvc.perform(get(ENDPOINT)
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.id=='" + created.getId() + "')]").doesNotExist());
 
@@ -359,7 +384,8 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   void shouldReturnNotFoundForDeletingInvalidPlan() throws Exception {
     UUID nonExistentId = UUID.randomUUID();
 
-    mockMvc.perform(delete(ENDPOINT + "/" + nonExistentId))
+    mockMvc.perform(delete(ENDPOINT + "/" + nonExistentId)
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isNotFound());
   }
 }
