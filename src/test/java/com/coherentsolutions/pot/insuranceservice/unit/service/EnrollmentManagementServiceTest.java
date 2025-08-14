@@ -106,21 +106,21 @@ public class EnrollmentManagementServiceTest {
       UUID id, UUID userIdParam, UUID planIdParam,
       BigDecimal electionAmount, BigDecimal contribution) {
 
-    Enrollment e = new Enrollment();
-    e.setId(id);
+    Enrollment enrollment = new Enrollment();
+    enrollment.setId(id);
 
-    User u = new User();
-    u.setId(userIdParam);
-    e.setUser(u);
+    User enrollmentUser = new User();
+    enrollmentUser.setId(userIdParam);
+    enrollment.setUser(enrollmentUser);
 
-    Plan p = new Plan();
-    p.setId(planIdParam);
-    p.setContribution(contribution);
-    e.setPlan(p);
+    Plan enrollmentPlan = new Plan();
+    enrollmentPlan.setId(planIdParam);
+    enrollmentPlan.setContribution(contribution);
+    enrollment.setPlan(enrollmentPlan);
 
-    e.setElectionAmount(electionAmount);
-    e.setPlanContribution(contribution);
-    return e;
+    enrollment.setElectionAmount(electionAmount);
+    enrollment.setPlanContribution(contribution);
+    return enrollment;
   }
 
   private EnrollmentDto buildEnrollmentDto(
@@ -177,12 +177,12 @@ public class EnrollmentManagementServiceTest {
     when(enrollmentRepository.existsByUserIdAndPlanIdAndDeletedAtIsNull(userId, planId))
         .thenReturn(true);
 
-    ResponseStatusException ex =
+    ResponseStatusException exception =
         assertThrows(ResponseStatusException.class,
             () -> enrollmentService.createEnrollment(requestDto));
 
-    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
-    assertEquals("Active enrollment already exists for this user and plan", ex.getReason());
+    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+    assertEquals("Active enrollment already exists for this user and plan", exception.getReason());
 
     verify(enrollmentRepository).existsByUserIdAndPlanIdAndDeletedAtIsNull(userId, planId);
     verifyNoInteractions(enrollmentMapper);
@@ -195,11 +195,11 @@ public class EnrollmentManagementServiceTest {
     doCallRealMethod().when(userRepository).findByIdOrThrow(userId);
     when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-    ResponseStatusException ex =
+    ResponseStatusException exception =
         assertThrows(ResponseStatusException.class,
             () -> enrollmentService.createEnrollment(requestDto));
 
-    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     verify(userRepository).findById(userId);
     verifyNoInteractions(planRepository, enrollmentRepository, enrollmentMapper);
   }
@@ -213,11 +213,11 @@ public class EnrollmentManagementServiceTest {
     when(userRepository.findById(userId)).thenReturn(Optional.of(user));
     when(planRepository.findById(planId)).thenReturn(Optional.empty());
 
-    ResponseStatusException ex =
+    ResponseStatusException exception =
         assertThrows(ResponseStatusException.class,
             () -> enrollmentService.createEnrollment(requestDto));
 
-    assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+    assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
     verify(planRepository).findById(planId);
     verify(enrollmentRepository, never()).existsByUserIdAndPlanIdAndDeletedAtIsNull(any(), any());
     verifyNoInteractions(enrollmentMapper);
@@ -226,37 +226,38 @@ public class EnrollmentManagementServiceTest {
   @Test
   @DisplayName("Should return mapped DTOs for active enrollments")
   void listAll_shouldReturnDtos() {
-    UUID e1Id = UUID.randomUUID();
-    UUID e2Id = UUID.randomUUID();
+    UUID enrollmentId1 = UUID.randomUUID();
+    UUID enrollmentId2 = UUID.randomUUID();
 
-    Enrollment e1 =
+    Enrollment enrollment1 =
         buildEnrollment(
-            e1Id, userId, planId, new BigDecimal("100.00"), new BigDecimal("2000.00"));
-    Enrollment e2 =
+            enrollmentId1, userId, planId, new BigDecimal("100.00"), new BigDecimal("2000.00"));
+    Enrollment enrollment2 =
         buildEnrollment(
-            e2Id, userId, planId, new BigDecimal("50.00"), new BigDecimal("2000.00"));
+            enrollmentId2, userId, planId, new BigDecimal("50.00"), new BigDecimal("2000.00"));
 
-    EnrollmentDto d1 =
+    EnrollmentDto enrollmentDto1 =
         buildEnrollmentDto(
-            e1Id, userId, planId, new BigDecimal("100.00"), new BigDecimal("2000.00"));
-    EnrollmentDto d2 =
+            enrollmentId1, userId, planId, new BigDecimal("100.00"), new BigDecimal("2000.00"));
+    EnrollmentDto enrollmentDto2 =
         buildEnrollmentDto(
-            e2Id, userId, planId, new BigDecimal("50.00"), new BigDecimal("2000.00"));
+            enrollmentId2, userId, planId, new BigDecimal("50.00"), new BigDecimal("2000.00"));
 
-    when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(e1, e2));
-    when(enrollmentMapper.toDto(e1)).thenReturn(d1);
-    when(enrollmentMapper.toDto(e2)).thenReturn(d2);
+    when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(
+        List.of(enrollment1, enrollment2));
+    when(enrollmentMapper.toDto(enrollment1)).thenReturn(enrollmentDto1);
+    when(enrollmentMapper.toDto(enrollment2)).thenReturn(enrollmentDto2);
 
     List<EnrollmentDto> result = enrollmentService.getAll();
 
     assertNotNull(result);
     assertEquals(2, result.size());
-    assertEquals(d1, result.get(0));
-    assertEquals(d2, result.get(1));
+    assertEquals(enrollmentDto1, result.get(0));
+    assertEquals(enrollmentDto2, result.get(1));
 
     verify(enrollmentRepository).findAllByDeletedAtIsNull();
-    verify(enrollmentMapper).toDto(e1);
-    verify(enrollmentMapper).toDto(e2);
+    verify(enrollmentMapper).toDto(enrollment1);
+    verify(enrollmentMapper).toDto(enrollment2);
     verifyNoInteractions(userRepository, planRepository);
   }
 
@@ -277,47 +278,48 @@ public class EnrollmentManagementServiceTest {
   @Test
   @DisplayName("Should call mapper for each entity")
   void listAll_shouldCallMapperForEachEntity() {
-    Enrollment e1 =
+    Enrollment enrollment1 =
         buildEnrollment(
             UUID.randomUUID(), userId, planId, new BigDecimal("10.00"), new BigDecimal("111.11"));
-    Enrollment e2 =
+    Enrollment enrollment2 =
         buildEnrollment(
             UUID.randomUUID(), userId, planId, new BigDecimal("20.00"), new BigDecimal("222.22"));
-    Enrollment e3 =
+    Enrollment enrollment3 =
         buildEnrollment(
             UUID.randomUUID(), userId, planId, new BigDecimal("30.00"), new BigDecimal("333.33"));
 
-    when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(e1, e2, e3));
-    when(enrollmentMapper.toDto(e1)).thenReturn(
-        buildEnrollmentDto(e1.getId(), userId, planId, e1.getElectionAmount(),
-            e1.getPlanContribution()));
-    when(enrollmentMapper.toDto(e2)).thenReturn(
-        buildEnrollmentDto(e2.getId(), userId, planId, e2.getElectionAmount(),
-            e2.getPlanContribution()));
-    when(enrollmentMapper.toDto(e3)).thenReturn(
-        buildEnrollmentDto(e3.getId(), userId, planId, e3.getElectionAmount(),
-            e3.getPlanContribution()));
+    when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(
+        List.of(enrollment1, enrollment2, enrollment3));
+    when(enrollmentMapper.toDto(enrollment1)).thenReturn(
+        buildEnrollmentDto(enrollment1.getId(), userId, planId, enrollment1.getElectionAmount(),
+            enrollment1.getPlanContribution()));
+    when(enrollmentMapper.toDto(enrollment2)).thenReturn(
+        buildEnrollmentDto(enrollment2.getId(), userId, planId, enrollment2.getElectionAmount(),
+            enrollment2.getPlanContribution()));
+    when(enrollmentMapper.toDto(enrollment3)).thenReturn(
+        buildEnrollmentDto(enrollment3.getId(), userId, planId, enrollment3.getElectionAmount(),
+            enrollment3.getPlanContribution()));
 
     enrollmentService.getAll();
 
-    verify(enrollmentMapper, times(1)).toDto(e1);
-    verify(enrollmentMapper, times(1)).toDto(e2);
-    verify(enrollmentMapper, times(1)).toDto(e3);
+    verify(enrollmentMapper, times(1)).toDto(enrollment1);
+    verify(enrollmentMapper, times(1)).toDto(enrollment2);
+    verify(enrollmentMapper, times(1)).toDto(enrollment3);
   }
 
   @Test
   @DisplayName("Should propagate exception thrown by mapper")
   void listAll_shouldPropagateMapperException() {
-    Enrollment e1 =
+    Enrollment enrollment1 =
         buildEnrollment(
             UUID.randomUUID(), userId, planId, new BigDecimal("10.00"), new BigDecimal("111.11"));
 
-    when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(e1));
-    when(enrollmentMapper.toDto(e1)).thenThrow(new IllegalStateException("mapping boom"));
+    when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(enrollment1));
+    when(enrollmentMapper.toDto(enrollment1)).thenThrow(new IllegalStateException("mapping boom"));
 
-    IllegalStateException ex =
+    IllegalStateException exception =
         assertThrows(IllegalStateException.class, () -> enrollmentService.getAll());
 
-    assertEquals("mapping boom", ex.getMessage());
+    assertEquals("mapping boom", exception.getMessage());
   }
 }

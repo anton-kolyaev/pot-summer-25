@@ -65,14 +65,14 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
   private UUID planId;
   private EnrollmentDto baseRequest;
 
-  private static EnrollmentDto copy(EnrollmentDto src) {
-    EnrollmentDto d = new EnrollmentDto();
-    d.setId(src.getId());
-    d.setUserId(src.getUserId());
-    d.setPlanId(src.getPlanId());
-    d.setElectionAmount(src.getElectionAmount());
-    d.setPlanContribution(src.getPlanContribution());
-    return d;
+  private static EnrollmentDto copy(EnrollmentDto sourceEnrollment) {
+    EnrollmentDto enrollmentDto = new EnrollmentDto();
+    enrollmentDto.setId(sourceEnrollment.getId());
+    enrollmentDto.setUserId(sourceEnrollment.getUserId());
+    enrollmentDto.setPlanId(sourceEnrollment.getPlanId());
+    enrollmentDto.setElectionAmount(sourceEnrollment.getElectionAmount());
+    enrollmentDto.setPlanContribution(sourceEnrollment.getPlanContribution());
+    return enrollmentDto;
   }
 
   @BeforeEach
@@ -224,41 +224,44 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
   }
 
   private UUID seedUser() {
-    Company c = new Company();
-    c.setName("Acme Inc.");
-    c.setCountryCode("US");
+    Company company = new Company();
+    company.setName("Acme Inc.");
+    company.setCountryCode("US");
 
-    companyRepository.saveAndFlush(c);
+    companyRepository.saveAndFlush(company);
 
-    User u = new User();
-    u.setFirstName("John");
-    u.setLastName("Doe");
-    u.setUsername("john.doe");
-    u.setEmail("john.doe@example.com");
-    u.setSsn("123-45-6789");
-    u.setDateOfBirth(LocalDate.of(1990, 1, 1));
-    u.setStatus(UserStatus.ACTIVE);
-    u.setCompany(c);
-    return userRepository.saveAndFlush(u).getId();
+    User user = new User();
+    user.setFirstName("John");
+    user.setLastName("Doe");
+    user.setUsername("john.doe");
+    user.setEmail("john.doe@example.com");
+    user.setSsn("123-45-6789");
+    user.setDateOfBirth(LocalDate.of(1990, 1, 1));
+    user.setStatus(UserStatus.ACTIVE);
+    user.setCompany(company);
+    return userRepository.saveAndFlush(user).getId();
   }
 
   private UUID seedPlan() {
-    PlanType dental = planTypeRepository.findByCode("DENTAL")
-        .orElseGet(() -> {
-          PlanType type = new PlanType();
-          type.setCode("DENTAL");
-          type.setName("Dental Plan");
-          return planTypeRepository.save(type);
-        });
+    PlanType dental =
+        planTypeRepository
+            .findByCode("DENTAL")
+            .orElseGet(
+                () -> {
+                  PlanType type = new PlanType();
+                  type.setCode("DENTAL");
+                  type.setName("Dental Plan");
+                  return planTypeRepository.save(type);
+                });
 
-    Plan p = new Plan();
-    p.setName("Basic Dental Plan");
-    p.setType(dental);
-    p.setContribution(new BigDecimal("100.00"));
-    return planRepository.save(p).getId();
+    Plan plan = new Plan();
+    plan.setName("Basic Dental Plan");
+    plan.setType(dental);
+    plan.setContribution(new BigDecimal("100.00"));
+    return planRepository.save(plan).getId();
   }
 
-  private String toJson(Object obj) throws Exception {
-    return objectMapper.writeValueAsString(obj);
+  private String toJson(Object object) throws Exception {
+    return objectMapper.writeValueAsString(object);
   }
 }
