@@ -35,6 +35,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,6 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @Transactional
 @Import(IntegrationTestConfiguration.class)
+@TestPropertySource(properties = {
+    "auth0.enabled=true"
+})
 @DisplayName("Integration test for Auth0UserManagementController")
 public class Auth0UserManagementControllerIt extends PostgresTestContainer {
 

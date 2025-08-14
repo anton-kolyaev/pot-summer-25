@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 @Configuration
 public class JwtAuthConverterConfig {
 
-  @Value("${AUTH0_AUDIENCE}")
+  @Value("${AUTH0_AUDIENCE:}")
   private String authAudience;
 
   private static final String PRINCIPAL_CLAIM = "user_uuid";
