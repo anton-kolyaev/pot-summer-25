@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.coherentsolutions.pot.insuranceservice.controller.AdminCompanyManagementController;
 import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityConfig;
 import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityUtils;
-import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
