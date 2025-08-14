@@ -15,6 +15,7 @@ public record Auth0Properties(
     String audience,
     String clientId,
     String connection,
+    String connectionId,
     int timeout,
     boolean enabled
 ) {
