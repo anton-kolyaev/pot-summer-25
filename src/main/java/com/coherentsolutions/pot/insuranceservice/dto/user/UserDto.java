@@ -60,4 +60,5 @@ public class UserDto {
   private Set<UserFunction> functions;
   private UserStatus status;
   private UUID companyId;
+  private String auth0UserId;
 }

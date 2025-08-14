@@ -59,8 +59,8 @@ public class UserInvitationService {
       
       log.info("Successfully created Auth0 user with invitation. Auth0 ID: {}", auth0User.getUserId());
       
-      // Step 3: Update local user with Auth0 ID (optional - for future reference)
-      // This could be stored in user metadata or a separate field
+      // Step 3: Update local user with Auth0 ID
+      savedUser = userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
       
       return savedUser;
       

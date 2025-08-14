@@ -17,6 +17,7 @@ import com.coherentsolutions.pot.insuranceservice.model.Phone;
 import com.coherentsolutions.pot.insuranceservice.model.User;
 import com.coherentsolutions.pot.insuranceservice.model.UserFunctionAssignment;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
+import com.coherentsolutions.pot.insuranceservice.service.Auth0UserMetadataService;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -49,9 +50,12 @@ class UserManagementServiceTest {
 
   private UserManagementService userManagementService;
 
+  @Mock
+  private Auth0UserMetadataService auth0UserMetadataService;
+
   @BeforeEach
   void setUp() {
-    userManagementService = new UserManagementService(userRepository, userMapper);
+    userManagementService = new UserManagementService(auth0UserMetadataService, userRepository, userMapper);
   }
 
   @Test

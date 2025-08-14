@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,11 @@ import org.springframework.web.server.ResponseStatusException;
  * and updates.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserManagementService {
+
+  private final Auth0UserMetadataService auth0UserMetadataService;
 
   private final UserRepository userRepository;
   private final UserMapper userMapper;
@@ -115,7 +119,21 @@ public class UserManagementService {
     }
 
     User updated = userRepository.save(user);
-    return userMapper.toDto(updated);
+    UserDto updatedDto = userMapper.toDto(updated);
+    
+    // Update Auth0 user metadata if Auth0 is enabled and user has Auth0 ID
+    try {
+      if (updated.getAuth0UserId() != null && !updated.getAuth0UserId().trim().isEmpty()) {
+        auth0UserMetadataService.updateUserMetadata(updated.getAuth0UserId(), updatedDto);
+      }
+    } catch (Exception e) {
+      // Log the error but don't fail the update operation
+      // This ensures the local update succeeds even if Auth0 update fails
+      log.warn("Failed to update Auth0 user metadata for user: {} (Auth0 ID: {}). Error: {}", 
+               updated.getEmail(), updated.getAuth0UserId(), e.getMessage());
+    }
+    
+    return updatedDto;
   }
 
   /**
@@ -149,6 +167,21 @@ public class UserManagementService {
     user.setStatus(targetStatus);
     User savedUser = userRepository.save(user);
 
+    return userMapper.toDto(savedUser);
+  }
+
+  /**
+   * Updates the Auth0 user ID for an existing user.
+   *
+   * @param userId the local user ID
+   * @param auth0UserId the Auth0 user ID
+   * @return the updated user DTO
+   */
+  @Transactional
+  public UserDto updateAuth0UserId(UUID userId, String auth0UserId) {
+    User user = userRepository.findByIdOrThrow(userId);
+    user.setAuth0UserId(auth0UserId);
+    User savedUser = userRepository.save(user);
     return userMapper.toDto(savedUser);
   }
 }
