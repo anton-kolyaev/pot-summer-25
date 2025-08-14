@@ -29,7 +29,12 @@ public class AuditConfig {
     public Optional<UUID> getCurrentAuditor() {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth instanceof JwtAuthenticationToken) {
-        return Optional.of(UUID.fromString(auth.getName()));
+        try {
+          return Optional.of(UUID.fromString(auth.getName()));
+        } catch (IllegalArgumentException | NullPointerException e) {
+          // If the name is null or not a valid UUID, fall back to SYSTEM
+          return Optional.of(SYSTEM);
+        }
       }
       // Branch is hit when the SecurityContext doesn’t contain a valid JWT-based Authentication,
       // e.g. during scheduled jobs or anonymous/unauthenticated requests.
