@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -686,6 +687,21 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
         .andExpect(jsonPath("$.error.message").value("Access Denied"));
 
   }
+
+  @Test
+  @DisplayName("Should return 401 Unauthorized when unauthenticated")
+  void shouldReturn401Unauthorized() throws Exception {
+    mockMvc
+        .perform(
+            get("/v1/companies")
+                .with(anonymous())
+                .param("name", "Alpha")
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+  }
+
   // ========== PRIVATE HELPER METHODS ==========
 
   private CompanyDto createCompany(CompanyDto createRequest) throws Exception {

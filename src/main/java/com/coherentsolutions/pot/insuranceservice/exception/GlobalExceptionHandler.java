@@ -250,7 +250,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  @ExceptionHandler({ AccessDeniedException.class, AuthorizationDeniedException.class })
+  @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
   public ResponseEntity<ErrorResponseDto> handleAccessDenied(Exception ex,
       HttpServletRequest servletRequest) {
     log.error(ex.getMessage(), ex);
