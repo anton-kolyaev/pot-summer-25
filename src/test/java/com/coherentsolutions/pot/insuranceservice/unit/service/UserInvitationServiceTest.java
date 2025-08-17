@@ -18,7 +18,6 @@ import com.coherentsolutions.pot.insuranceservice.service.UserInvitationService;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +43,7 @@ class UserInvitationServiceTest {
 
   @BeforeEach
   void setUp() {
-    userInvitationService = new UserInvitationService(userManagementService, Optional.of(auth0InvitationService));
+    userInvitationService = new UserInvitationService(userManagementService, auth0InvitationService);
     ReflectionTestUtils.setField(userInvitationService, "auth0ClientId", "test-client-id");
   }
 

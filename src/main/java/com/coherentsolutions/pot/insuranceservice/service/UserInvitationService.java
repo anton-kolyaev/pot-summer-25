@@ -5,7 +5,6 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import java.util.HashMap;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  * <p>This service orchestrates the user creation process by:
  * 1. Saving user data to the local database
- * 2. Creating the user in Auth0 with invitation email (if Auth0 is enabled)
+ * 2. Creating the user in Auth0 with invitation email
  * 3. Handling error cases and rollback scenarios
  */
 @Slf4j
@@ -26,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserInvitationService {
 
   private final UserManagementService userManagementService;
-  private final Optional<Auth0InvitationService> auth0InvitationService;
+  private final Auth0InvitationService auth0InvitationService;
   
   @Value("${AUTH0_CLIENT_ID:}")
   private String auth0ClientId;
@@ -36,7 +35,7 @@ public class UserInvitationService {
    * 
    * <p>This method:
    * 1. Saves the user to the local database
-   * 2. Creates the user in Auth0 with invitation email (if Auth0 is enabled)
+   * 2. Creates the user in Auth0 with invitation email
    * 3. Handles rollback if Auth0 creation fails
    * 
    *
@@ -53,28 +52,24 @@ public class UserInvitationService {
     UserDto savedUser = userManagementService.createUser(userDto);
     log.info("Successfully saved user to local database with ID: {}", savedUser.getId());
     
-    // Step 2: Create Auth0 user with invitation (if Auth0 is enabled)
-    if (auth0InvitationService.isPresent()) {
-      try {
-        Auth0InvitationDto invitationDto = buildInvitationDto(userDto);
-        Auth0UserDto auth0User = auth0InvitationService.get().createUserWithInvitation(invitationDto);
-        
-        log.info("Successfully created Auth0 user with invitation. Auth0 ID: {}", auth0User.getUserId());
-        
-        // Step 3: Update local user with Auth0 ID (optional - for future reference)
-        // This could be stored in user metadata or a separate field
-        
-      } catch (Auth0Exception e) {
-        log.error("Failed to create Auth0 user with invitation for email: {}. Rolling back local user creation.", userDto.getEmail(), e);
-        
-        log.info("Marked user {} as inactive pending email confirmation", savedUser.getId());
-        throw e;
-      }
-    } else {
-      log.info("Auth0 is disabled, skipping Auth0 user creation for email: {}", userDto.getEmail());
+    try {
+      // Step 2: Create Auth0 user with invitation
+      Auth0InvitationDto invitationDto = buildInvitationDto(userDto);
+      Auth0UserDto auth0User = auth0InvitationService.createUserWithInvitation(invitationDto);
+      
+      log.info("Successfully created Auth0 user with invitation. Auth0 ID: {}", auth0User.getUserId());
+      
+      // Step 3: Update local user with Auth0 ID (optional - for future reference)
+      // This could be stored in user metadata or a separate field
+      
+      return savedUser;
+      
+    } catch (Auth0Exception e) {
+      log.error("Failed to create Auth0 user with invitation for email: {}. Rolling back local user creation.", userDto.getEmail(), e);
+      
+      log.info("Marked user {} as inactive pending email confirmation", savedUser.getId());
+      throw e;
     }
-    
-    return savedUser;
   }
 
   /**
@@ -140,7 +135,7 @@ public class UserInvitationService {
     }
     
     // Resend invitation via Auth0
-    auth0InvitationService.ifPresent(service -> service.resendInvitation(auth0UserId, email));
+    auth0InvitationService.resendInvitation(auth0UserId, email);
     
     log.info("Successfully resent invitation email to user: {}", userId);
   }
@@ -165,7 +160,7 @@ public class UserInvitationService {
     }
     
     // Check Auth0
-    boolean auth0Exists = auth0InvitationService.map(service -> service.userExistsByEmail(email)).orElse(false);
+    boolean auth0Exists = auth0InvitationService.userExistsByEmail(email);
     
     return localExists && auth0Exists;
   }

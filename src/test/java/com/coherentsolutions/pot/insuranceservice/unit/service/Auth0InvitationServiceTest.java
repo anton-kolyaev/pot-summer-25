@@ -23,12 +23,10 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0InvitationService;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0PasswordService;
-import com.coherentsolutions.pot.insuranceservice.service.Auth0TicketService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,9 +45,6 @@ class Auth0InvitationServiceTest {
 
   @Mock
   private Auth0PasswordService auth0PasswordService;
-
-  @Mock
-  private Auth0TicketService auth0TicketService;
 
   @Mock
   private UsersEntity usersEntity;
@@ -82,7 +77,7 @@ class Auth0InvitationServiceTest {
 
   @BeforeEach
   void setUp() {
-    auth0InvitationService = new Auth0InvitationService(managementAPI, auth0UserMapper, Optional.of(auth0PasswordService), auth0TicketService);
+    auth0InvitationService = new Auth0InvitationService(managementAPI, auth0UserMapper, auth0PasswordService);
   }
 
   @Test
@@ -108,7 +103,7 @@ class Auth0InvitationServiceTest {
     when(createUserResponse.getBody()).thenReturn(createdUser);
     when(usersEntity.update(eq("auth0|123"), any(User.class))).thenReturn(updateUserRequest);
     when(updateUserRequest.execute()).thenReturn(updateUserResponse);
-    when(auth0TicketService.createPasswordChangeTicket("auth0|123", "test@example.com")).thenReturn("ticket-url");
+    when(auth0PasswordService.sendPasswordChangeEmail("test@example.com")).thenReturn("Success");
     when(auth0UserMapper.toDto(createdUser)).thenReturn(expectedDto);
 
     // When
@@ -116,7 +111,7 @@ class Auth0InvitationServiceTest {
 
     // Then
     assertEquals(expectedDto, result);
-    verify(auth0TicketService).createPasswordChangeTicket("auth0|123", "test@example.com");
+    verify(auth0PasswordService).sendPasswordChangeEmail("test@example.com");
   }
 
   @Test
@@ -148,7 +143,7 @@ class Auth0InvitationServiceTest {
     when(createUserResponse.getBody()).thenReturn(createdUser);
     when(usersEntity.update(eq("auth0|123"), any(User.class))).thenReturn(updateUserRequest);
     when(updateUserRequest.execute()).thenReturn(updateUserResponse);
-    when(auth0TicketService.createPasswordChangeTicket("auth0|123", "test@example.com")).thenReturn("ticket-url");
+    when(auth0PasswordService.sendPasswordChangeEmail("test@example.com")).thenReturn("Success");
     when(auth0UserMapper.toDto(createdUser)).thenReturn(expectedDto);
 
     // When
@@ -225,7 +220,7 @@ class Auth0InvitationServiceTest {
     when(createUserResponse.getBody()).thenReturn(createdUser);
     when(usersEntity.update(eq("auth0|123"), any(User.class))).thenReturn(updateUserRequest);
     when(updateUserRequest.execute()).thenReturn(updateUserResponse);
-    when(auth0TicketService.createPasswordChangeTicket("auth0|123", "test@example.com")).thenThrow(new RuntimeException("Password reset failed"));
+    when(auth0PasswordService.sendPasswordChangeEmail("test@example.com")).thenThrow(new RuntimeException("Password reset failed"));
     when(auth0UserMapper.toDto(createdUser)).thenReturn(expectedDto);
 
     // When
@@ -252,13 +247,13 @@ class Auth0InvitationServiceTest {
     when(getUserResponse.getBody()).thenReturn(existingUser);
     when(usersEntity.update(eq(userId), any(User.class))).thenReturn(updateUserRequest);
     when(updateUserRequest.execute()).thenReturn(updateUserResponse);
-    when(auth0TicketService.createPasswordChangeTicket(userId, email)).thenReturn("ticket-url");
+    when(auth0PasswordService.sendPasswordChangeEmail(email)).thenReturn("Success");
 
     // When
     auth0InvitationService.resendInvitation(userId, email);
 
     // Then
-    verify(auth0TicketService).createPasswordChangeTicket(userId, email);
+    verify(auth0PasswordService).sendPasswordChangeEmail(email);
   }
 
   @Test
@@ -415,7 +410,7 @@ class Auth0InvitationServiceTest {
     when(createUserResponse.getBody()).thenReturn(createdUser);
     when(usersEntity.update(eq("auth0|123"), any(User.class))).thenReturn(updateUserRequest);
     when(updateUserRequest.execute()).thenReturn(updateUserResponse);
-    when(auth0TicketService.createPasswordChangeTicket("auth0|123", "test@example.com")).thenReturn("ticket-url");
+    when(auth0PasswordService.sendPasswordChangeEmail("test@example.com")).thenReturn("Success");
     when(auth0UserMapper.toDto(createdUser)).thenReturn(expectedDto);
 
     // When
@@ -447,7 +442,7 @@ class Auth0InvitationServiceTest {
     when(createUserResponse.getBody()).thenReturn(createdUser);
     when(usersEntity.update(eq("auth0|123"), any(User.class))).thenReturn(updateUserRequest);
     when(updateUserRequest.execute()).thenReturn(updateUserResponse);
-    when(auth0TicketService.createPasswordChangeTicket("auth0|123", "test@example.com")).thenReturn("ticket-url");
+    when(auth0PasswordService.sendPasswordChangeEmail("test@example.com")).thenReturn("Success");
     when(auth0UserMapper.toDto(createdUser)).thenReturn(expectedDto);
 
     // When
