@@ -2,6 +2,8 @@ package com.coherentsolutions.pot.insuranceservice.controller;
 
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserFilter;
+import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
+import com.coherentsolutions.pot.insuranceservice.service.UserInvitationService;
 import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,14 +34,24 @@ import org.springframework.web.server.ResponseStatusException;
 public class AdminUserManagementController {
 
   private final UserManagementService userManagementService;
+  private final UserInvitationService userInvitationService;
 
   /**
-   * Creates a new user.
+   * Creates a new user with invitation flow.
+   * 
+   * <p>This endpoint:
+   * 1. Saves the user data to the local database
+   * 2. Creates the user in Auth0 with invitation email
+   * 3. The invited user will receive an email to set up their account
    */
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-    return userManagementService.createUser(userDto);
+    try {
+      return userInvitationService.createUserWithInvitation(userDto);
+    } catch (Auth0Exception e) {
+      throw new RuntimeException("Failed to create user with invitation: " + e.getMessage(), e);
+    }
   }
 
   /**
@@ -78,8 +91,32 @@ public class AdminUserManagementController {
   }
 
   /**
-   * Retrieves user details by ID. If the user does not exist, throws
-   * {@link ResponseStatusException} with 404 NOT FOUND.
+
+   * Resends invitation email to the user.
+   * 
+   *
+   * @param id the user ID
+   *
+   * @param auth0UserId the Auth0 user ID
+   *
+   * @param email the user's email
+   */
+  @PostMapping("/{id}/resend-invitation")
+  @ResponseStatus(HttpStatus.OK)
+  public void resendInvitation(
+      @PathVariable("id") UUID id,
+      @RequestParam("auth0UserId") String auth0UserId,
+      @RequestParam("email") String email) {
+    try {
+      userInvitationService.resendInvitation(id.toString(), auth0UserId, email);
+    } catch (Auth0Exception e) {
+      throw new RuntimeException("Failed to resend invitation: " + e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Retrieves user details by ID. If the user does not exist, throws {@link
+   * ResponseStatusException} with 404 NOT FOUND.
    */
   @GetMapping("/{id}")
   public UserDto viewUsersDetails(@PathVariable("id") UUID id) {

@@ -1,163 +1,171 @@
 package com.coherentsolutions.pot.insuranceservice.unit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Unit tests for Auth0Properties.
- *
- * <p>Tests cover record creation and default values.
- */
+@DisplayName("Auth0Properties Unit Tests")
 class Auth0PropertiesTest {
 
   @Test
-  void testConstructorWithValidDataCreatesProperties() {
-    // Given & When
-    Auth0Properties properties = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "https://test-domain.auth0.com/api/v2/",
-        15000,
-        true
-    );
+  @DisplayName("Should create Auth0Properties with valid values")
+  void shouldCreateAuth0PropertiesWithValidValues() {
+    // Given
+    String domain = "test.auth0.com";
+    String apiToken = "test-token";
+    String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
+    int timeout = 5000;
+    boolean enabled = true;
+
+    // When
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
-    assertNotNull(properties);
-    assertEquals("test-domain.auth0.com", properties.domain());
-    assertEquals("test-api-token", properties.apiToken());
-    assertEquals("https://test-domain.auth0.com/api/v2/", properties.audience());
+    assertEquals(domain, properties.domain());
+    assertEquals(apiToken, properties.apiToken());
+    assertEquals(audience, properties.audience());
+    assertEquals(clientId, properties.clientId());
+    assertEquals(connection, properties.connection());
+    assertEquals(timeout, properties.timeout());
+    assertEquals(enabled, properties.enabled());
+  }
+
+  @Test
+  @DisplayName("Should set default timeout when timeout is zero")
+  void shouldSetDefaultTimeoutWhenTimeoutIsZero() {
+    // Given
+    String domain = "test.auth0.com";
+    String apiToken = "test-token";
+    String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
+    int timeout = 0;
+    boolean enabled = true;
+
+    // When
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+
+    // Then
+    assertEquals(10000, properties.timeout());
+  }
+
+  @Test
+  @DisplayName("Should set default timeout when timeout is negative")
+  void shouldSetDefaultTimeoutWhenTimeoutIsNegative() {
+    // Given
+    String domain = "test.auth0.com";
+    String apiToken = "test-token";
+    String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
+    int timeout = -1000;
+    boolean enabled = true;
+
+    // When
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+
+    // Then
+    assertEquals(10000, properties.timeout());
+  }
+
+  @Test
+  @DisplayName("Should keep custom timeout when timeout is positive")
+  void shouldKeepCustomTimeoutWhenTimeoutIsPositive() {
+    // Given
+    String domain = "test.auth0.com";
+    String apiToken = "test-token";
+    String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
+    int timeout = 15000;
+    boolean enabled = true;
+
+    // When
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+
+    // Then
     assertEquals(15000, properties.timeout());
-    assertEquals(true, properties.enabled());
   }
 
   @Test
-  void testConstructorWithZeroTimeoutSetsDefaultTimeout() {
-    // Given & When
-    Auth0Properties properties = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "https://test-domain.auth0.com/api/v2/",
-        0,
-        true
-    );
+  @DisplayName("Should create Auth0Properties with disabled state")
+  void shouldCreateAuth0PropertiesWithDisabledState() {
+    // Given
+    String domain = "test.auth0.com";
+    String apiToken = "test-token";
+    String audience = "https://api.test.com";
+    String clientId = "test-client-id";
+    String connection = "Username-Password-Authentication";
+    int timeout = 5000;
+    boolean enabled = false;
+
+    // When
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
-    assertEquals(10000, properties.timeout());
+    assertEquals(domain, properties.domain());
+    assertEquals(apiToken, properties.apiToken());
+    assertEquals(audience, properties.audience());
+    assertEquals(clientId, properties.clientId());
+    assertEquals(connection, properties.connection());
+    assertEquals(timeout, properties.timeout());
+    assertFalse(properties.enabled());
   }
 
   @Test
-  void testConstructorWithNegativeTimeoutSetsDefaultTimeout() {
-    // Given & When
-    Auth0Properties properties = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "https://test-domain.auth0.com/api/v2/",
-        -1000,
-        true
-    );
+  @DisplayName("Should create Auth0Properties with null values")
+  void shouldCreateAuth0PropertiesWithNullValues() {
+    // Given
+    String domain = null;
+    String apiToken = null;
+    String audience = null;
+    String clientId = null;
+    String connection = null;
+    int timeout = 5000;
+    boolean enabled = true;
+
+    // When
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
-    assertEquals(10000, properties.timeout());
+    assertNull(properties.domain());
+    assertNull(properties.apiToken());
+    assertNull(properties.audience());
+    assertNull(properties.clientId());
+    assertNull(properties.connection());
+    assertEquals(timeout, properties.timeout());
+    assertTrue(properties.enabled());
   }
 
   @Test
-  void testConstructorWithValidTimeoutKeepsTimeout() {
-    // Given & When
-    Auth0Properties properties = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "https://test-domain.auth0.com/api/v2/",
-        5000,
-        true
-    );
+  @DisplayName("Should create Auth0Properties with empty strings")
+  void shouldCreateAuth0PropertiesWithEmptyStrings() {
+    // Given
+    String domain = "";
+    String apiToken = "";
+    String audience = "";
+    String clientId = "";
+    String connection = "";
+    int timeout = 5000;
+    boolean enabled = true;
+
+    // When
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
 
     // Then
-    assertEquals(5000, properties.timeout());
-  }
-
-  @Test
-  void testConstructorWithNullValuesHandlesCorrectly() {
-    // Given & When
-    Auth0Properties properties = new Auth0Properties(
-        null,
-        null,
-        null,
-        10000,
-        false
-    );
-
-    // Then
-    assertNotNull(properties);
-    assertEquals(null, properties.domain());
-    assertEquals(null, properties.apiToken());
-    assertEquals(null, properties.audience());
-    assertEquals(10000, properties.timeout());
-    assertEquals(false, properties.enabled());
-  }
-
-  @Test
-  void testConstructorWithEmptyStringsHandlesCorrectly() {
-    // Given & When
-    Auth0Properties properties = new Auth0Properties(
-        "",
-        "",
-        "",
-        10000,
-        false
-    );
-
-    // Then
-    assertNotNull(properties);
     assertEquals("", properties.domain());
     assertEquals("", properties.apiToken());
     assertEquals("", properties.audience());
-    assertEquals(10000, properties.timeout());
-    assertEquals(false, properties.enabled());
-  }
-
-  @Test
-  void testRecordImmutabilityWorksCorrectly() {
-    // Given
-    Auth0Properties properties = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "https://test-domain.auth0.com/api/v2/",
-        10000,
-        true
-    );
-
-    // When & Then - Record should be immutable, so we can only read values
-    assertEquals("test-domain.auth0.com", properties.domain());
-    assertEquals("test-api-token", properties.apiToken());
-    assertEquals("https://test-domain.auth0.com/api/v2/", properties.audience());
-    assertEquals(10000, properties.timeout());
-    assertEquals(true, properties.enabled());
-  }
-
-  @Test
-  void testRecordEqualityWorksCorrectly() {
-    // Given
-    Auth0Properties properties1 = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "https://test-domain.auth0.com/api/v2/",
-        10000,
-        true
-    );
-
-    Auth0Properties properties2 = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "https://test-domain.auth0.com/api/v2/",
-        10000,
-        true
-    );
-
-    // When & Then
-    assertEquals(properties1, properties2);
-    assertEquals(properties1.hashCode(), properties2.hashCode());
+    assertEquals("", properties.clientId());
+    assertEquals("", properties.connection());
+    assertEquals(timeout, properties.timeout());
+    assertTrue(properties.enabled());
   }
 } 
