@@ -34,6 +34,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        null,
         10000,
         true
     );
@@ -55,6 +56,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        null,
         10000,
         true
     );
@@ -73,6 +75,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        null,
         10000,
         true
     );
@@ -91,6 +94,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        null,
         10000,
         true
     );
@@ -109,6 +113,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        null,
         10000,
         true
     );

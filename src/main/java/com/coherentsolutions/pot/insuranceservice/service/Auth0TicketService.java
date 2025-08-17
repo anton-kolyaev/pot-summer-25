@@ -5,16 +5,16 @@ import com.auth0.client.mgmt.filter.UserFilter;
 import com.auth0.json.mgmt.users.UsersPage;
 import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 /**
  * Service for handling Auth0 Tickets API operations.
@@ -49,8 +49,6 @@ public class Auth0TicketService {
     try {
       log.info("Creating password change ticket for user: {} with email: {}", userId, email);
 
-      String url = "https://" + auth0Properties.domain() + "/api/v2/tickets/password-change";
-
       // Request body for password change ticket
       Map<String, Object> body = new HashMap<>();
       body.put("user_id", userId);
@@ -84,12 +82,14 @@ public class Auth0TicketService {
 
       HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
+      final String url = "https://" + auth0Properties.domain() + "/api/v2/tickets/password-change";
+
       // Make POST request to create ticket
       ResponseEntity<Map> response = restClient.post()
           .uri(url)
           .headers(httpHeaders -> {
-              httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-              httpHeaders.setBearerAuth(auth0Properties.apiToken());
+            httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+            httpHeaders.setBearerAuth(auth0Properties.apiToken());
           })
           .body(body)
           .retrieve()

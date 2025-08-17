@@ -7,6 +7,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.auth0.Auth0UserDto;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.mapper.Auth0UserMapper;
 import com.coherentsolutions.pot.insuranceservice.util.PasswordGenerator;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +35,7 @@ public class Auth0InvitationService {
 
   private final ManagementAPI managementAPI;
   private final Auth0UserMapper auth0UserMapper;
-  private final Auth0PasswordService auth0PasswordService;
+  private final Optional<Auth0PasswordService> auth0PasswordService;
   private final Auth0TicketService auth0TicketService;
   
   @Value("${auth0.domain:}")
@@ -250,7 +251,10 @@ public class Auth0InvitationService {
       log.info("Sending password reset email to: {}", email);
       
       // Use Auth0PasswordService to send password reset email
-      String response = auth0PasswordService.sendPasswordChangeEmail(email);
+      String response = auth0PasswordService
+          .map(service -> service.sendPasswordChangeEmail(email))
+          .orElseThrow(() -> new Auth0Exception("Auth0PasswordService not available", 
+              "AUTH0_PASSWORD_SERVICE_NOT_AVAILABLE", 503));
       
       log.info("Successfully sent password reset email to: {}. Auth0 response: {}", email, response);
       
