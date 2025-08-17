@@ -48,7 +48,7 @@ class Auth0UserMetadataServiceTest {
   private UsersEntity usersEntity;
 
   @Mock
-  private Request<User> userRequest;
+  private Request<User> userUpdateRequest;
 
   @Mock
   private Response<User> userResponse;
@@ -79,8 +79,8 @@ class Auth0UserMetadataServiceTest {
     mockUser.setId(auth0UserId);
 
     when(managementAPI.users()).thenReturn(usersEntity);
-    when(usersEntity.update(eq(auth0UserId), any(User.class))).thenReturn(userRequest);
-    when(userRequest.execute()).thenReturn(userResponse);
+    when(usersEntity.update(eq(auth0UserId), any(User.class))).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
     when(userResponse.getBody()).thenReturn(mockUser);
 
     // When
@@ -111,8 +111,8 @@ class Auth0UserMetadataServiceTest {
     when(usersPage.getItems()).thenReturn(Arrays.asList(mockFoundUser));
 
     // Mock the update
-    when(usersEntity.update(eq(foundAuth0UserId), any(User.class))).thenReturn(userRequest);
-    when(userRequest.execute()).thenReturn(userResponse);
+    when(usersEntity.update(eq(foundAuth0UserId), any(User.class))).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
     when(userResponse.getBody()).thenReturn(mockFoundUser);
 
     // When
@@ -144,8 +144,8 @@ class Auth0UserMetadataServiceTest {
     when(usersPage.getItems()).thenReturn(Arrays.asList(mockFoundUser));
 
     // Mock the update
-    when(usersEntity.update(eq(foundAuth0UserId), any(User.class))).thenReturn(userRequest);
-    when(userRequest.execute()).thenReturn(userResponse);
+    when(usersEntity.update(eq(foundAuth0UserId), any(User.class))).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
     when(userResponse.getBody()).thenReturn(mockFoundUser);
 
     // When
@@ -205,8 +205,8 @@ class Auth0UserMetadataServiceTest {
     when(usersPage.getItems()).thenReturn(Arrays.asList(mockFirstUser, mockSecondUser));
 
     // Mock the update
-    when(usersEntity.update(eq(firstAuth0UserId), any(User.class))).thenReturn(userRequest);
-    when(userRequest.execute()).thenReturn(userResponse);
+    when(usersEntity.update(eq(firstAuth0UserId), any(User.class))).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
     when(userResponse.getBody()).thenReturn(mockFirstUser);
 
     // When
