@@ -662,4 +662,176 @@ class UserManagementServiceTest {
     assertEquals(expectedDto, result);
     verify(userRepository).save(existingUser);
   }
+
+  @Test
+  @DisplayName("Should update Auth0 user ID successfully")
+  void shouldUpdateAuth0UserIdSuccessfully() {
+    // Given
+    final UUID userId = UUID.randomUUID();
+    final String auth0UserId = "auth0|123456789";
+    
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setFirstName("John");
+    existingUser.setLastName("Doe");
+    existingUser.setEmail("john.doe@example.com");
+    existingUser.setAuth0UserId("old-auth0-id");
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFirstName("John");
+    updatedUser.setLastName("Doe");
+    updatedUser.setEmail("john.doe@example.com");
+    updatedUser.setAuth0UserId(auth0UserId);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setFirstName("John");
+    expectedDto.setLastName("Doe");
+    expectedDto.setEmail("john.doe@example.com");
+    expectedDto.setAuth0UserId(auth0UserId);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateAuth0UserId(userId, auth0UserId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(auth0UserId, existingUser.getAuth0UserId());
+    verify(userRepository).findByIdOrThrow(userId);
+    verify(userRepository).save(existingUser);
+    verify(userMapper).toDto(updatedUser);
+  }
+
+  @Test
+  @DisplayName("Should update Auth0 user ID when user has no existing Auth0 ID")
+  void shouldUpdateAuth0UserIdWhenUserHasNoExistingAuth0Id() {
+    // Given
+    final UUID userId = UUID.randomUUID();
+    final String auth0UserId = "auth0|987654321";
+    
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setFirstName("Jane");
+    existingUser.setLastName("Smith");
+    existingUser.setEmail("jane.smith@example.com");
+    existingUser.setAuth0UserId(null);
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFirstName("Jane");
+    updatedUser.setLastName("Smith");
+    updatedUser.setEmail("jane.smith@example.com");
+    updatedUser.setAuth0UserId(auth0UserId);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setFirstName("Jane");
+    expectedDto.setLastName("Smith");
+    expectedDto.setEmail("jane.smith@example.com");
+    expectedDto.setAuth0UserId(auth0UserId);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateAuth0UserId(userId, auth0UserId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(auth0UserId, existingUser.getAuth0UserId());
+    verify(userRepository).findByIdOrThrow(userId);
+    verify(userRepository).save(existingUser);
+    verify(userMapper).toDto(updatedUser);
+  }
+
+  @Test
+  @DisplayName("Should update Auth0 user ID with empty string")
+  void shouldUpdateAuth0UserIdWithEmptyString() {
+    // Given
+    final UUID userId = UUID.randomUUID();
+    final String auth0UserId = "";
+    
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setFirstName("Bob");
+    existingUser.setLastName("Johnson");
+    existingUser.setEmail("bob.johnson@example.com");
+    existingUser.setAuth0UserId("existing-auth0-id");
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFirstName("Bob");
+    updatedUser.setLastName("Johnson");
+    updatedUser.setEmail("bob.johnson@example.com");
+    updatedUser.setAuth0UserId(auth0UserId);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setFirstName("Bob");
+    expectedDto.setLastName("Johnson");
+    expectedDto.setEmail("bob.johnson@example.com");
+    expectedDto.setAuth0UserId(auth0UserId);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateAuth0UserId(userId, auth0UserId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(auth0UserId, existingUser.getAuth0UserId());
+    verify(userRepository).findByIdOrThrow(userId);
+    verify(userRepository).save(existingUser);
+    verify(userMapper).toDto(updatedUser);
+  }
+
+  @Test
+  @DisplayName("Should update Auth0 user ID with null value")
+  void shouldUpdateAuth0UserIdWithNullValue() {
+    // Given
+    final UUID userId = UUID.randomUUID();
+    final String auth0UserId = null;
+    
+    User existingUser = new User();
+    existingUser.setId(userId);
+    existingUser.setFirstName("Alice");
+    existingUser.setLastName("Brown");
+    existingUser.setEmail("alice.brown@example.com");
+    existingUser.setAuth0UserId("existing-auth0-id");
+
+    User updatedUser = new User();
+    updatedUser.setId(userId);
+    updatedUser.setFirstName("Alice");
+    updatedUser.setLastName("Brown");
+    updatedUser.setEmail("alice.brown@example.com");
+    updatedUser.setAuth0UserId(auth0UserId);
+
+    UserDto expectedDto = new UserDto();
+    expectedDto.setId(userId);
+    expectedDto.setFirstName("Alice");
+    expectedDto.setLastName("Brown");
+    expectedDto.setEmail("alice.brown@example.com");
+    expectedDto.setAuth0UserId(auth0UserId);
+
+    when(userRepository.findByIdOrThrow(userId)).thenReturn(existingUser);
+    when(userRepository.save(existingUser)).thenReturn(updatedUser);
+    when(userMapper.toDto(updatedUser)).thenReturn(expectedDto);
+
+    // When
+    UserDto result = userManagementService.updateAuth0UserId(userId, auth0UserId);
+
+    // Then
+    assertEquals(expectedDto, result);
+    assertEquals(auth0UserId, existingUser.getAuth0UserId());
+    verify(userRepository).findByIdOrThrow(userId);
+    verify(userRepository).save(existingUser);
+    verify(userMapper).toDto(updatedUser);
+  }
 }
