@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.coherentsolutions.pot.insuranceservice.controller.AdminCompanyManagementController;
 import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityConfig;
+import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,8 @@ class SecurityConfigIt {
   @ValueSource(strings = {"/swagger-ui/index.html", "/v3/api-docs"})
   @DisplayName("permitAll endpoints are reachable without JWT")
   void publicEndpointsAreOpen(String url) throws Exception {
-    mockMvc.perform(get(url))
+    mockMvc.perform(get(url)
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk());
   }
 
@@ -47,7 +49,7 @@ class SecurityConfigIt {
   @DisplayName("Protected endpoint with JWT returns 200")
   void protectedEndpointWithJwt() throws Exception {
     mockMvc.perform(get("/v1/companies")
-            .with(jwt().jwt(j -> j.claim("sub", "tester"))))
+          .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk());
   }
 
