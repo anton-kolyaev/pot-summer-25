@@ -12,8 +12,6 @@ import org.springframework.lang.NonNull;
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class AuditConfig {
 
-  private static final UUID SYSTEM = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
   @Bean
   public AuditorAware<UUID> auditorProvider() {
     return new SecurityAuditorAware();
