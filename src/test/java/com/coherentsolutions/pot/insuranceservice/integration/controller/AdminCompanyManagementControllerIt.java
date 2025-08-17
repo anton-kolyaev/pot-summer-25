@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -19,6 +22,7 @@ import com.coherentsolutions.pot.insuranceservice.dto.company.CompanyReactivatio
 import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
+import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityUtils;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.User;
@@ -122,6 +126,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
         mockMvc
             .perform(
                 get("/v1/companies")
+                    .with(TestSecurityUtils.adminUser())
                     .param("name", "Alpha")
                     .param("page", "0")
                     .param("size", "10")
@@ -149,6 +154,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
         mockMvc
             .perform(
                 get("/v1/companies")
+                    .with(TestSecurityUtils.adminUser())
                     .param("countryCode", "CAN")
                     .param("page", "0")
                     .param("size", "10")
@@ -210,7 +216,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
 
     // When & Then
     mockMvc
-        .perform(get("/v1/companies/{id}", nonExistentId).contentType(MediaType.APPLICATION_JSON))
+        .perform(get("/v1/companies/{id}", nonExistentId)
+            .with(TestSecurityUtils.adminUser())
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
@@ -225,6 +233,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             put("/v1/companies/{id}", nonExistentId)
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(updateRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
@@ -238,7 +247,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
 
     // When & Then
     mockMvc
-        .perform(post("/v1/companies").content(invalidJson).contentType(MediaType.APPLICATION_JSON))
+        .perform(post("/v1/companies").content(invalidJson)
+            .with(TestSecurityUtils.adminUser())
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -252,6 +263,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             put("/v1/companies/{id}", UUID.randomUUID())
+                .with(TestSecurityUtils.adminUser())
                 .content(invalidJson)
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -262,7 +274,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   void shouldReturn400WhenCreatingCompanyWithEmptyBody() throws Exception {
     // When & Then
     mockMvc
-        .perform(post("/v1/companies").content("").contentType(MediaType.APPLICATION_JSON))
+        .perform(post("/v1/companies").content("")
+            .with(TestSecurityUtils.adminUser())
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -273,6 +287,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             put("/v1/companies/{id}", UUID.randomUUID())
+                .with(TestSecurityUtils.adminUser())
                 .content("")
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -283,7 +298,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   void shouldReturn400WhenCreatingCompanyWithNullBody() throws Exception {
     // When & Then
     mockMvc
-        .perform(post("/v1/companies").contentType(MediaType.APPLICATION_JSON))
+        .perform(post("/v1/companies")
+            .with(TestSecurityUtils.adminUser())
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -293,7 +310,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     // When & Then
     mockMvc
         .perform(
-            put("/v1/companies/{id}", UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON))
+            put("/v1/companies/{id}", UUID.randomUUID())
+                .with(TestSecurityUtils.adminUser())
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -302,7 +321,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   void shouldHandleInvalidUuidFormatInPathParameter() throws Exception {
     // When & Then
     mockMvc
-        .perform(get("/v1/companies/{id}", "invalid-uuid").contentType(MediaType.APPLICATION_JSON))
+        .perform(get("/v1/companies/{id}", "invalid-uuid")
+            .with(TestSecurityUtils.adminUser())
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
 
     CompanyDto simpleDto = CompanyDto.builder().name("Test Company").countryCode("USA").build();
@@ -310,6 +331,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             put("/v1/companies/{id}", "invalid-uuid")
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(simpleDto))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -322,6 +344,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             get("/v1/companies")
+                .with(TestSecurityUtils.adminUser())
                 .param("page", "invalid")
                 .param("size", "invalid")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -335,6 +358,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             get("/v1/companies")
+                .with(TestSecurityUtils.adminUser())
                 .param("page", "-1")
                 .param("size", "-10")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -347,7 +371,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     // When & Then
     mockMvc
         .perform(
-            patch("/v1/companies/{id}", UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON))
+            patch("/v1/companies/{id}", UUID.randomUUID())
+                .with(TestSecurityUtils.adminUser())
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isMethodNotAllowed());
   }
 
@@ -359,12 +385,15 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
 
     // When & Then
     mockMvc
-        .perform(post("/v1/companies").content(objectMapper.writeValueAsString(createRequest)))
+        .perform(post("/v1/companies")
+            .with(TestSecurityUtils.adminUser())
+            .content(objectMapper.writeValueAsString(createRequest)))
         .andExpect(status().isUnsupportedMediaType());
 
     mockMvc
         .perform(
             put("/v1/companies/{id}", UUID.randomUUID())
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(createRequest)))
         .andExpect(status().isUnsupportedMediaType());
   }
@@ -379,6 +408,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             post("/v1/companies")
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(createRequest))
                 .contentType(MediaType.TEXT_PLAIN))
         .andExpect(status().isUnsupportedMediaType());
@@ -386,6 +416,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             put("/v1/companies/{id}", UUID.randomUUID())
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(createRequest))
                 .contentType(MediaType.TEXT_PLAIN))
         .andExpect(status().isUnsupportedMediaType());
@@ -439,7 +470,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
 
     // When & Then - Try to deactivate again
     mockMvc
-        .perform(delete("/v1/companies/{id}", companyId).contentType(MediaType.APPLICATION_JSON))
+        .perform(delete("/v1/companies/{id}", companyId)
+            .with(TestSecurityUtils.adminUser())
+            .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
   }
 
@@ -511,6 +544,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             post("/v1/companies/{id}/reactivate", companyId)
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(reactivateRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -532,6 +566,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             post("/v1/companies/{id}/reactivate", companyId)
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(reactivateRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
@@ -546,7 +581,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     // When & Then
     mockMvc
         .perform(
-            delete("/v1/companies/{id}", nonExistentId).contentType(MediaType.APPLICATION_JSON))
+            delete("/v1/companies/{id}", nonExistentId)
+                .with(TestSecurityUtils.adminUser())
+                .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
@@ -563,6 +600,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             post("/v1/companies/{id}/reactivate", nonExistentId)
+                .with(TestSecurityUtils.adminUser())
                 .content(objectMapper.writeValueAsString(reactivateRequest))
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
@@ -583,6 +621,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             get("/v1/companies/{id}/users", companyId)
+                .with(TestSecurityUtils.adminUser())
                 .param("page", "0")
                 .param("size", "10")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -606,6 +645,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             get("/v1/companies/{id}/users", emptyCompany.getId())
+                .with(TestSecurityUtils.adminUser())
                 .param("page", "0")
                 .param("size", "10")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -623,10 +663,43 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     mockMvc
         .perform(
             get("/v1/companies/{id}/users", invalidCompanyId)
+                .with(TestSecurityUtils.adminUser())
                 .param("page", "0")
                 .param("size", "10")
                 .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @DisplayName("Should return 403 forbidden status when trying to access secured endpoint")
+  void shouldReturn403Forbidden() throws Exception {
+    mockMvc
+        .perform(
+            get("/v1/companies")
+                .with(user("123e4567-e89b-12d3-a456-426614174000"))
+                .param("name", "Alpha")
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isForbidden())
+        .andExpect(content().contentTypeCompatibleWith(APPLICATION_JSON))
+        .andExpect(jsonPath("$.error.code").value("FORBIDDEN"))
+        .andExpect(jsonPath("$.error.message").value("Access Denied"));
+
+  }
+
+  @Test
+  @DisplayName("Should return 401 Unauthorized when unauthenticated")
+  void shouldReturn401Unauthorized() throws Exception {
+    mockMvc
+        .perform(
+            get("/v1/companies")
+                .with(anonymous())
+                .param("name", "Alpha")
+                .param("page", "0")
+                .param("size", "10")
+                .contentType(APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
   }
 
   // ========== PRIVATE HELPER METHODS ==========
@@ -636,6 +709,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
         mockMvc
             .perform(
                 post("/v1/companies")
+                    .with(TestSecurityUtils.adminUser())
                     .content(objectMapper.writeValueAsString(createRequest))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
@@ -669,7 +743,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
   private CompanyDto getCompany(UUID companyId) throws Exception {
     String responseJson =
         mockMvc
-            .perform(get("/v1/companies/{id}", companyId).contentType(MediaType.APPLICATION_JSON))
+            .perform(get("/v1/companies/{id}", companyId)
+                .with(TestSecurityUtils.adminUser())
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -683,6 +759,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
         mockMvc
             .perform(
                 put("/v1/companies/{id}", companyId)
+                    .with(TestSecurityUtils.adminUser())
                     .content(objectMapper.writeValueAsString(updateRequest))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -697,7 +774,9 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
     String responseJson =
         mockMvc
             .perform(
-                delete("/v1/companies/{id}", companyId).contentType(MediaType.APPLICATION_JSON))
+                delete("/v1/companies/{id}", companyId)
+                    .with(TestSecurityUtils.adminUser())
+                    .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()
@@ -712,6 +791,7 @@ public class AdminCompanyManagementControllerIt extends PostgresTestContainer {
         mockMvc
             .perform(
                 post("/v1/companies/{id}/reactivate", companyId)
+                    .with(TestSecurityUtils.adminUser())
                     .content(objectMapper.writeValueAsString(reactivateRequest))
                     .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())

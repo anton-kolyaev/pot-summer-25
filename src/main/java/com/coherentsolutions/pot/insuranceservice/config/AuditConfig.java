@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
@@ -28,12 +27,14 @@ public class AuditConfig {
     @Override
     public Optional<UUID> getCurrentAuditor() {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-      if (auth instanceof JwtAuthenticationToken) {
-        return Optional.of(UUID.fromString(auth.getName()));
+
+      if (auth == null || !auth.isAuthenticated()) {
+        return Optional.of(SYSTEM);
       }
       // Branch is hit when the SecurityContext doesn’t contain a valid JWT-based Authentication,
       // e.g. during scheduled jobs or anonymous/unauthenticated requests.
-      return Optional.of(SYSTEM);
+      var authUuid = auth.getName() != null ? UUID.fromString(auth.getName()) : SYSTEM;
+      return Optional.of(authUuid);
     }
   }
 }

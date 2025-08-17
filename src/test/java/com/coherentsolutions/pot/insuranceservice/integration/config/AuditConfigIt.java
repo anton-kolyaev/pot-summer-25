@@ -24,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -63,7 +64,8 @@ class AuditConfigIt extends PostgresTestContainer {
     CompanyDto testCompany = companyBuilder("TestCompany");
 
     mockMvc.perform(post("/v1/companies")
-            .with(jwt().jwt(j -> j.subject(TEST_USER.toString())))
+            .with(jwt().jwt(j -> j.subject(TEST_USER.toString()))
+                    .authorities(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(testCompany)))
         .andExpect(status().isCreated());
@@ -83,6 +85,8 @@ class AuditConfigIt extends PostgresTestContainer {
     CompanyDto testCompanyBefore = companyBuilder("Before");
 
     mockMvc.perform(post("/v1/companies")
+            .with(jwt().jwt(j -> j.subject(TEST_USER.toString()))
+                .authorities(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(testCompanyBefore)))
         .andExpect(status().isCreated());
@@ -94,6 +98,8 @@ class AuditConfigIt extends PostgresTestContainer {
     CompanyDto testCompanyAfter = companyBuilder("After");
 
     mockMvc.perform(put("/v1/companies/{id}", id)
+            .with(jwt().jwt(j -> j.subject(TEST_USER.toString()))
+                .authorities(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(testCompanyAfter)))
         .andExpect(status().isOk());
@@ -110,7 +116,8 @@ class AuditConfigIt extends PostgresTestContainer {
 
     CompanyDto testCompany = companyBuilder("testCompany");
     mockMvc.perform(post("/v1/companies")
-            .with(jwt().jwt(j -> j.subject(TEST_USER.toString())))
+            .with(jwt().jwt(j -> j.subject(TEST_USER.toString()))
+                .authorities(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(testCompany)))
         .andExpect(status().isCreated());
@@ -120,7 +127,8 @@ class AuditConfigIt extends PostgresTestContainer {
     Instant tsBefore = testCompanyBefore.getUpdatedAt();
 
     mockMvc.perform(put("/v1/companies/{id}", id)
-            .with(jwt().jwt(j -> j.subject(TEST_USER.toString())))
+            .with(jwt().jwt(j -> j.subject(TEST_USER.toString()))
+                .authorities(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN")))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(testCompany)))
         .andExpect(status().isOk());
