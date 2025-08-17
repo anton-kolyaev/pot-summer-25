@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users_aud
     phone_data    JSONB,
     address_data  JSONB,
     company_id    UUID,
-    status        VARCHAR,
+    status        VARCHAR(20),
     created_by    UUID,
     updated_by    UUID,
     created_at    TIMESTAMP,
