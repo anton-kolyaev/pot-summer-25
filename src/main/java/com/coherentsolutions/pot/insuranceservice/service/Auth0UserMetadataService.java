@@ -18,7 +18,8 @@ import org.springframework.stereotype.Service;
  * Service for updating Auth0 user metadata when local users are updated.
  *
  * <p>This service provides methods to synchronize user metadata between the local database
- * and Auth0 when user information is updated.
+ * and Auth0 when user information is updated. It handles both user_metadata (data users can modify)
+ * and app_metadata (data controlled by administrators).
  */
 @Slf4j
 @Service
@@ -30,6 +31,9 @@ public class Auth0UserMetadataService {
 
   /**
    * Updates Auth0 user metadata for the given user.
+   *
+   * <p>This method updates both user_metadata (data users can modify) and app_metadata 
+   * (data controlled by administrators) in Auth0 based on the provided UserDto.
    *
    * @param auth0UserId the Auth0 user ID
    * @param userDto the updated user data
@@ -53,12 +57,16 @@ public class Auth0UserMetadataService {
     log.info("Updating Auth0 user metadata for user: {} (Auth0 ID: {})", userDto.getEmail(), auth0UserId);
 
     try {
-      // Build the user metadata
+      // Build the user metadata (data that users can modify)
       Map<String, Object> userMetadata = buildUserMetadata(userDto);
+      
+      // Build the app metadata (data controlled by admins)
+      Map<String, Object> appMetadata = buildAppMetadata(userDto);
 
-      // Create a User object with only the metadata to update
+      // Create a User object with both types of metadata
       User auth0User = new User();
       auth0User.setUserMetadata(userMetadata);
+      auth0User.setAppMetadata(appMetadata);
 
       // Update the user in Auth0
       User updatedUser = managementAPI.users().update(auth0UserId, auth0User).execute().getBody();
@@ -128,6 +136,7 @@ public class Auth0UserMetadataService {
 
   /**
    * Builds user metadata for Auth0 from UserDto.
+   * User metadata contains data that users can modify themselves.
    *
    * @param userDto the user DTO
    * @return the user metadata map
@@ -139,6 +148,19 @@ public class Auth0UserMetadataService {
     metadata.put("username", userDto.getUsername());
     metadata.put("dateOfBirth", userDto.getDateOfBirth() != null ? userDto.getDateOfBirth().toString() : null);
     metadata.put("ssn", userDto.getSsn());
+    
+    return metadata;
+  }
+
+  /**
+   * Builds app metadata for Auth0 from UserDto.
+   * App metadata contains data controlled by administrators.
+   *
+   * @param userDto the user DTO
+   * @return the app metadata map
+   */
+  private Map<String, Object> buildAppMetadata(UserDto userDto) {
+    Map<String, Object> metadata = new HashMap<>();
     metadata.put("companyId", userDto.getCompanyId() != null ? userDto.getCompanyId().toString() : null);
     
     if (userDto.getFunctions() != null) {
