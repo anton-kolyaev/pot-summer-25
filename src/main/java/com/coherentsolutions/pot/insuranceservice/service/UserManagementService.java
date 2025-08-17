@@ -62,7 +62,24 @@ public class UserManagementService {
    * bidirectional linkage between user and their function assignments.
    */
   public UserDto createUser(UserDto dto) {
+    return createUser(dto, null);
+  }
+
+  /**
+   * Creates a new user entity from the given {@link UserDto} with optional Auth0 user ID and persists it.
+   * Also ensures bidirectional linkage between user and their function assignments.
+   *
+   * @param dto the user DTO
+   * @param auth0UserId the Auth0 user ID (can be null)
+   * @return the created user DTO
+   */
+  @Transactional
+  public UserDto createUser(UserDto dto, String auth0UserId) {
     User user = userMapper.toEntity(dto);
+
+    if (auth0UserId != null && !auth0UserId.trim().isEmpty()) {
+      user.setAuth0UserId(auth0UserId);
+    }
 
     if (user.getFunctions() != null) {
       for (UserFunctionAssignment ufa : user.getFunctions()) {

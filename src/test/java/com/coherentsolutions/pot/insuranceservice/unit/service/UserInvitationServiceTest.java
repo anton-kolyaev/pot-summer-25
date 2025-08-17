@@ -67,18 +67,16 @@ class UserInvitationServiceTest {
     Auth0UserDto auth0User = new Auth0UserDto();
     auth0User.setUserId("auth0|123");
 
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class))).thenReturn(auth0User);
-    when(userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId())).thenReturn(savedUser);
+    when(userManagementService.createUser(userDto, auth0User.getUserId())).thenReturn(savedUser);
 
     // When
     UserDto result = userInvitationService.createUserWithInvitation(userDto);
 
     // Then
     assertEquals(savedUser, result);
-    verify(userManagementService).createUser(userDto);
     verify(auth0InvitationService).createUserWithInvitation(any(Auth0InvitationDto.class));
-    verify(userManagementService).updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
+    verify(userManagementService).createUser(userDto, auth0User.getUserId());
   }
 
   @Test
@@ -103,18 +101,16 @@ class UserInvitationServiceTest {
     Auth0UserDto auth0User = new Auth0UserDto();
     auth0User.setUserId("auth0|123");
 
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class))).thenReturn(auth0User);
-    when(userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId())).thenReturn(savedUser);
+    when(userManagementService.createUser(userDto, auth0User.getUserId())).thenReturn(savedUser);
 
     // When
     UserDto result = userInvitationService.createUserWithInvitation(userDto);
 
     // Then
     assertEquals(savedUser, result);
-    verify(userManagementService).createUser(userDto);
     verify(auth0InvitationService).createUserWithInvitation(any(Auth0InvitationDto.class));
-    verify(userManagementService).updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
+    verify(userManagementService).createUser(userDto, auth0User.getUserId());
   }
 
   @Test
@@ -127,11 +123,6 @@ class UserInvitationServiceTest {
     userDto.setLastName("Doe");
     userDto.setEmail("john.doe@example.com");
 
-    UserDto savedUser = new UserDto();
-    savedUser.setId(userDto.getId());
-    savedUser.setEmail("john.doe@example.com");
-
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class)))
         .thenThrow(new Auth0Exception("Auth0 creation failed", "AUTH0_ERROR", 400));
 
@@ -139,7 +130,7 @@ class UserInvitationServiceTest {
     Auth0Exception exception = assertThrows(Auth0Exception.class,
         () -> userInvitationService.createUserWithInvitation(userDto));
     assertEquals("Auth0 creation failed", exception.getMessage());
-    verify(userManagementService).createUser(userDto);
+    // Verify that no local user was created since Auth0 creation failed
   }
 
   @Test
@@ -253,18 +244,16 @@ class UserInvitationServiceTest {
     Auth0UserDto auth0User = new Auth0UserDto();
     auth0User.setUserId("auth0|123");
 
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class))).thenReturn(auth0User);
-    when(userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId())).thenReturn(savedUser);
+    when(userManagementService.createUser(userDto, auth0User.getUserId())).thenReturn(savedUser);
 
     // When
     UserDto result = userInvitationService.createUserWithInvitation(userDto);
 
     // Then
     assertEquals(savedUser, result);
-    verify(userManagementService).createUser(userDto);
     verify(auth0InvitationService).createUserWithInvitation(any(Auth0InvitationDto.class));
-    verify(userManagementService).updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
+    verify(userManagementService).createUser(userDto, auth0User.getUserId());
   }
 
   @Test
@@ -286,18 +275,16 @@ class UserInvitationServiceTest {
     Auth0UserDto auth0User = new Auth0UserDto();
     auth0User.setUserId("auth0|123");
 
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class))).thenReturn(auth0User);
-    when(userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId())).thenReturn(savedUser);
+    when(userManagementService.createUser(userDto, auth0User.getUserId())).thenReturn(savedUser);
 
     // When
     UserDto result = userInvitationService.createUserWithInvitation(userDto);
 
     // Then
     assertEquals(savedUser, result);
-    verify(userManagementService).createUser(userDto);
     verify(auth0InvitationService).createUserWithInvitation(any(Auth0InvitationDto.class));
-    verify(userManagementService).updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
+    verify(userManagementService).createUser(userDto, auth0User.getUserId());
   }
 
   @Test
@@ -319,18 +306,16 @@ class UserInvitationServiceTest {
     Auth0UserDto auth0User = new Auth0UserDto();
     auth0User.setUserId("auth0|123");
 
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class))).thenReturn(auth0User);
-    when(userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId())).thenReturn(savedUser);
+    when(userManagementService.createUser(userDto, auth0User.getUserId())).thenReturn(savedUser);
 
     // When
     UserDto result = userInvitationService.createUserWithInvitation(userDto);
 
     // Then
     assertEquals(savedUser, result);
-    verify(userManagementService).createUser(userDto);
     verify(auth0InvitationService).createUserWithInvitation(any(Auth0InvitationDto.class));
-    verify(userManagementService).updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
+    verify(userManagementService).createUser(userDto, auth0User.getUserId());
   }
 
   @Test
@@ -352,18 +337,16 @@ class UserInvitationServiceTest {
     Auth0UserDto auth0User = new Auth0UserDto();
     auth0User.setUserId("auth0|123");
 
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class))).thenReturn(auth0User);
-    when(userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId())).thenReturn(savedUser);
+    when(userManagementService.createUser(userDto, auth0User.getUserId())).thenReturn(savedUser);
 
     // When
     UserDto result = userInvitationService.createUserWithInvitation(userDto);
 
     // Then
     assertEquals(savedUser, result);
-    verify(userManagementService).createUser(userDto);
     verify(auth0InvitationService).createUserWithInvitation(any(Auth0InvitationDto.class));
-    verify(userManagementService).updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
+    verify(userManagementService).createUser(userDto, auth0User.getUserId());
   }
 
   @Test
@@ -385,17 +368,15 @@ class UserInvitationServiceTest {
     Auth0UserDto auth0User = new Auth0UserDto();
     auth0User.setUserId("auth0|123");
 
-    when(userManagementService.createUser(userDto)).thenReturn(savedUser);
     when(auth0InvitationService.createUserWithInvitation(any(Auth0InvitationDto.class))).thenReturn(auth0User);
-    when(userManagementService.updateAuth0UserId(savedUser.getId(), auth0User.getUserId())).thenReturn(savedUser);
+    when(userManagementService.createUser(userDto, auth0User.getUserId())).thenReturn(savedUser);
 
     // When
     UserDto result = userInvitationService.createUserWithInvitation(userDto);
 
     // Then
     assertEquals(savedUser, result);
-    verify(userManagementService).createUser(userDto);
     verify(auth0InvitationService).createUserWithInvitation(any(Auth0InvitationDto.class));
-    verify(userManagementService).updateAuth0UserId(savedUser.getId(), auth0User.getUserId());
+    verify(userManagementService).createUser(userDto, auth0User.getUserId());
   }
 } 
