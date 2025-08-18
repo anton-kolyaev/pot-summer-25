@@ -40,39 +40,31 @@ public class Auth0UserMetadataService {
    * @throws Auth0Exception if the update fails
    */
   public void updateUserMetadata(String auth0UserId, UserDto userDto) throws Auth0Exception {
-    if (auth0UserId == null || auth0UserId.trim().isEmpty()) {
-      log.warn("Auth0 user ID is null or empty for user: {}. Attempting to find user by email as backup.", userDto.getEmail());
-      
-      // Try to find the user by email as a backup plan
-      String foundAuth0UserId = findAuth0UserIdByEmail(userDto.getEmail());
-      if (foundAuth0UserId != null) {
-        log.info("Found Auth0 user by email for user: {} (Auth0 ID: {})", userDto.getEmail(), foundAuth0UserId);
-        auth0UserId = foundAuth0UserId;
-      } else {
-        log.error("Cannot update Auth0 metadata: Auth0 user ID is null/empty and no user found by email for user: {}", userDto.getEmail());
-        return;
-      }
-    }
-
-    log.info("Updating Auth0 user metadata for user: {} (Auth0 ID: {})", userDto.getEmail(), auth0UserId);
+    log.info("Updating Auth0 user metadata for user: {}", userDto.getEmail());
 
     try {
+      // Find the Auth0 user by ID or email
+      User auth0User = findAuth0UserByIdOrEmail(auth0UserId, userDto.getEmail());
+      if (auth0User == null) {
+        log.error("Cannot update Auth0 metadata: No Auth0 user found for user: {}", userDto.getEmail());
+        return;
+      }
+
       // Build the user metadata (data that users can modify)
       Map<String, Object> userMetadata = buildUserMetadata(userDto);
       
       // Build the app metadata (data controlled by admins)
       Map<String, Object> appMetadata = buildAppMetadata(userDto);
 
-      // Create a User object with both types of metadata
-      User auth0User = new User();
+      // Update the user's metadata
       auth0User.setUserMetadata(userMetadata);
       auth0User.setAppMetadata(appMetadata);
 
       // Update the user in Auth0
-      User updatedUser = managementAPI.users().update(auth0UserId, auth0User).execute().getBody();
+      User updatedUser = managementAPI.users().update(auth0User.getId(), auth0User).execute().getBody();
       
       log.info("Successfully updated Auth0 user metadata for user: {} (Auth0 ID: {})", 
-               userDto.getEmail(), auth0UserId);
+               userDto.getEmail(), auth0User.getId());
 
     } catch (Exception e) {
       log.error("Failed to update Auth0 user metadata for user: {} (Auth0 ID: {})", 
@@ -87,51 +79,69 @@ public class Auth0UserMetadataService {
   }
 
   /**
-   * Finds Auth0 user ID by email as a backup plan when the Auth0 user ID is not available.
+   * Finds Auth0 user by ID or email as a backup plan.
    *
-   * @param email the email to search for
-   * @return the Auth0 user ID if found, null otherwise
+   * @param auth0UserId the Auth0 user ID (can be null or empty)
+   * @param email the email to search for as backup
+   * @return the Auth0 User object if found, null otherwise
    * @throws Auth0Exception if the search fails
    */
-  public String findAuth0UserIdByEmail(String email) throws Auth0Exception {
-    if (email == null || email.trim().isEmpty()) {
-      log.warn("Cannot search for Auth0 user: email is null or empty");
-      return null;
+  private User findAuth0UserByIdOrEmail(String auth0UserId, String email) throws Auth0Exception {
+    // First try to find by Auth0 user ID if provided
+    if (auth0UserId != null && !auth0UserId.trim().isEmpty()) {
+      try {
+        log.debug("Attempting to find Auth0 user by ID: {}", auth0UserId);
+        User user = managementAPI.users().get(auth0UserId, null).execute().getBody();
+        if (user != null) {
+          log.debug("Found Auth0 user by ID: {}", auth0UserId);
+          return user;
+        }
+      } catch (Exception e) {
+        log.warn("Failed to find Auth0 user by ID: {}. Will try email as backup.", auth0UserId, e);
+      }
     }
 
-    try {
-      log.debug("Searching for Auth0 user by email: {}", email);
+    // If not found by ID or ID is not provided, try to find by email
+    if (email != null && !email.trim().isEmpty()) {
+      log.warn("Auth0 user ID is null, empty, or invalid for user: {}. Attempting to find user by email as backup.", email);
       
-      // Create a filter to search by email
-      UserFilter filter = new UserFilter().withQuery("email:" + email);
-      
-      // Search for users with the given email
-      UsersPage usersPage = managementAPI.users().list(filter).execute().getBody();
-      List<User> users = usersPage.getItems();
-      
-      if (users.isEmpty()) {
-        log.warn("No Auth0 user found with email: {}", email);
-        return null;
+      try {
+        log.debug("Searching for Auth0 user by email: {}", email);
+        
+        // Create a filter to search by email
+        UserFilter filter = new UserFilter().withQuery("email:" + email);
+        
+        // Search for users with the given email
+        UsersPage usersPage = managementAPI.users().list(filter).execute().getBody();
+        List<User> users = usersPage.getItems();
+        
+        if (users.isEmpty()) {
+          log.warn("No Auth0 user found with email: {}", email);
+          return null;
+        }
+        
+        if (users.size() > 1) {
+          log.warn("Multiple Auth0 users found with email: {}. Using the first one.", email);
+        }
+        
+        User foundUser = users.get(0);
+        log.info("Found Auth0 user by email for user: {} (Auth0 ID: {})", email, foundUser.getId());
+        
+        return foundUser;
+        
+      } catch (Exception e) {
+        log.error("Failed to search for Auth0 user by email: {}", email, e);
+        throw new Auth0Exception(
+            "Failed to search for Auth0 user by email: " + e.getMessage(), 
+            e, 
+            "AUTH0_USER_SEARCH_FAILED", 
+            400
+        );
       }
-      
-      if (users.size() > 1) {
-        log.warn("Multiple Auth0 users found with email: {}. Using the first one.", email);
-      }
-      
-      String auth0UserId = users.get(0).getId();
-      log.debug("Found Auth0 user ID: {} for email: {}", auth0UserId, email);
-      
-      return auth0UserId;
-      
-    } catch (Exception e) {
-      log.error("Failed to search for Auth0 user by email: {}", email, e);
-      throw new Auth0Exception(
-          "Failed to search for Auth0 user by email: " + e.getMessage(), 
-          e, 
-          "AUTH0_USER_SEARCH_FAILED", 
-          400
-      );
     }
+
+    log.error("Cannot find Auth0 user: both auth0UserId and email are null or empty");
+    return null;
   }
 
   /**

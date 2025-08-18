@@ -2,7 +2,6 @@ package com.coherentsolutions.pot.insuranceservice.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,7 +18,6 @@ import com.auth0.net.Request;
 import com.auth0.net.Response;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.enums.UserFunction;
-import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0UserMetadataService;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -78,8 +76,12 @@ class Auth0UserMetadataServiceTest {
     final UserDto userDto = createTestUserDto();
     User mockUser = new User();
     mockUser.setId(auth0UserId);
+    mockUser.setEmail(userDto.getEmail());
 
     when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(auth0UserId), any())).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(mockUser);
     when(usersEntity.update(eq(auth0UserId), any(User.class))).thenReturn(userUpdateRequest);
     when(userUpdateRequest.execute()).thenReturn(userResponse);
     when(userResponse.getBody()).thenReturn(mockUser);
@@ -88,6 +90,7 @@ class Auth0UserMetadataServiceTest {
     auth0UserMetadataService.updateUserMetadata(auth0UserId, userDto);
 
     // Then
+    verify(usersEntity).get(eq(auth0UserId), any());
     verify(usersEntity).update(eq(auth0UserId), any(User.class));
   }
 
@@ -158,6 +161,72 @@ class Auth0UserMetadataServiceTest {
   }
 
   @Test
+  @DisplayName("Should find Auth0 user by ID when valid ID is provided")
+  void shouldFindAuth0UserByIdWhenValidIdIsProvided() throws Exception {
+    // Given
+    String auth0UserId = "auth0|123";
+    final UserDto userDto = createTestUserDto();
+    User mockUser = new User();
+    mockUser.setId(auth0UserId);
+    mockUser.setEmail(userDto.getEmail());
+
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(auth0UserId), any())).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(mockUser);
+
+    // Mock the update
+    when(usersEntity.update(eq(auth0UserId), any(User.class))).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(mockUser);
+
+    // When
+    auth0UserMetadataService.updateUserMetadata(auth0UserId, userDto);
+
+    // Then
+    verify(usersEntity).get(eq(auth0UserId), any());
+    verify(usersEntity).update(eq(auth0UserId), any(User.class));
+  }
+
+  @Test
+  @DisplayName("Should fallback to email search when user ID lookup fails")
+  void shouldFallbackToEmailSearchWhenUserIdLookupFails() throws Exception {
+    // Given
+    String auth0UserId = "auth0|invalid";
+    String email = "test@example.com";
+    final String foundAuth0UserId = "auth0|456";
+    final UserDto userDto = createTestUserDto();
+    userDto.setEmail(email);
+
+    // Mock the ID lookup to fail
+    when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(auth0UserId), any())).thenThrow(new RuntimeException("User not found"));
+
+    // Mock the email search to succeed
+    User mockFoundUser = new User();
+    mockFoundUser.setId(foundAuth0UserId);
+    mockFoundUser.setEmail(email);
+
+    when(usersEntity.list(any(UserFilter.class))).thenReturn(usersPageRequest);
+    when(usersPageRequest.execute()).thenReturn(usersPageResponse);
+    when(usersPageResponse.getBody()).thenReturn(usersPage);
+    when(usersPage.getItems()).thenReturn(Arrays.asList(mockFoundUser));
+
+    // Mock the update
+    when(usersEntity.update(eq(foundAuth0UserId), any(User.class))).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(mockFoundUser);
+
+    // When
+    auth0UserMetadataService.updateUserMetadata(auth0UserId, userDto);
+
+    // Then
+    verify(usersEntity).get(eq(auth0UserId), any());
+    verify(usersEntity).list(any(UserFilter.class));
+    verify(usersEntity).update(eq(foundAuth0UserId), any(User.class));
+  }
+
+  @Test
   @DisplayName("Should return early when Auth0 user ID is null/empty and no user found by email")
   void shouldReturnEarlyWhenNoUserFoundByEmail() throws Exception {
     // Given
@@ -219,84 +288,19 @@ class Auth0UserMetadataServiceTest {
   }
 
   @Test
-  @DisplayName("Should find Auth0 user ID by email successfully")
-  void shouldFindAuth0UserIdByEmailSuccessfully() throws Exception {
+  @DisplayName("Should return early when both auth0UserId and email are null/empty")
+  void shouldReturnEarlyWhenBothAuth0UserIdAndEmailAreNull() throws Exception {
     // Given
-    String email = "test@example.com";
-    String expectedAuth0UserId = "auth0|123";
-    
-    User mockUser = new User();
-    mockUser.setId(expectedAuth0UserId);
-    mockUser.setEmail(email);
-
-    when(managementAPI.users()).thenReturn(usersEntity);
-    when(usersEntity.list(any(UserFilter.class))).thenReturn(usersPageRequest);
-    when(usersPageRequest.execute()).thenReturn(usersPageResponse);
-    when(usersPageResponse.getBody()).thenReturn(usersPage);
-    when(usersPage.getItems()).thenReturn(Arrays.asList(mockUser));
+    final UserDto userDto = createTestUserDto();
+    userDto.setEmail(null);
 
     // When
-    String result = auth0UserMetadataService.findAuth0UserIdByEmail(email);
+    auth0UserMetadataService.updateUserMetadata(null, userDto);
 
     // Then
-    assertEquals(expectedAuth0UserId, result);
-    verify(usersEntity).list(any(UserFilter.class));
-  }
-
-  @Test
-  @DisplayName("Should return null when no user found by email")
-  void shouldReturnNullWhenNoUserFoundByEmail() throws Exception {
-    // Given
-    String email = "nonexistent@example.com";
-
-    when(managementAPI.users()).thenReturn(usersEntity);
-    when(usersEntity.list(any(UserFilter.class))).thenReturn(usersPageRequest);
-    when(usersPageRequest.execute()).thenReturn(usersPageResponse);
-    when(usersPageResponse.getBody()).thenReturn(usersPage);
-    when(usersPage.getItems()).thenReturn(Collections.emptyList());
-
-    // When
-    String result = auth0UserMetadataService.findAuth0UserIdByEmail(email);
-
-    // Then
-    assertNull(result);
-    verify(usersEntity).list(any(UserFilter.class));
-  }
-
-  @Test
-  @DisplayName("Should return null when email is null")
-  void shouldReturnNullWhenEmailIsNull() throws Exception {
-    // When
-    String result = auth0UserMetadataService.findAuth0UserIdByEmail(null);
-
-    // Then
-    assertNull(result);
+    verify(usersEntity, never()).get(anyString(), any());
     verify(usersEntity, never()).list(any(UserFilter.class));
-  }
-
-  @Test
-  @DisplayName("Should return null when email is empty")
-  void shouldReturnNullWhenEmailIsEmpty() throws Exception {
-    // When
-    String result = auth0UserMetadataService.findAuth0UserIdByEmail("");
-
-    // Then
-    assertNull(result);
-    verify(usersEntity, never()).list(any(UserFilter.class));
-  }
-
-  @Test
-  @DisplayName("Should throw Auth0Exception when search fails")
-  void shouldThrowAuth0ExceptionWhenSearchFails() throws Exception {
-    // Given
-    String email = "test@example.com";
-    when(managementAPI.users()).thenReturn(usersEntity);
-    when(usersEntity.list(any(UserFilter.class))).thenThrow(new RuntimeException("Search failed"));
-
-    // When & Then
-    assertThrows(Auth0Exception.class, () -> {
-      auth0UserMetadataService.findAuth0UserIdByEmail(email);
-    });
+    verify(usersEntity, never()).update(anyString(), any(User.class));
   }
 
   @Test
@@ -307,8 +311,12 @@ class Auth0UserMetadataServiceTest {
     final UserDto userDto = createTestUserDto();
     User mockUser = new User();
     mockUser.setId(auth0UserId);
+    mockUser.setEmail(userDto.getEmail());
 
     when(managementAPI.users()).thenReturn(usersEntity);
+    when(usersEntity.get(eq(auth0UserId), any())).thenReturn(userUpdateRequest);
+    when(userUpdateRequest.execute()).thenReturn(userResponse);
+    when(userResponse.getBody()).thenReturn(mockUser);
     when(usersEntity.update(eq(auth0UserId), any(User.class))).thenReturn(userUpdateRequest);
     when(userUpdateRequest.execute()).thenReturn(userResponse);
     when(userResponse.getBody()).thenReturn(mockUser);
@@ -317,6 +325,7 @@ class Auth0UserMetadataServiceTest {
     auth0UserMetadataService.updateUserMetadata(auth0UserId, userDto);
 
     // Then
+    verify(usersEntity).get(eq(auth0UserId), any());
     verify(usersEntity).update(eq(auth0UserId), any(User.class));
     
     // Capture the User object passed to update and verify it has both metadata types
