@@ -17,15 +17,28 @@ public final class SecurityAuditor {
   public static final UUID SYSTEM = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
   public static UUID currentUserOrSystem() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    if (auth == null) {
-      log.warn("SecurityContext has no Authentication. Defaulting auditor to SYSTEM {}.", SYSTEM);
-      return SYSTEM;
-    }
     try {
-      return UUID.fromString(auth.getName());
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      if (auth == null || !auth.isAuthenticated()) {
+        log.warn("SecurityContext has no Authentication. Defaulting auditor to SYSTEM {}.", SYSTEM);
+        return SYSTEM;
+      }
+      String name = auth.getName();
+      if (name == null || name.isBlank() || ("anonymousUser").equals(name)) {
+        log.warn(
+            "Expected UUID principal but was anonymous/blank. Defaulting auditor to SYSTEM {}.",
+            SYSTEM);
+        return SYSTEM;
+      }
+      try {
+        return UUID.fromString(name);
+      } catch (IllegalArgumentException e) {
+        log.warn("Expected UUID principal but got non-UUID name. Using SYSTEM {}.", SYSTEM);
+        return SYSTEM;
+      }
     } catch (Exception e) {
-      log.error("Unexpected error resolving current auditor. Using SYSTEM {}.", SYSTEM, e);
+      log.error("Unexpected error resolving current auditor. Defaulting auditor to SYSTEM {}.",
+          SYSTEM, e);
       return SYSTEM;
     }
   }
