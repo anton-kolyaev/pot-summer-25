@@ -6,6 +6,7 @@ import com.auth0.json.mgmt.users.User;
 import com.auth0.json.mgmt.users.UsersPage;
 import com.coherentsolutions.pot.insuranceservice.dto.user.UserDto;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +178,37 @@ public class Auth0UserMetadataService {
       metadata.put("functions", userDto.getFunctions());
     }
     
+    // Determine system roles based on user functions or other criteria
+    List<String> roles = determineUserRoles(userDto);
+    if (!roles.isEmpty()) {
+      metadata.put("roles", roles);
+    }
+    
     return metadata;
+  }
+
+  /**
+   * Determines system roles for a user based on their functions or other criteria.
+   * 
+   * @param userDto the user DTO
+   * @return list of system roles for the user
+   */
+  private List<String> determineUserRoles(UserDto userDto) {
+    List<String> roles = new ArrayList<>();
+    
+    // Add APPLICATION_ADMIN role if user has multiple management functions
+    // This is a simple heuristic - in a real system, you might have more sophisticated logic
+    if (userDto.getFunctions() != null && userDto.getFunctions().size() >= 3) {
+      // If user has 3 or more management functions, they get application admin role
+      long managementFunctions = userDto.getFunctions().stream()
+          .filter(function -> function.name().contains("MANAGER"))
+          .count();
+      
+      if (managementFunctions >= 3) {
+        roles.add("APPLICATION_ADMIN");
+      }
+    }
+    
+    return roles;
   }
 }
