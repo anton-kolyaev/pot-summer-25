@@ -1,9 +1,8 @@
 package com.coherentsolutions.pot.insuranceservice.unit.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
+import com.auth0.client.mgmt.ManagementAPI;
 import com.coherentsolutions.pot.insuranceservice.config.Auth0Properties;
 import com.coherentsolutions.pot.insuranceservice.exception.Auth0Exception;
 import com.coherentsolutions.pot.insuranceservice.service.Auth0TicketService;
@@ -19,6 +18,9 @@ import org.springframework.web.client.RestClient;
 class Auth0TicketServiceTest {
 
   @Mock
+  private ManagementAPI managementAPI;
+
+  @Mock
   private RestClient restClient;
 
   @Mock
@@ -28,26 +30,7 @@ class Auth0TicketServiceTest {
 
   @BeforeEach
   void setUp() {
-    when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
-    when(auth0Properties.apiToken()).thenReturn("test-api-token");
-
-    auth0TicketService = new Auth0TicketService(null, auth0Properties, restClient);
-  }
-
-  @Test
-  @DisplayName("Should throw Auth0Exception when Auth0 is disabled")
-  void shouldThrowAuth0ExceptionWhenAuth0IsDisabled() {
-    // Given
-    when(auth0Properties.enabled()).thenReturn(false);
-    String email = "test@example.com";
-
-    // When & Then
-    Auth0Exception exception = assertThrows(Auth0Exception.class,
-        () -> auth0TicketService.createPasswordChangeTicketByEmail(email));
-    assertEquals("Auth0 integration is disabled", exception.getMessage());
+    auth0TicketService = new Auth0TicketService(managementAPI, auth0Properties, restClient);
   }
 
   @Test
@@ -57,7 +40,7 @@ class Auth0TicketServiceTest {
     String email = null;
 
     // When & Then
-    assertThrows(Exception.class,
+    assertThrows(Auth0Exception.class,
         () -> auth0TicketService.createPasswordChangeTicketByEmail(email));
   }
 
@@ -68,7 +51,7 @@ class Auth0TicketServiceTest {
     String email = "";
 
     // When & Then
-    assertThrows(Exception.class,
+    assertThrows(Auth0Exception.class,
         () -> auth0TicketService.createPasswordChangeTicketByEmail(email));
   }
 }

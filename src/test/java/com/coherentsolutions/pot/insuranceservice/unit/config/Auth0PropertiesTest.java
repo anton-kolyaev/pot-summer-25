@@ -25,7 +25,7 @@ class Auth0PropertiesTest {
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, "test-connection-id", timeout, enabled);
 
     // Then
     assertEquals(domain, properties.domain());
@@ -50,7 +50,7 @@ class Auth0PropertiesTest {
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, "test-connection-id", timeout, enabled);
 
     // Then
     assertEquals(10000, properties.timeout());
@@ -69,7 +69,7 @@ class Auth0PropertiesTest {
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, "test-connection-id", timeout, enabled);
 
     // Then
     assertEquals(10000, properties.timeout());
@@ -88,7 +88,7 @@ class Auth0PropertiesTest {
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, "test-connection-id", timeout, enabled);
 
     // Then
     assertEquals(15000, properties.timeout());
@@ -107,7 +107,7 @@ class Auth0PropertiesTest {
     boolean enabled = false;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, "test-connection-id", timeout, enabled);
 
     // Then
     assertEquals(domain, properties.domain());
@@ -132,7 +132,7 @@ class Auth0PropertiesTest {
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, "test-connection-id", timeout, enabled);
 
     // Then
     assertNull(properties.domain());
@@ -157,7 +157,7 @@ class Auth0PropertiesTest {
     boolean enabled = true;
 
     // When
-    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, timeout, enabled);
+    Auth0Properties properties = new Auth0Properties(domain, apiToken, audience, clientId, connection, "test-connection-id", timeout, enabled);
 
     // Then
     assertEquals("", properties.domain());

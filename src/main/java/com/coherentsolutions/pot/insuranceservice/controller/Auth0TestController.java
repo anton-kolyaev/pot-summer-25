@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/test/auth0")
 @Tag(name = "Auth0 Test", description = "Test endpoints for Auth0 functionality")
+@ConditionalOnProperty(name = "auth0.enabled", havingValue = "true", matchIfMissing = false)
 public class Auth0TestController {
 
   private final Auth0TicketService auth0TicketService;

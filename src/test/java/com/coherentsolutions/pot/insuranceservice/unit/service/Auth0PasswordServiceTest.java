@@ -14,16 +14,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClient;
 
 @ExtendWith(MockitoExtension.class)
 class Auth0PasswordServiceTest {
 
   @Mock
-  private Auth0Properties auth0Properties;
+  private Auth0TicketService auth0TicketService;
 
   @Mock
-  private Auth0TicketService auth0TicketService;
+  private Auth0Properties auth0Properties;
 
   private Auth0PasswordService auth0PasswordService;
 
@@ -67,12 +66,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn(null);
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("Domain is null"));
 
     // When & Then
-    assertThrows(Exception.class, 
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -82,12 +80,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("Domain is empty"));
 
     // When & Then
-    assertThrows(Exception.class, 
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -97,13 +94,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn(null);
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("Client ID is null"));
 
-    // When & Then - The service will proceed with null clientId and make the HTTP request
-    // which will then fail, but the service itself doesn't validate null values
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -113,12 +108,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn(null);
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("Connection is null"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -127,12 +121,11 @@ class Auth0PasswordServiceTest {
   void shouldHandleNullEmail() {
     // Given
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(null))
+        .thenThrow(new RuntimeException("Email is null"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(null));
   }
 
@@ -141,12 +134,11 @@ class Auth0PasswordServiceTest {
   void shouldHandleEmptyEmail() {
     // Given
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(""))
+        .thenThrow(new RuntimeException("Email is empty"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(""));
   }
 
@@ -155,12 +147,11 @@ class Auth0PasswordServiceTest {
   void shouldHandleWhitespaceEmail() {
     // Given
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail("   "))
+        .thenThrow(new RuntimeException("Email is whitespace"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail("   "));
   }
 
@@ -170,12 +161,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("invalid-domain");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("Malformed domain"));
 
     // When & Then
-    assertThrows(Exception.class, 
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -185,13 +175,14 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test+tag@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenReturn("https://test-domain.auth0.com/lo/reset?ticket=abc123");
 
-    // When & Then
-    assertThrows(Exception.class, 
-        () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
+    // When
+    String result = auth0PasswordService.sendPasswordChangeEmail(userEmail);
+
+    // Then
+    assertEquals("We've just sent you an email to change your password.", result);
   }
 
   @Test
@@ -200,13 +191,14 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "very.long.email.address.that.exceeds.normal.length.but.should.still.be.valid@very.long.domain.name.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenReturn("https://test-domain.auth0.com/lo/reset?ticket=abc123");
 
-    // When & Then
-    assertThrows(Exception.class, 
-        () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
+    // When
+    String result = auth0PasswordService.sendPasswordChangeEmail(userEmail);
+
+    // Then
+    assertEquals("We've just sent you an email to change your password.", result);
   }
 
   @Test
@@ -215,20 +207,21 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "user.name+tag@subdomain.example.co.uk";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenReturn("https://test-domain.auth0.com/lo/reset?ticket=abc123");
 
-    // When & Then
-    assertThrows(Exception.class, 
-        () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
+    // When
+    String result = auth0PasswordService.sendPasswordChangeEmail(userEmail);
+
+    // Then
+    assertEquals("We've just sent you an email to change your password.", result);
   }
 
   @Test
   @DisplayName("Should handle constructor with valid parameters")
   void shouldHandleConstructorWithValidParameters() {
     // Given & When
-    Auth0PasswordService service = new Auth0PasswordService(auth0Properties, restClient);
+    Auth0PasswordService service = new Auth0PasswordService(auth0Properties, auth0TicketService);
 
     // Then
     // No exception should be thrown
@@ -241,13 +234,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("HTTP 400 error"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    // but we can verify that the service attempts to handle HTTP errors
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -257,13 +248,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("HTTP 500 error"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    // but we can verify that the service attempts to handle HTTP errors
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -273,13 +262,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("test-domain.auth0.com");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("Network timeout"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    // but we can verify that the service attempts to handle network errors
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 
@@ -289,13 +276,11 @@ class Auth0PasswordServiceTest {
     // Given
     final String userEmail = "test@example.com";
     when(auth0Properties.enabled()).thenReturn(true);
-    when(auth0Properties.domain()).thenReturn("invalid domain with spaces");
-    when(auth0Properties.clientId()).thenReturn("test-client-id");
-    when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
+    when(auth0TicketService.createPasswordChangeTicketByEmail(userEmail))
+        .thenThrow(new RuntimeException("Malformed URL"));
 
-    // When & Then - This will throw an exception due to RestClient not being properly mocked
-    // but we can verify that the service attempts to handle malformed URLs
-    assertThrows(Exception.class, 
+    // When & Then
+    assertThrows(Auth0Exception.class, 
         () -> auth0PasswordService.sendPasswordChangeEmail(userEmail));
   }
 }

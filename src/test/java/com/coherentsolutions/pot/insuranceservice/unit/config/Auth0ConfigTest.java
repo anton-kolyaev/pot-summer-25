@@ -29,14 +29,8 @@ class Auth0ConfigTest {
     // Given
     Auth0Config config = new Auth0Config();
     Auth0Properties properties = new Auth0Properties(
-        "test-domain.auth0.com",
-        "test-api-token",
-        "test-audience",
-        "test-client-id",
-        "Username-Password-Authentication",
-        10000,
-        true
-    );
+        "test.auth0.com", "test-token", "https://api.test.com", 
+        "test-client-id", "Username-Password-Authentication", "test-connection-id", 5000, true);
 
     // When
     ManagementAPI result = config.managementAPI(properties);
@@ -55,6 +49,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        "test-connection-id",
         10000,
         true
     );
@@ -73,6 +68,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        "test-connection-id",
         10000,
         true
     );
@@ -91,6 +87,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        "test-connection-id",
         10000,
         true
     );
@@ -109,6 +106,7 @@ class Auth0ConfigTest {
         "test-audience",
         "test-client-id",
         "Username-Password-Authentication",
+        "test-connection-id",
         10000,
         true
     );
