@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.MockMvc;
 class AuditConfigIt extends PostgresTestContainer {
 
   private static final UUID TEST_USER =
-      UUID.fromString("11111111-2222-3333-4444-555555555555");
+      UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
   
   @Autowired
   MockMvc mockMvc;
