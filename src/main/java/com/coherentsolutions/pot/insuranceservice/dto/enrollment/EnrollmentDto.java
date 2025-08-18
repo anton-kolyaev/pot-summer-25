@@ -27,8 +27,5 @@ public class EnrollmentDto {
   @Positive(message = "Election amount must be positive")
   private BigDecimal electionAmount;
 
-  @NotNull(message = "Plan contribution is required")
-  @Positive(message = "Plan contribution must be positive")
   private BigDecimal planContribution;
-
 }
