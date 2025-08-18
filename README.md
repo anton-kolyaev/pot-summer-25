@@ -188,12 +188,11 @@ In Auth0:
     `Trigger:` Login / Post Login;  
     `Runtime:` Node 22;
 
-- Replace `AUTH_API_AUDIENCE` with your `Auth0 Management API identifier` and paste this code that creates custom claims with user's roles and functions in the token (between ===):  
+- Replace `AUTH_API_AUDIENCE` with your `Auth0 Management API identifier` and paste this code below that creates custom claims with user's roles and functions in the token:  
 
-============================================================
-
-  exports.onExecutePostLogin = async (event, api) => {
-  const namespace = "AUTH_API_AUDIENCE";
+```
+exports.onExecutePostLogin = async (event, api) => {
+const namespace = "AUTH_API_AUDIENCE";
 
 const systemRoles = event.user.app_metadata?.roles || [];
 const functionalRoles = event.user.app_metadata?.functions || [];
@@ -207,8 +206,7 @@ api.accessToken.setCustomClaim(namespace + "roles", systemRoles);
 api.accessToken.setCustomClaim(namespace + "functions", functionalRoles);
 api.accessToken.setCustomClaim(namespace + "company_id", companyId);
 };
-
-============================================================
+```
 
 
 - Click `Deploy` (On the right side above code window)
@@ -220,7 +218,7 @@ api.accessToken.setCustomClaim(namespace + "company_id", companyId);
 ### How to assign roles:
 - Click `User Management`
 - Click `Users`
-- Select your user which you are authorizing with to the `Swagger` 
+- Select your user which you are authorizing with in the `Swagger` 
 - Go to `Details`
 - Scroll down and find `App Metadata` **(Not `User Metadata`)**
 - In this window you can define roles and functions you want a user to have (See the examples below)
@@ -229,32 +227,40 @@ api.accessToken.setCustomClaim(namespace + "company_id", companyId);
 ### Examples with defined roles:
 
 **Application admin (can access every endpoint):**  
-`{
-    "roles": [  
-    "APPLICATION_ADMIN"]  
-}`
+```
+{
+  "roles": [  
+  "APPLICATION_ADMIN"]  
+}
+```
 
 **Company admin:**  
-`{  
-    "company_id": "73673983-785e-4a9c-8776-0f9712a6f503",  
-    "functions": [  
-        "COMPANY_MANAGER",  
-        "COMPANY_USER_MANAGER",  
-        "COMPANY_PLAN_MANAGER",  
-        "COMPANY_INSURANCE_PACKAGE_MANAGER",  
-        "COMPANY_CLAIM_MANAGER",  
-        "COMPANY_ENROLLMENT_MANAGER"  
-        ],  
-    "roles": [
-    "COMPANY_ADMIN"
-    ]  
-}`
+```
+{  
+  "company_id": "73673983-785e-4a9c-8776-0f9712a6f503",  
+  "functions": [  
+    "COMPANY_MANAGER",  
+    "COMPANY_USER_MANAGER",  
+    "COMPANY_PLAN_MANAGER",  
+    "COMPANY_INSURANCE_PACKAGE_MANAGER",  
+    "COMPANY_CLAIM_MANAGER",  
+    "COMPANY_ENROLLMENT_MANAGER"  
+    ],  
+  "roles": [
+  "COMPANY_ADMIN"
+  ]  
+}
+```
 
 **Consumer:**  
-`{ "user_id": "73673983-785e-4a9c-8776-0f9712a6f503",  
-"functions": [ "CONSUMER_CLAIM_MANAGER" ],  
-"roles": [ "CONSUMER" ] }
-`
+
+```
+{ 
+  "user_id": "73673983-785e-4a9c-8776-0f9712a6f503",  
+  "functions": [ "CONSUMER_CLAIM_MANAGER" ],  
+  "roles": [ "CONSUMER" ] 
+}
+```
 
 
 
