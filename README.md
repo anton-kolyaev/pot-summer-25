@@ -5,6 +5,7 @@
 - [.env Setup](#env-settings)
 - [SMTP Setup](#how-to-configure-it-in-your-auth0)
 - [How to authorize with Auth0](#how-to-authorize-with-auth0)
+- [How to start using role based permission management and access secured endpoints](#How-to-start-using-role-based-permission-management-and-access-secured-endpoints)
 
 
 ## Authors:
@@ -171,3 +172,89 @@ curl -X 'POST' \
 - - Try to execute any endpoint in Swagger
 - If **no**
 - - Probably, there are some errors in the previous steps
+
+## How to start using role based permission management and access secured endpoints:
+
+### How to make JWTs include claims with User's roles and functions:
+In Auth0:
+- Click `Actions` on the left ->
+- Click `Triggers` ->
+- Click `Post Login` ->
+- Click `Add action` (On the right side) ->
+- Click `Create Custom Action` -> 
+- Fill all required fields: 
+
+    `Name:` InjectCustomClaims;  
+    `Trigger:` Login / Post Login;  
+    `Runtime:` Node 22;
+
+- Replace `AUTH_API_AUDIENCE` with your `Auth0 Management API identifier` and paste this code that creates custom claims with user's roles and functions in the token (between ===):  
+
+============================================================
+
+  exports.onExecutePostLogin = async (event, api) => {
+  const namespace = "AUTH_API_AUDIENCE";
+
+const systemRoles = event.user.app_metadata?.roles || [];
+const functionalRoles = event.user.app_metadata?.functions || [];
+const companyId = event.user.app_metadata?.company_id || null;
+
+api.idToken.setCustomClaim(namespace + "roles", systemRoles);
+api.idToken.setCustomClaim(namespace + "functions", functionalRoles);
+api.idToken.setCustomClaim(namespace + "company_id", companyId);
+
+api.accessToken.setCustomClaim(namespace + "roles", systemRoles);
+api.accessToken.setCustomClaim(namespace + "functions", functionalRoles);
+api.accessToken.setCustomClaim(namespace + "company_id", companyId);
+};
+
+============================================================
+
+
+- Click `Deploy` (On the right side above code window)
+- Click `Back to Triggers`
+- Drag `InjectCustomClaims` from the right side to the place between `Start` and `Complete`
+- Click `Apply`.
+- Now JWTs include user's roles and functions.
+
+### How to assign roles:
+- Click `User Management`
+- Click `Users`
+- Select your user which you are authorizing with to the `Swagger` 
+- Go to `Details`
+- Scroll down and find `App Metadata` **(Not `User Metadata`)**
+- In this window you can define roles and functions you want a user to have (See the examples below)
+- Click `Save`
+
+### Examples with defined roles:
+
+**Application admin (can access every endpoint):**  
+`{
+    "roles": [  
+    "APPLICATION_ADMIN"]  
+}`
+
+**Company admin:**  
+`{  
+    "company_id": "73673983-785e-4a9c-8776-0f9712a6f503",  
+    "functions": [  
+        "COMPANY_MANAGER",  
+        "COMPANY_USER_MANAGER",  
+        "COMPANY_PLAN_MANAGER",  
+        "COMPANY_INSURANCE_PACKAGE_MANAGER",  
+        "COMPANY_CLAIM_MANAGER",  
+        "COMPANY_ENROLLMENT_MANAGER"  
+        ],  
+    "roles": [
+    "COMPANY_ADMIN"
+    ]  
+}`
+
+**Consumer:**  
+`{ "user_id": "73673983-785e-4a9c-8776-0f9712a6f503",  
+"functions": [ "CONSUMER_CLAIM_MANAGER" ],  
+"roles": [ "CONSUMER" ] }
+`
+
+
+
