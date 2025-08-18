@@ -16,30 +16,33 @@ public final class SecurityAuditor {
 
   public static final UUID SYSTEM = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
+  private static UUID warnFallback(String reason) {
+    log.warn("{} Defaulting auditor to SYSTEM {}.", reason, SYSTEM);
+    return SYSTEM;
+  }
+
+  private static UUID errorFallback(String reason, Throwable t) {
+    log.error("{} Defaulting auditor to SYSTEM {}.", reason, SYSTEM, t);
+    return SYSTEM;
+  }
+
   public static UUID currentUserOrSystem() {
     try {
       Authentication auth = SecurityContextHolder.getContext().getAuthentication();
       if (auth == null || !auth.isAuthenticated()) {
-        log.warn("SecurityContext has no Authentication. Defaulting auditor to SYSTEM {}.", SYSTEM);
-        return SYSTEM;
+        return warnFallback("SecurityContext has no authenticated principal.");
       }
       String name = auth.getName();
       if (name == null || name.isBlank() || ("anonymousUser").equals(name)) {
-        log.warn(
-            "Expected UUID principal but was anonymous/blank. Defaulting auditor to SYSTEM {}.",
-            SYSTEM);
-        return SYSTEM;
+        return warnFallback("Expected UUID principal but was anonymous/blank.");
       }
       try {
         return UUID.fromString(name);
       } catch (IllegalArgumentException e) {
-        log.warn("Expected UUID principal but got non-UUID name. Using SYSTEM {}.", SYSTEM);
-        return SYSTEM;
+        return warnFallback("Expected UUID principal but got non-UUID name.");
       }
     } catch (Exception e) {
-      log.error("Unexpected error resolving current auditor. Defaulting auditor to SYSTEM {}.",
-          SYSTEM, e);
-      return SYSTEM;
+      return errorFallback("Unexpected error resolving current auditor.", e);
     }
   }
 }
