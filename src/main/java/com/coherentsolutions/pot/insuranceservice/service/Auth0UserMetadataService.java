@@ -189,7 +189,7 @@ public class Auth0UserMetadataService {
 
   /**
    * Determines system roles for a user based on their functions or other criteria.
-   * 
+   *
    * @param userDto the user DTO
    * @return list of system roles for the user
    */
