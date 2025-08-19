@@ -12,13 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.RestClient;
 
 @ExtendWith(MockitoExtension.class)
 class Auth0PasswordServiceTest {
 
   @Mock
-  private RestClient restClient;
+  private Auth0TicketService auth0TicketService;
 
   @Mock
   private Auth0Properties auth0Properties;
@@ -33,7 +32,7 @@ class Auth0PasswordServiceTest {
     when(auth0Properties.connection()).thenReturn("Username-Password-Authentication");
     when(auth0Properties.timeout()).thenReturn(10000);
 
-    auth0PasswordService = new Auth0PasswordService(auth0Properties, restClient);
+    auth0PasswordService = new Auth0PasswordService(auth0Properties, auth0TicketService);
   }
 
   @Test

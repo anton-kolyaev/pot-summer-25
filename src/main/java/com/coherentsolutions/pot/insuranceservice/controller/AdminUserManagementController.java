@@ -8,6 +8,7 @@ import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/companies/{companyId}/users")
+@ConditionalOnProperty(name = "auth0.enabled", havingValue = "true", matchIfMissing = false)
 public class AdminUserManagementController {
 
   private final UserManagementService userManagementService;
