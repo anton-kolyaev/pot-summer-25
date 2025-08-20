@@ -13,6 +13,7 @@ import com.coherentsolutions.pot.insuranceservice.repository.ClaimRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.ClaimSpecification;
 import com.coherentsolutions.pot.insuranceservice.repository.EnrollmentRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -84,7 +86,8 @@ public class ClaimManagementService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Approved amount must be positive");
     }
     if (claim.getAmount() != null && request.getApprovedAmount().compareTo(claim.getAmount()) > 0) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Approved amount cannot exceed claim amount");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Approved amount cannot exceed claim amount");
     }
 
     claim.setStatus(ClaimStatus.APPROVED);
@@ -118,6 +121,19 @@ public class ClaimManagementService {
 
     Claim saved = claimRepository.save(claim);
     return claimMapper.toDto(saved);
+  }
+  @GetMapping("/{id}")
+  @Operation(
+      summary = "Get claim by id",
+      description = """
+        Retrieve details of a specific claim by its unique identifier.
+        """
+  )
+  @Transactional(readOnly = true)
+  public ClaimDto getClaimById(UUID id) {
+    Claim claim = claimRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Claim not found"));
+    return claimMapper.toDto(claim);
   }
 
 }
