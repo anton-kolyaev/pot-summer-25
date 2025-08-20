@@ -24,6 +24,9 @@ public interface ClaimMapper {
   @Mapping(target = "status", ignore = true)
   @Mapping(target = "consumer", ignore = true)
   @Mapping(target = "enrollment", ignore = true)
+  @Mapping(target = "approvedAmount", ignore = true)
+  @Mapping(target = "deniedReason", ignore = true)
+  @Mapping(target = "notes", ignore = true)
   Claim toEntity(ClaimDto dto);
 
   default ConsumerDto toConsumerDto(User user) {
