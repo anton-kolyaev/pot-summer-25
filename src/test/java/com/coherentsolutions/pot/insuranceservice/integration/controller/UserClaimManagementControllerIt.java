@@ -2,10 +2,10 @@ package com.coherentsolutions.pot.insuranceservice.integration.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimDto;
 import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
@@ -52,13 +52,19 @@ import org.springframework.transaction.annotation.Transactional;
 @DisplayName("Integration Test for UserClaimManagementController")
 public class UserClaimManagementControllerIt extends PostgresTestContainer {
 
-  @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
+  @Autowired
+  private MockMvc mockMvc;
+  @Autowired
+  private ObjectMapper objectMapper;
 
-  @Autowired private CompanyRepository companyRepository;
-  @Autowired private UserRepository userRepository;
-  @Autowired private PlanTypeRepository planTypeRepository;
-  @Autowired private PlanRepository planRepository;
+  @Autowired
+  private CompanyRepository companyRepository;
+  @Autowired
+  private UserRepository userRepository;
+  @Autowired
+  private PlanTypeRepository planTypeRepository;
+  @Autowired
+  private PlanRepository planRepository;
 
   private User user;
   private Plan plan;
@@ -110,7 +116,8 @@ public class UserClaimManagementControllerIt extends PostgresTestContainer {
         ClaimDto.class);
 
     assertNotNull(created.getId());
-    assertEquals(created.getId().toString(), created.getClaimNumber(), "claimNumber should mirror id");
+    assertEquals(created.getId().toString(), created.getClaimNumber(),
+        "claimNumber should mirror id");
     assertEquals(ClaimStatus.PENDING, created.getStatus());
     assertEquals(user.getId(), created.getConsumer().getUserId());
   }
@@ -161,10 +168,12 @@ public class UserClaimManagementControllerIt extends PostgresTestContainer {
     ClaimDto created = objectMapper.readValue(response, ClaimDto.class);
     assertEquals(ClaimStatus.PENDING, created.getStatus());
   }
+
   @Test
   @DisplayName("POST /v1/users/{userId}/claims — returns 403 when caller is not a CONSUMER")
   void shouldForbidWhenNotConsumer() throws Exception {
-    ClaimDto req = buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("50.00"));
+    ClaimDto req = buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(),
+        new BigDecimal("50.00"));
 
     mockMvc.perform(
             post(userEndpoint(user.getId()))
@@ -179,7 +188,8 @@ public class UserClaimManagementControllerIt extends PostgresTestContainer {
   void shouldForbidWhenConsumerTriesForOtherUser() throws Exception {
     UUID otherUserId = UUID.randomUUID();
 
-    ClaimDto req = buildClaimDto(otherUserId, enrollment.getId(), LocalDate.now(), new BigDecimal("50.00"));
+    ClaimDto req = buildClaimDto(otherUserId, enrollment.getId(), LocalDate.now(),
+        new BigDecimal("50.00"));
 
     mockMvc.perform(
             post(userEndpoint(otherUserId))
@@ -189,15 +199,16 @@ public class UserClaimManagementControllerIt extends PostgresTestContainer {
         .andExpect(status().isForbidden());
   }
 
-  
 
   private RequestPostProcessor asConsumer(UUID userId) {
     return jwt().jwt(j -> j.claim("user_uuid", userId.toString()))
         .authorities(new SimpleGrantedAuthority("ROLE_CONSUMER"));
   }
+
   private RequestPostProcessor asCompanyClaimManager() {
     return jwt().authorities(new SimpleGrantedAuthority("ROLE_FUNC_COMPANY_CLAIM_MANAGER"));
   }
+
   private ClaimDto buildClaimDto(UUID userId, UUID enrollmentId, LocalDate serviceDate,
       BigDecimal amount) {
     return ClaimDto.builder()
