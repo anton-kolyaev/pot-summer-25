@@ -51,6 +51,7 @@ dependencies {
     implementation libs.auth0
     implementation libs.dotenv
     implementation libs.spring.boot.starter.oauth2.resource.server
+    implementation libs.hibernate.envers
     compileOnly libs.lombok
     annotationProcessor libs.lombok
     annotationProcessor libs.mapstruct.processor
@@ -75,6 +76,7 @@ tasks.register('unitTest', Test) {
     classpath = sourceSets.test.runtimeClasspath
 
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
     include '**/unit/**/*.class'
 
 }
@@ -87,12 +89,15 @@ tasks.register('integrationTest', Test) {
     classpath = sourceSets.test.runtimeClasspath
 
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
     include '**/integration/**/*.class'
 
     shouldRunAfter tasks.named('unitTest')
 }
 
 jacocoTestReport {
+    dependsOn tasks.named("unitTest"), tasks.named("integrationTest")
+
     reports {
         xml.required = true
         html.required = true
