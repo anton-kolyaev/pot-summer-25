@@ -110,4 +110,9 @@ public class ClaimManagementController {
       @Valid @RequestBody ClaimDenialRequest request) {
     return claimManagementService.denyClaim(id, request);
   }
+  @GetMapping("/{id}")
+  @Operation(summary = "Get claim by id")
+  public ClaimDto getClaimById(@PathVariable UUID id) {
+    return claimManagementService.getClaimById(id);
+  }
 }
