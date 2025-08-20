@@ -1,0 +1,13 @@
+package com.coherentsolutions.pot.insuranceservice.dto.claim;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class ClaimDenialRequest {
+
+  @NotBlank(message = "reason is required")
+  private String reason;
+
+  private String notes;
+}
