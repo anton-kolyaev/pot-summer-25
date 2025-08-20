@@ -122,12 +122,13 @@ public class ClaimManagementService {
     Claim saved = claimRepository.save(claim);
     return claimMapper.toDto(saved);
   }
+
   @GetMapping("/{id}")
   @Operation(
       summary = "Get claim by id",
       description = """
-        Retrieve details of a specific claim by its unique identifier.
-        """
+          Retrieve details of a specific claim by its unique identifier.
+          """
   )
   @Transactional(readOnly = true)
   public ClaimDto getClaimById(UUID id) {
@@ -136,4 +137,20 @@ public class ClaimManagementService {
     return claimMapper.toDto(claim);
   }
 
+  @Transactional(readOnly = true)
+  public Ownership getClaimOwnership(UUID claimId) {
+    return claimRepository.findById(claimId)
+        .map(c -> new Ownership(
+            c.getConsumer() != null ? c.getConsumer().getId() : null,
+            (c.getEnrollment() != null
+                && c.getEnrollment().getUser() != null
+                && c.getEnrollment().getUser().getCompany() != null)
+                ? c.getEnrollment().getUser().getCompany().getId()
+                : null))
+        .orElse(null);
+  }
+
+  public record Ownership(UUID userId, UUID companyId) {
+
+  }
 }
