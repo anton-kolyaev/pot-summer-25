@@ -33,3 +33,6 @@ databaseChangeLog:
       file: db/changelog/create-table-users_aud.sql
   - include:
       file: db/changelog/create-table-companies_aud.sql
+  - include:
+      file: db/changelog/create-table-companies_aud.sql
+

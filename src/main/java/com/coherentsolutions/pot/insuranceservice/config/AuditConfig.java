@@ -23,7 +23,6 @@ public class AuditConfig {
     @Override
     public Optional<UUID> getCurrentAuditor() {
       return Optional.of(SecurityAuditor.currentUserOrSystem());
-
     }
   }
 }
