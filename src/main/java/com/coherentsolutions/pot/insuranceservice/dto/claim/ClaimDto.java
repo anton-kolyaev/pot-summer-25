@@ -41,9 +41,9 @@ public class ClaimDto {
   @Digits(integer = 17, fraction = 2, message = "Amount must have max 2 decimals")
   private BigDecimal amount;
 
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  @NotNull(message = "Plan ID is required")
-  private UUID planId;
+  @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+  @NotNull(message = "Enrollment ID is required")
+  private UUID enrollmentId;
 
   @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   private String planName;

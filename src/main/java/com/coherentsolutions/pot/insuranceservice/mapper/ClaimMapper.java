@@ -14,15 +14,16 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface ClaimMapper {
 
-  @Mapping(target = "planId", ignore = true)
-  @Mapping(target = "planName", source = "plan.name")
+  @Mapping(target = "enrollmentId", source = "enrollment.id")
+  @Mapping(target = "planName", source = "enrollment.plan.name")
   @Mapping(target = "consumer", ignore = true)
   ClaimDto toDto(Claim claim);
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "claimNumber", ignore = true)
+  @Mapping(target = "status", ignore = true)
   @Mapping(target = "consumer", ignore = true)
-  @Mapping(target = "plan", ignore = true)
+  @Mapping(target = "enrollment", ignore = true)
   Claim toEntity(ClaimDto dto);
 
   default ConsumerDto toConsumerDto(User user) {

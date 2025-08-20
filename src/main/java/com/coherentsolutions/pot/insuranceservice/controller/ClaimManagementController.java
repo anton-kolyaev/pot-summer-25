@@ -35,8 +35,9 @@ public class ClaimManagementController {
           - `status`
           - `planName` - case-insensitive
           - `amountMin` / `amountMax` - inclusive
-          - `serviceDateFrom` / `serviceDateTo` - inclusive, (YYYY-MM-DD)
+          - `serviceDateFrom` / `serviceDateTo` - inclusive (YYYY-MM-DD)
           - `userId`, `companyId`
+          - `enrollmentId`
           """
   )
   public Page<ClaimDto> getClaims(@ParameterObject ClaimFilter filter,
@@ -52,7 +53,7 @@ public class ClaimManagementController {
           
           **Required body fields**
           - `consumer.userId`
-          - `planId`
+          - `enrollmentId`
           - `serviceDate` (YYYY-MM-DD)
           - `amount`
           

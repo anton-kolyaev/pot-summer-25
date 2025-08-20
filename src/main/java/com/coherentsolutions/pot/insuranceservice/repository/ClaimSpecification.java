@@ -26,10 +26,15 @@ public class ClaimSpecification {
     specs.add(lessThanOrEqualTo(filter.getAmountMax(), r -> r.get("amount")));
     specs.add(equal(filter.getUserId(), r -> r.join("consumer").get("id")));
     specs.add(equal(filter.getCompanyId(), r -> r.join("consumer").join("company").get("id")));
+    specs.add(equal(filter.getEnrollmentId(), r -> r.join("enrollment").get("id")));
     if (filter.getPlanName() != null && !filter.getPlanName().isBlank()) {
       final String pattern = "%" + filter.getPlanName().toLowerCase(Locale.ROOT) + "%";
       specs.add((root, query, cb) ->
-          cb.like(cb.lower(root.join("plan").get("name")), pattern));
+          cb.like(
+              cb.lower(root.join("enrollment").join("plan").get("name")),
+              pattern
+          )
+      );
     }
     return specs.stream()
         .filter(Objects::nonNull)

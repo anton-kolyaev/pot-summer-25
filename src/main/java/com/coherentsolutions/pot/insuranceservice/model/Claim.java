@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +33,7 @@ public class Claim extends Auditable {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(name = "claim_number", nullable = false, length = 100, unique = true)
+  @Column(name = "claim_number", nullable = false, length = 100, unique = true, updatable = false)
   private String claimNumber;
 
   @Enumerated(EnumType.STRING)
@@ -46,9 +47,10 @@ public class Claim extends Auditable {
   @JoinColumn(name = "user_id", nullable = false)
   private User consumer;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "plan_id", nullable = false)
-  private Plan plan;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "enrollment_id", nullable = false,
+      foreignKey = @ForeignKey(name = "fk_claim_enrollment"))
+  private Enrollment enrollment;
 
   @Column(name = "amount", nullable = false)
   private BigDecimal amount;
@@ -59,4 +61,5 @@ public class Claim extends Auditable {
       claimNumber = id.toString();
     }
   }
+
 }
