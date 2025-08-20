@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimDto;
 import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
 import com.coherentsolutions.pot.insuranceservice.dto.enrollment.EnrollmentDto;
@@ -441,6 +442,35 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
                 .content(objectMapper.writeValueAsString(body)))
         .andExpect(status().isNotFound());
   }
+  @Test
+  @DisplayName("GET /v1/claims/{id} — returns claim by id")
+  void shouldGetClaimById() throws Exception {
+    // Given
+    ClaimDto created = createClaimViaApi(
+        buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("42.00")));
+
+    // When / Then
+    mockMvc.perform(get("/v1/claims/{id}", created.getId())
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(created.getId().toString()))
+        .andExpect(jsonPath("$.claimNumber").value(created.getClaimNumber()))
+        .andExpect(jsonPath("$.status").value("PENDING"))
+        .andExpect(jsonPath("$.planName").value(plan.getName()))
+        .andExpect(jsonPath("$.consumer.userId").value(user.getId().toString()));
+  }
+
+  @Test
+  @DisplayName("GET /v1/claims/{id} — 404 when not found")
+  void shouldReturnNotFoundWhenClaimMissing() throws Exception {
+    // Given
+    UUID nonExistentId = UUID.fromString("12345678-0000-0000-0000-000000000000");
+    // When / Then
+    mockMvc.perform(get("/v1/claims/{id}", nonExistentId)
+            .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound());
+  }
+
 
 
   private ClaimDto buildClaimDto(UUID userId, UUID enrollmentId, LocalDate serviceDate,
