@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.coherentsolutions.pot.insuranceservice.dto.claim.ClaimDto;
 import com.coherentsolutions.pot.insuranceservice.dto.consumer.ConsumerDto;
+import com.coherentsolutions.pot.insuranceservice.dto.enrollment.EnrollmentDto;
 import com.coherentsolutions.pot.insuranceservice.enums.ClaimStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.CompanyStatus;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
@@ -48,43 +49,51 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @Import(IntegrationTestConfiguration.class)
 @Transactional
-@DisplayName("Integration Test for ClaimManagementController")
+@DisplayName("Integration Test for ClaimManagementController (consumer + enrollment)")
 public class ClaimManagementControllerIt extends PostgresTestContainer {
 
   private static final String ENDPOINT = "/v1/claims";
 
-  @Autowired
-  private MockMvc mockMvc;
-  @Autowired
-  private ObjectMapper objectMapper;
+  @Autowired private MockMvc mockMvc;
+  @Autowired private ObjectMapper objectMapper;
 
-  @Autowired
-  private CompanyRepository companyRepository;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private PlanTypeRepository planTypeRepository;
-  @Autowired
-  private PlanRepository planRepository;
+  @Autowired private CompanyRepository companyRepository;
+  @Autowired private UserRepository userRepository;
+  @Autowired private PlanTypeRepository planTypeRepository;
+  @Autowired private PlanRepository planRepository;
 
   private User user;
   private Plan plan;
+  private EnrollmentDto enrollment;
 
   @BeforeEach
-  void setUp() {
-    // Given
+  void setUp() throws Exception {
     Company company = createTestCompany("Acme", "USA", "acme@example.com", "https://acme.test");
     user = createTestUser("Alice", "Doe", "alice", "alice@example.com", company, "123-45-6789");
     PlanType dental = ensurePlanType("DENTAL", "Dental");
     plan = planRepository.save(buildPlan("Dental Basic", dental, new BigDecimal("199.99")));
+    
+    var enrollReq = EnrollmentDto.builder()
+        .userId(user.getId())
+        .planId(plan.getId())
+        .electionAmount(new BigDecimal("100.00"))
+        .build();
+
+    String resp = mockMvc.perform(
+            post("/v1/enrollments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(enrollReq)))
+        .andExpect(status().isCreated())
+        .andReturn().getResponse().getContentAsString();
+
+    enrollment = objectMapper.readValue(resp, EnrollmentDto.class);
   }
 
   @Test
   @DisplayName("POST /v1/claims — should create claim successfully (status defaults to PENDING, claimNumber mirrors id)")
   void shouldCreateClaimSuccessfully() throws Exception {
     // Given
-    ClaimDto req = buildClaimDto(user.getId(), plan.getId(), LocalDate.now(),
-        new BigDecimal("50.00"));
+    ClaimDto req = buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("50.00"));
     req.setClaimNumber("client-should-not-set");
 
     // When
@@ -93,7 +102,7 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createClaimJson(
                     req.getConsumer().getUserId(),
-                    req.getPlanId(),
+                    req.getEnrollmentId(),
                     req.getServiceDate(),
                     req.getAmount(),
                     req.getStatus(),
@@ -106,8 +115,8 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     ClaimDto created = objectMapper.readValue(response, ClaimDto.class);
 
     // Then
-    assertNotNull(created.getId());
-    assertNotNull(created.getClaimNumber());
+    assertNotNull(created.getId(), "created id is null");
+    assertNotNull(created.getClaimNumber(), "claimNumber is null");
     assertEquals(created.getId().toString(), created.getClaimNumber());
     assertEquals(ClaimStatus.PENDING, created.getStatus());
     assertEquals(req.getServiceDate(), created.getServiceDate());
@@ -115,17 +124,15 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     assertEquals(user.getId(), created.getConsumer().getUserId());
   }
 
-
   @Test
-  @DisplayName("POST /v1/claims — should return 400 when consumer.userId is missing")
-  void shouldReturnBadRequestWhenConsumerMissing() throws Exception {
-    // When / Then
+  @DisplayName("POST /v1/claims — should return 400 when enrollmentId is missing")
+  void shouldReturnBadRequestWhenEnrollmentMissing() throws Exception {
     mockMvc.perform(
             post(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createClaimJson(
+                    user.getId(),
                     null,
-                    plan.getId(),
                     LocalDate.now(),
                     new BigDecimal("10.00")
                 )))
@@ -133,9 +140,8 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   }
 
   @Test
-  @DisplayName("POST /v1/claims — should return 404 when plan not found")
-  void shouldReturnNotFoundWhenPlanMissing() throws Exception {
-    // When / Then
+  @DisplayName("POST /v1/claims — should return 404 when enrollment not found")
+  void shouldReturnNotFoundWhenEnrollmentMissing() throws Exception {
     mockMvc.perform(
             post(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -152,10 +158,10 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   @DisplayName("GET /v1/claims — returns all when no filters")
   void shouldReturnAllWhenNoFilters() throws Exception {
     // Given
-    createClaimViaApi(buildClaimDto(user.getId(), plan.getId(), LocalDate.now().minusDays(1),
+    createClaimViaApi(buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now().minusDays(1),
         new BigDecimal("25.00")));
     createClaimViaApi(
-        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("30.00")));
+        buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("30.00")));
 
     // When
     String response = mockMvc.perform(
@@ -167,8 +173,7 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     // Then
     var tree = objectMapper.readTree(response);
     List<ClaimDto> content = objectMapper.readValue(tree.get("content").toString(),
-        new TypeReference<List<ClaimDto>>() {
-        });
+        new TypeReference<List<ClaimDto>>() {});
     assertEquals(2, content.size());
   }
 
@@ -176,10 +181,10 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   @DisplayName("GET /v1/claims — filter by status, serviceDate range, userId")
   void shouldFilterByStatusDateAndUser() throws Exception {
     // Given
-    createClaimViaApi(buildClaimDto(user.getId(), plan.getId(), LocalDate.now().minusDays(10),
+    createClaimViaApi(buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now().minusDays(10),
         new BigDecimal("10.00")));
     ClaimDto c2 = createClaimViaApi(
-        buildClaimDto(user.getId(), plan.getId(), LocalDate.now().minusDays(2),
+        buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now().minusDays(2),
             new BigDecimal("20.00")));
 
     // When
@@ -196,8 +201,7 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     // Then
     var tree = objectMapper.readTree(response);
     List<ClaimDto> content = objectMapper.readValue(tree.get("content").toString(),
-        new TypeReference<>() {
-        });
+        new TypeReference<>() {});
     assertEquals(1, content.size());
     assertEquals(c2.getId(), content.getFirst().getId());
   }
@@ -206,29 +210,26 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   @DisplayName("POST /v1/claims — ignores client-provided status; always PENDING on create")
   void shouldIgnoreClientProvidedStatusOnCreate() throws Exception {
     // Given
-    ClaimDto req = buildClaimDto(user.getId(), plan.getId(), LocalDate.now(),
-        new BigDecimal("12.34"));
+    ClaimDto req = buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("12.34"));
 
-    // When
+    // When / Then
     String response = mockMvc.perform(
             post(ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createClaimJson(
                     req.getConsumer().getUserId(),
-                    req.getPlanId(),
+                    req.getEnrollmentId(),
                     req.getServiceDate(),
                     req.getAmount(),
                     ClaimStatus.APPROVED, // client tries to set it
                     null
                 )))
-        // Then
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.status").value("PENDING"))
         .andReturn()
         .getResponse()
         .getContentAsString();
 
-    // Then
     ClaimDto created = objectMapper.readValue(response, ClaimDto.class);
     assertEquals(ClaimStatus.PENDING, created.getStatus());
   }
@@ -238,12 +239,27 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   void shouldFilterByPlanName() throws Exception {
     // Given
     createClaimViaApi(
-        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("10.00")));
+        buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("10.00")));
+    
     PlanType dental = ensurePlanType("DENTAL", "Dental");
     Plan otherPlan = planRepository.save(
         buildPlan("Vision Premium", dental, new BigDecimal("299.99")));
+
+    var enrollReq = EnrollmentDto.builder()
+        .userId(user.getId())
+        .planId(otherPlan.getId())
+        .electionAmount(new BigDecimal("200.00"))
+        .build();
+    String resp = mockMvc.perform(
+            post("/v1/enrollments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(enrollReq)))
+        .andExpect(status().isCreated())
+        .andReturn().getResponse().getContentAsString();
+    EnrollmentDto otherEnrollment = objectMapper.readValue(resp, EnrollmentDto.class);
+
     createClaimViaApi(
-        buildClaimDto(user.getId(), otherPlan.getId(), LocalDate.now(), new BigDecimal("15.00")));
+        buildClaimDto(user.getId(), otherEnrollment.getId(), LocalDate.now(), new BigDecimal("15.00")));
 
     // When / Then
     mockMvc.perform(get(ENDPOINT)
@@ -259,11 +275,11 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   void shouldFilterByAmountRangeInclusive() throws Exception {
     // Given
     createClaimViaApi(
-        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("10.00")));
+        buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("10.00")));
     ClaimDto mid = createClaimViaApi(
-        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("20.00")));
+        buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("20.00")));
     createClaimViaApi(
-        buildClaimDto(user.getId(), plan.getId(), LocalDate.now(), new BigDecimal("30.00")));
+        buildClaimDto(user.getId(), enrollment.getId(), LocalDate.now(), new BigDecimal("30.00")));
 
     // When / Then
     mockMvc.perform(get(ENDPOINT)
@@ -274,13 +290,13 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
         .andExpect(jsonPath("$.content.length()").value(1))
         .andExpect(jsonPath("$.content[0].id").value(mid.getId().toString()));
   }
+  
 
-  private ClaimDto buildClaimDto(UUID userId, UUID planId, LocalDate serviceDate,
-      BigDecimal amount) {
+  private ClaimDto buildClaimDto(UUID userId, UUID enrollmentId, LocalDate serviceDate, BigDecimal amount) {
     return ClaimDto.builder()
         .serviceDate(serviceDate)
         .amount(amount)
-        .planId(planId)
+        .enrollmentId(enrollmentId)
         .consumer(ConsumerDto.builder().userId(userId).build())
         .build();
   }
@@ -290,7 +306,7 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
             post(ENDPOINT).contentType(MediaType.APPLICATION_JSON)
                 .content(createClaimJson(
                     req.getConsumer().getUserId(),
-                    req.getPlanId(),
+                    req.getEnrollmentId(),
                     req.getServiceDate(),
                     req.getAmount(),
                     req.getStatus(),
@@ -346,28 +362,30 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
   }
 
   private String createClaimJson(
-      UUID userId, UUID planId, LocalDate serviceDate, BigDecimal amount,
-      ClaimStatus status, String claimNumber
+      UUID userId, UUID enrollmentId, LocalDate serviceDate,
+      BigDecimal amount, ClaimStatus status, String claimNumber
   ) throws Exception {
     var root = objectMapper.createObjectNode();
     root.put("serviceDate", serviceDate.toString());
     root.put("amount", amount);
-    root.put("planId", planId.toString());
+    if (userId != null) {
+      var consumer = root.putObject("consumer");
+      consumer.put("userId", userId.toString());
+    }
+    if (enrollmentId != null) {
+      root.put("enrollmentId", enrollmentId.toString());
+    }
     if (status != null) {
       root.put("status", status.name());
     }
     if (claimNumber != null) {
       root.put("claimNumber", claimNumber);
     }
-    if (userId != null) {
-      var consumer = root.putObject("consumer");
-      consumer.put("userId", userId.toString());
-    }
     return objectMapper.writeValueAsString(root);
   }
 
-  private String createClaimJson(UUID userId, UUID planId, LocalDate serviceDate, BigDecimal amount)
+  private String createClaimJson(UUID userId, UUID enrollmentId, LocalDate serviceDate, BigDecimal amount)
       throws Exception {
-    return createClaimJson(userId, planId, serviceDate, amount, null, null);
+    return createClaimJson(userId, enrollmentId, serviceDate, amount, null, null);
   }
 }
