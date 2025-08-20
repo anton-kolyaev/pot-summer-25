@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class ClaimDenialRequest {
 
-  @NotBlank(message = "reason is required")
+  @NotBlank(message = "Reason is required")
   private String reason;
 
   private String notes;
