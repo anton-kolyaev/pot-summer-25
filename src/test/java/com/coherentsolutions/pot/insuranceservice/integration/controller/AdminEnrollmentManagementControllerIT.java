@@ -45,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DisplayName("Integration Test for AdminEnrollmentManagementController")
 public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer {
 
-  private static final String ENDPOINT = "/v1/user/73673983-785e-4a9c-8776-0f9712a6f503/enrollments";
+  private static final String ENDPOINT = "/v1/companies/73673983-785e-4a9c-8776-0f9712a6f503/users/73673983-785e-4a9c-8776-0f9712a6f503/enrollments";
 
   @Autowired
   private MockMvc mockMvc;

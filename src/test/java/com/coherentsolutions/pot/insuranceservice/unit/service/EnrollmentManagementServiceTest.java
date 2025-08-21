@@ -34,6 +34,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -228,6 +231,13 @@ public class EnrollmentManagementServiceTest {
   void listAll_shouldReturnDtos() {
     UUID enrollmentId1 = UUID.randomUUID();
     UUID enrollmentId2 = UUID.randomUUID();
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(
+            "testUser", // principal (can also be a UserDetails object)
+            null,
+            List.of(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN"))
+        );
+    UUID companyId = UUID.randomUUID();
 
     Enrollment enrollment1 =
         buildEnrollment(
@@ -248,7 +258,7 @@ public class EnrollmentManagementServiceTest {
     when(enrollmentMapper.toDto(enrollment1)).thenReturn(enrollmentDto1);
     when(enrollmentMapper.toDto(enrollment2)).thenReturn(enrollmentDto2);
 
-    List<EnrollmentDto> result = enrollmentService.getAll();
+    List<EnrollmentDto> result = enrollmentService.getAll(authentication, companyId, userId);
 
     assertNotNull(result);
     assertEquals(2, result.size());
@@ -265,8 +275,15 @@ public class EnrollmentManagementServiceTest {
   @DisplayName("Should return empty list when no active enrollments")
   void listAll_shouldReturnEmptyList_whenNoActiveEnrollments() {
     when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(List.of());
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(
+            "testUser", // principal (can also be a UserDetails object)
+            null,
+            List.of(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN"))
+        );
+    UUID companyId = UUID.randomUUID();
 
-    List<EnrollmentDto> result = enrollmentService.getAll();
+    List<EnrollmentDto> result = enrollmentService.getAll(authentication, companyId, userId);
 
     assertNotNull(result);
     assertTrue(result.isEmpty());
@@ -300,7 +317,15 @@ public class EnrollmentManagementServiceTest {
         buildEnrollmentDto(enrollment3.getId(), userId, planId, enrollment3.getElectionAmount(),
             enrollment3.getPlanContribution()));
 
-    enrollmentService.getAll();
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(
+            "testUser", // principal (can also be a UserDetails object)
+            null,
+            List.of(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN"))
+        );
+    UUID companyId = UUID.randomUUID();
+
+    enrollmentService.getAll(authentication, companyId, userId);
 
     verify(enrollmentMapper, times(1)).toDto(enrollment1);
     verify(enrollmentMapper, times(1)).toDto(enrollment2);
@@ -317,8 +342,17 @@ public class EnrollmentManagementServiceTest {
     when(enrollmentRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(enrollment1));
     when(enrollmentMapper.toDto(enrollment1)).thenThrow(new IllegalStateException("mapping boom"));
 
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(
+            "testUser", // principal (can also be a UserDetails object)
+            null,
+            List.of(new SimpleGrantedAuthority("ROLE_APPLICATION_ADMIN"))
+        );
+    UUID companyId = UUID.randomUUID();
+
     IllegalStateException exception =
-        assertThrows(IllegalStateException.class, () -> enrollmentService.getAll());
+        assertThrows(IllegalStateException.class, () -> enrollmentService.getAll(
+            authentication, companyId, userId));
 
     assertEquals("mapping boom", exception.getMessage());
   }
