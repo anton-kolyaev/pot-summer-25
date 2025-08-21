@@ -16,7 +16,7 @@ public class JwtAuthConverterConfig {
   @Value("${AUTH0_AUDIENCE:}")
   private String authAudience;
 
-  private static final String PRINCIPAL_CLAIM = "user_uuid";
+  private static final String PRINCIPAL_CLAIM = "sub";
 
   @Bean
   public JwtAuthenticationConverter jwtAuthenticationConverter() {

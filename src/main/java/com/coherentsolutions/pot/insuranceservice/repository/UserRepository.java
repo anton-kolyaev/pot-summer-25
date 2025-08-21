@@ -56,4 +56,9 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
    * Finds a user by email address.
    */
   Optional<User> findByEmail(String email);
+
+  /**
+   * Finds a user by Auth0 user ID.
+   */
+  Optional<User> findByAuth0UserId(String auth0UserId);
 }

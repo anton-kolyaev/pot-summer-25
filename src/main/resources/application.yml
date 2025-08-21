@@ -60,3 +60,4 @@ springdoc:
       use-pkce-with-authorization-code-grant: true
       additional-query-string-params:
         audience: ${AUTH0_AUDIENCE:}
+        prompt: login

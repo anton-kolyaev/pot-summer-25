@@ -139,15 +139,19 @@ public class UserManagementService {
     UserDto updatedDto = userMapper.toDto(updated);
     
     // Update Auth0 user metadata if Auth0 is enabled and user has Auth0 ID
-    try {
-      if (updated.getAuth0UserId() != null && !updated.getAuth0UserId().trim().isEmpty()) {
+    if (updated.getAuth0UserId() != null && !updated.getAuth0UserId().trim().isEmpty()) {
+      try {
         auth0UserMetadataService.updateUserMetadata(updated.getAuth0UserId(), updatedDto);
+        log.info("Successfully updated Auth0 user metadata for user: {} (Auth0 ID: {})", 
+                 updated.getEmail(), updated.getAuth0UserId());
+      } catch (Exception e) {
+        // Log the error and throw it to ensure the caller knows about the Auth0 update failure
+        log.error("Failed to update Auth0 user metadata for user: {} (Auth0 ID: {}). Error: {}", 
+                 updated.getEmail(), updated.getAuth0UserId(), e.getMessage(), e);
+        throw new RuntimeException("Local user updated successfully, but Auth0 update failed: " + e.getMessage(), e);
       }
-    } catch (Exception e) {
-      // Log the error but don't fail the update operation
-      // This ensures the local update succeeds even if Auth0 update fails
-      log.warn("Failed to update Auth0 user metadata for user: {} (Auth0 ID: {}). Error: {}", 
-               updated.getEmail(), updated.getAuth0UserId(), e.getMessage());
+    } else {
+      log.warn("Cannot update Auth0 metadata: user {} has no Auth0 user ID", updated.getEmail());
     }
     
     return updatedDto;

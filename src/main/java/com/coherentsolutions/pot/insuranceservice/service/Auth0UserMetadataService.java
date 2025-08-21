@@ -56,19 +56,32 @@ public class Auth0UserMetadataService {
       // Build the app metadata (data controlled by admins)
       Map<String, Object> appMetadata = buildAppMetadata(userDto);
 
-      // Update the user's metadata
-      auth0User.setUserMetadata(userMetadata);
-      auth0User.setAppMetadata(appMetadata);
+      // Create a new User object with only the fields we want to update
+      User updateUser = new User();
+      
+      // Update basic user fields
+      updateUser.setEmail(userDto.getEmail());
+      updateUser.setName(userDto.getFirstName() + " " + userDto.getLastName());
+      updateUser.setGivenName(userDto.getFirstName());
+      updateUser.setFamilyName(userDto.getLastName());
+      updateUser.setNickname(userDto.getUsername());
+      
+      // Update metadata
+      updateUser.setUserMetadata(userMetadata);
+      updateUser.setAppMetadata(appMetadata);
+
+      log.debug("Updating Auth0 user {} with email: {}, name: {}, userMetadata: {} and appMetadata: {}", 
+               auth0User.getId(), userDto.getEmail(), updateUser.getName(), userMetadata, appMetadata);
 
       // Update the user in Auth0
-      User updatedUser = managementAPI.users().update(auth0User.getId(), auth0User).execute().getBody();
+      User updatedUser = managementAPI.users().update(auth0User.getId(), updateUser).execute().getBody();
       
       log.info("Successfully updated Auth0 user metadata for user: {} (Auth0 ID: {})", 
                userDto.getEmail(), auth0User.getId());
 
     } catch (Exception e) {
-      log.error("Failed to update Auth0 user metadata for user: {} (Auth0 ID: {})", 
-                userDto.getEmail(), auth0UserId, e);
+      log.error("Failed to update Auth0 user metadata for user: {} (Auth0 ID: {}). Error: {}", 
+                userDto.getEmail(), auth0UserId, e.getMessage(), e);
       throw new Auth0Exception(
           "Failed to update Auth0 user metadata: " + e.getMessage(), 
           e, 
@@ -157,7 +170,7 @@ public class Auth0UserMetadataService {
     metadata.put("lastName", userDto.getLastName());
     metadata.put("username", userDto.getUsername());
     metadata.put("dateOfBirth", userDto.getDateOfBirth() != null ? userDto.getDateOfBirth().toString() : null);
-    metadata.put("ssn", userDto.getSsn());
+    // Note: SSN is not included in user_metadata for security reasons
     
     return metadata;
   }
@@ -176,6 +189,8 @@ public class Auth0UserMetadataService {
     if (userDto.getFunctions() != null) {
       metadata.put("functions", userDto.getFunctions());
     }
+    
+    // Note: auth0UserId is not included in metadata as it's managed by Auth0 itself
     
     return metadata;
   }
