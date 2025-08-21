@@ -361,7 +361,8 @@ class Auth0UserMetadataServiceTest {
     assertEquals(userDto.getLastName(), userMetadata.get("lastName"));
     assertEquals(userDto.getUsername(), userMetadata.get("username"));
     assertEquals(userDto.getDateOfBirth().toString(), userMetadata.get("dateOfBirth"));
-    assertEquals(userDto.getSsn(), userMetadata.get("ssn"));
+    // SSN is not included in user_metadata for security reasons
+    assertNull(userMetadata.get("ssn"));
     
     // Verify user metadata does NOT contain admin-controlled fields
     assertNull(userMetadata.get("companyId"));
