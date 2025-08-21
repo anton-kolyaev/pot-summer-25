@@ -23,13 +23,7 @@ public class CompanyAdminSecurityService {
     boolean belongsToCompany = checkIfBelongsToCompany(authentication, companyId);
     boolean hasRequiredRole = authentication.getAuthorities().stream()
         .anyMatch(a -> a.getAuthority().equals(requiredRole));
-    System.out.println(requiredRole);
 
-    authentication.getAuthorities().forEach(authority ->
-        System.out.println(authority.getAuthority())
-    );
-    System.out.println(hasRequiredRole);
-    System.out.println(belongsToCompany);
     return hasRequiredRole && belongsToCompany;
   }
 
