@@ -336,15 +336,16 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return all plan types")
   void shouldReturnAllPlanTypes() throws Exception {
-    // Create MEDICAL plan type for this test
-    PlanType medical = buildPlanType("MEDICAL", "Medical Plan");
-    planTypeRepository.save(medical);
+    // The test should check for existing plan types from the migration
+    // DENTAL and MEDICAL are already created in the migration
     
     mockMvc.perform(get(ENDPOINT + "/plan-types")
             .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[?(@.code=='DENTAL')]").exists())
-        .andExpect(jsonPath("$[?(@.code=='MEDICAL')]").exists());
+        .andExpect(jsonPath("$[?(@.code=='MEDICAL')]").exists())
+        .andExpect(jsonPath("$[?(@.code=='VISION')]").exists())
+        .andExpect(jsonPath("$[?(@.code=='LIFE')]").exists());
   }
 
   @Test

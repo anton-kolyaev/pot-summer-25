@@ -5,7 +5,7 @@ spring:
     url: jdbc:tc:postgresql:16.9://localhost/test
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
