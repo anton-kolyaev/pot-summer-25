@@ -256,8 +256,8 @@ api.accessToken.setCustomClaim(namespace + "company_id", companyId);
 
 ```
 { 
-  "user_id": "73673983-785e-4a9c-8776-0f9712a6f503",  
-  "functions": [ "CONSUMER_CLAIM_MANAGER" ],  
+  "user_uuid": "73673983-785e-4a9c-8776-0f9712a6f503",  
+  "functions": [ "CONSUMER" ],  
   "roles": [ "CONSUMER" ] 
 }
 ```

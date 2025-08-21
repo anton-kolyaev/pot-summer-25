@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.coherentsolutions.pot.insuranceservice.dto.enrollment.EnrollmentDto;
 import com.coherentsolutions.pot.insuranceservice.enums.UserStatus;
 import com.coherentsolutions.pot.insuranceservice.integration.IntegrationTestConfiguration;
+import com.coherentsolutions.pot.insuranceservice.integration.TestSecurityUtils;
 import com.coherentsolutions.pot.insuranceservice.integration.containers.PostgresTestContainer;
 import com.coherentsolutions.pot.insuranceservice.model.Company;
 import com.coherentsolutions.pot.insuranceservice.model.Plan;
@@ -44,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 @DisplayName("Integration Test for AdminEnrollmentManagementController")
 public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer {
 
-  private static final String ENDPOINT = "/v1/enrollments";
+  private static final String ENDPOINT = "/v1/companies/73673983-785e-4a9c-8776-0f9712a6f503/users/73673983-785e-4a9c-8776-0f9712a6f503/enrollments";
 
   @Autowired
   private MockMvc mockMvc;
@@ -92,6 +93,7 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
     EnrollmentDto createRequest = copy(baseRequest);
 
     String response = mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(createRequest)))
         .andExpect(status().isCreated())
@@ -110,11 +112,13 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
   @DisplayName("Should return 400 when active enrollment already exists for same user & plan")
   void shouldReturnBadRequestWhenDuplicateEnrollment() throws Exception {
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(baseRequest)))
         .andExpect(status().isCreated());
 
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(baseRequest)))
         .andExpect(status().isBadRequest());
@@ -126,6 +130,7 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
     EnrollmentDto req = copy(baseRequest);
     req.setUserId(UUID.randomUUID()); // non-existent
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(req)))
         .andExpect(status().isNotFound());
@@ -137,6 +142,7 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
     EnrollmentDto req = copy(baseRequest);
     req.setPlanId(UUID.randomUUID()); // non-existent
     mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(req)))
         .andExpect(status().isNotFound());
@@ -172,7 +178,8 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
   @Test
   @DisplayName("Should return empty list when no enrollments")
   void shouldReturnEmptyListWhenNoEnrollments() throws Exception {
-    String json = mockMvc.perform(get(ENDPOINT))
+    String json = mockMvc.perform(get(ENDPOINT)
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())
         .andReturn()
         .getResponse()
@@ -189,6 +196,7 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
   void shouldListAllActiveEnrollments() throws Exception {
 
     String createdJson1 = mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(baseRequest)))
         .andExpect(status().isCreated())
@@ -203,6 +211,7 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
     req2.setElectionAmount(new BigDecimal("50.00"));
 
     String createdJson2 = mockMvc.perform(post(ENDPOINT)
+            .with(TestSecurityUtils.adminUser())
             .contentType(MediaType.APPLICATION_JSON)
             .content(toJson(req2)))
         .andExpect(status().isCreated())
@@ -210,7 +219,8 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
         .getResponse()
         .getContentAsString();
 
-    String json = mockMvc.perform(get(ENDPOINT))
+    String json = mockMvc.perform(get(ENDPOINT)
+            .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())
         .andReturn()
         .getResponse()
