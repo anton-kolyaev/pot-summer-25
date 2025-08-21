@@ -71,14 +71,36 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     company.setEmail(email);
     company.setCountryCode("USA");
     company.setWebsite(website);
+    
+    // Manually set audit fields for test
+    company.setCreatedAt(java.time.Instant.now());
+    company.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     return companyRepository.save(company);
   }
 
   private Plan createPlan(String name, BigDecimal contribution) {
     Plan plan = new Plan();
     plan.setName(name);
-    plan.setType(planTypeRepository.findByIdOrThrow(1));
+    
+    // Create plan type if it doesn't exist
+    var planType = planTypeRepository.findById(1)
+        .orElseGet(() -> {
+          var type = new com.coherentsolutions.pot.insuranceservice.model.PlanType();
+          type.setCode("HEALTH");
+          type.setName("Health Plan");
+          type.setCreatedAt(java.time.Instant.now());
+          type.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+          return planTypeRepository.save(type);
+        });
+    
+    plan.setType(planType);
     plan.setContribution(contribution);
+    
+    // Manually set audit fields for test
+    plan.setCreatedAt(java.time.Instant.now());
+    plan.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     return planRepository.save(plan);
   }
 
@@ -95,6 +117,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     package1.setPayrollFrequency(PayrollFrequency.MONTHLY);
     package1.setCompany(company);
     package1.setStatus(PackageStatus.ACTIVE);
+    
+    // Manually set audit fields for test
+    package1.setCreatedAt(java.time.Instant.now());
+    package1.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackageRepository.save(package1);
 
     InsurancePackage package2 = new InsurancePackage();
@@ -104,6 +131,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     package2.setPayrollFrequency(PayrollFrequency.WEEKLY);
     package2.setCompany(company);
     package2.setStatus(PackageStatus.ACTIVE);
+    
+    // Manually set audit fields for test
+    package2.setCreatedAt(java.time.Instant.now());
+    package2.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackageRepository.save(package2);
 
     InsurancePackageFilter filter = new InsurancePackageFilter();
@@ -136,6 +168,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     pkg.setPayrollFrequency(PayrollFrequency.MONTHLY);
     pkg.setCompany(company);
     pkg.setStatus(PackageStatus.ACTIVE);
+    
+    // Manually set audit fields for test
+    pkg.setCreatedAt(java.time.Instant.now());
+    pkg.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackageRepository.save(pkg);
 
     UUID companyId = company.getId();
@@ -168,6 +205,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
     insurancePackage.setStatus(PackageStatus.INITIALIZED);
     insurancePackage.setCompany(company);
+    
+    // Manually set audit fields for test
+    insurancePackage.setCreatedAt(java.time.Instant.now());
+    insurancePackage.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackage = insurancePackageRepository.save(insurancePackage);
 
     UUID companyId = company.getId();
@@ -291,6 +333,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.ACTIVE);
+    
+    // Manually set audit fields for test
+    insurancePackage.setCreatedAt(java.time.Instant.now());
+    insurancePackage.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackage = insurancePackageRepository.save(insurancePackage);
 
     UUID packageId = insurancePackage.getId();
@@ -316,6 +363,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    
+    // Manually set audit fields for test
+    insurancePackage.setCreatedAt(java.time.Instant.now());
+    insurancePackage.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackage = insurancePackageRepository.save(insurancePackage);
 
     UUID packageId = insurancePackage.getId();
@@ -353,6 +405,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    
+    // Manually set audit fields for test
+    insurancePackage.setCreatedAt(java.time.Instant.now());
+    insurancePackage.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackage = insurancePackageRepository.save(insurancePackage);
 
     UUID companyId = company.getId();
@@ -395,6 +452,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.DEACTIVATED);
+    
+    // Manually set audit fields for test
+    insurancePackage.setCreatedAt(java.time.Instant.now());
+    insurancePackage.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackage = insurancePackageRepository.save(insurancePackage);
 
     UUID companyId = company.getId();
@@ -434,6 +496,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.ACTIVE);
+    
+    // Manually set audit fields for test
+    insurancePackage.setCreatedAt(java.time.Instant.now());
+    insurancePackage.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackage = insurancePackageRepository.save(insurancePackage);
 
     UUID companyId = company.getId();
@@ -471,6 +538,11 @@ public class InsurancePackageManagementControllerIt extends PostgresTestContaine
     insurancePackage.setPayrollFrequency(PayrollFrequency.MONTHLY);
     insurancePackage.setCompany(company);
     insurancePackage.setStatus(PackageStatus.INITIALIZED);
+    
+    // Manually set audit fields for test
+    insurancePackage.setCreatedAt(java.time.Instant.now());
+    insurancePackage.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    
     insurancePackage = insurancePackageRepository.save(insurancePackage);
 
     UUID companyId = company.getId();

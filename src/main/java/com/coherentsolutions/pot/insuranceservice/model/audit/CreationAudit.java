@@ -5,10 +5,12 @@ import jakarta.persistence.MappedSuperclass;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 
 @Getter
+@Setter
 @MappedSuperclass
 public abstract class CreationAudit {
 

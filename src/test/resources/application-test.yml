@@ -5,11 +5,13 @@ spring:
     url: jdbc:tc:postgresql:16.9://localhost/test
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+  liquibase:
+    enabled: false  # Disable Liquibase for tests, let Hibernate handle schema
   security:
     oauth2:
       client:

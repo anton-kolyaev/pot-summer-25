@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,7 +33,7 @@ public class Plan extends AuditableSoftDelete {
   @Column(name = "name", length = 100, nullable = false)
   private String name;
 
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "plan_type_id", nullable = false)
   private PlanType type;
 

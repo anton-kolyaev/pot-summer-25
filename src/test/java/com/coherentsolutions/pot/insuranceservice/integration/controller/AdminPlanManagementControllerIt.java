@@ -64,6 +64,9 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
           PlanType dental = new PlanType();
           dental.setCode("DENTAL");
           dental.setName("Dental Plan");
+          // Manually set audit fields for test
+          dental.setCreatedAt(Instant.now());
+          dental.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
           return planTypeRepository.save(dental).getId();
         });
   }
@@ -84,6 +87,9 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
     PlanType type = new PlanType();
     type.setCode(code);
     type.setName(name);
+    // Manually set audit fields for test
+    type.setCreatedAt(Instant.now());
+    type.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     return type;
   }
 
@@ -330,6 +336,10 @@ public class AdminPlanManagementControllerIt extends PostgresTestContainer {
   @Test
   @DisplayName("Should return all plan types")
   void shouldReturnAllPlanTypes() throws Exception {
+    // Create MEDICAL plan type for this test
+    PlanType medical = buildPlanType("MEDICAL", "Medical Plan");
+    planTypeRepository.save(medical);
+    
     mockMvc.perform(get(ENDPOINT + "/plan-types")
             .with(TestSecurityUtils.adminUser()))
         .andExpect(status().isOk())

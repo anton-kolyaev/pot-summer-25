@@ -20,6 +20,7 @@ import com.coherentsolutions.pot.insuranceservice.repository.PlanTypeRepository;
 import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -251,6 +252,9 @@ public class AdminEnrollmentManagementControllerIT extends PostgresTestContainer
                   PlanType type = new PlanType();
                   type.setCode("DENTAL");
                   type.setName("Dental Plan");
+                  // Manually set audit fields for test
+                  type.setCreatedAt(Instant.now());
+                  type.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
                   return planTypeRepository.save(type);
                 });
 
