@@ -11,7 +11,7 @@ spring:
       hibernate:
         format_sql: true
   liquibase:
-    enabled: false  # Disable Liquibase for tests, let Hibernate handle schema
+    enabled: true
   security:
     oauth2:
       client:
