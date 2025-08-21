@@ -25,6 +25,7 @@ import com.coherentsolutions.pot.insuranceservice.repository.UserRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -308,6 +309,9 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     company.setEmail(email);
     company.setWebsite(website);
     company.setStatus(CompanyStatus.ACTIVE);
+    // Manually set audit fields for test
+    company.setCreatedAt(Instant.now());
+    company.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     return companyRepository.save(company);
   }
 
@@ -322,6 +326,9 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     user.setStatus(UserStatus.ACTIVE);
     user.setDateOfBirth(LocalDate.of(1990, 1, 1));
     user.setSsn(ssn);
+    // Manually set audit fields for test
+    user.setCreatedAt(Instant.now());
+    user.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     return userRepository.save(user);
   }
 
@@ -329,6 +336,9 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     var planType = new PlanType();
     planType.setCode(code);
     planType.setName(name);
+    // Manually set audit fields for test
+    planType.setCreatedAt(Instant.now());
+    planType.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     return planType;
   }
 
@@ -337,6 +347,9 @@ public class ClaimManagementControllerIt extends PostgresTestContainer {
     plan.setName(name);
     plan.setType(type);
     plan.setContribution(contribution);
+    // Manually set audit fields for test
+    plan.setCreatedAt(Instant.now());
+    plan.setCreatedBy(UUID.fromString("00000000-0000-0000-0000-000000000000"));
     return plan;
   }
 

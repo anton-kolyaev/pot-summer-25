@@ -31,3 +31,7 @@ databaseChangeLog:
       file: db/changelog/create-table-users_aud.sql
   - include:
       file: db/changelog/create-table-companies_aud.sql
+  - include:
+      file: db/changelog/add-auth0-user-id-to-users-aud.sql
+  - include:
+      file: db/changelog/add-auth0-user-id-to-users.sql

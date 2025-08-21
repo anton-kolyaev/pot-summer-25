@@ -91,4 +91,7 @@ public class User extends Auditable {
   @NotAudited
   private Set<UserFunctionAssignment> functions;
 
+  @Column(name = "auth0_user_id", length = 255, unique = true)
+  private String auth0UserId;
+  
 }

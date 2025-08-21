@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,11 @@ import org.springframework.web.server.ResponseStatusException;
  * and updates.
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UserManagementService {
+
+  private final Auth0UserMetadataService auth0UserMetadataService;
 
   private final UserRepository userRepository;
   private final UserMapper userMapper;
@@ -58,7 +62,24 @@ public class UserManagementService {
    * bidirectional linkage between user and their function assignments.
    */
   public UserDto createUser(UserDto dto) {
+    return createUser(dto, null);
+  }
+
+  /**
+   * Creates a new user entity from the given {@link UserDto} with optional Auth0 user ID and persists it.
+   * Also ensures bidirectional linkage between user and their function assignments.
+   *
+   * @param dto the user DTO
+   * @param auth0UserId the Auth0 user ID (can be null)
+   * @return the created user DTO
+   */
+  @Transactional
+  public UserDto createUser(UserDto dto, String auth0UserId) {
     User user = userMapper.toEntity(dto);
+
+    if (auth0UserId != null && !auth0UserId.trim().isEmpty()) {
+      user.setAuth0UserId(auth0UserId);
+    }
 
     if (user.getFunctions() != null) {
       for (UserFunctionAssignment ufa : user.getFunctions()) {
@@ -115,7 +136,25 @@ public class UserManagementService {
     }
 
     User updated = userRepository.save(user);
-    return userMapper.toDto(updated);
+    UserDto updatedDto = userMapper.toDto(updated);
+    
+    // Update Auth0 user metadata if Auth0 is enabled and user has Auth0 ID
+    if (updated.getAuth0UserId() != null && !updated.getAuth0UserId().trim().isEmpty()) {
+      try {
+        auth0UserMetadataService.updateUserMetadata(updated.getAuth0UserId(), updatedDto);
+        log.info("Successfully updated Auth0 user metadata for user: {} (Auth0 ID: {})", 
+                 updated.getEmail(), updated.getAuth0UserId());
+      } catch (Exception e) {
+        // Log the error and throw it to ensure the caller knows about the Auth0 update failure
+        log.error("Failed to update Auth0 user metadata for user: {} (Auth0 ID: {}). Error: {}", 
+                 updated.getEmail(), updated.getAuth0UserId(), e.getMessage(), e);
+        throw new RuntimeException("Local user updated successfully, but Auth0 update failed: " + e.getMessage(), e);
+      }
+    } else {
+      log.warn("Cannot update Auth0 metadata: user {} has no Auth0 user ID", updated.getEmail());
+    }
+    
+    return updatedDto;
   }
 
   /**
@@ -149,6 +188,21 @@ public class UserManagementService {
     user.setStatus(targetStatus);
     User savedUser = userRepository.save(user);
 
+    return userMapper.toDto(savedUser);
+  }
+
+  /**
+   * Updates the Auth0 user ID for an existing user.
+   *
+   * @param userId the local user ID
+   * @param auth0UserId the Auth0 user ID
+   * @return the updated user DTO
+   */
+  @Transactional
+  public UserDto updateAuth0UserId(UUID userId, String auth0UserId) {
+    User user = userRepository.findByIdOrThrow(userId);
+    user.setAuth0UserId(auth0UserId);
+    User savedUser = userRepository.save(user);
     return userMapper.toDto(savedUser);
   }
 }

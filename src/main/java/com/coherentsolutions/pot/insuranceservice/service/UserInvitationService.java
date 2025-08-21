@@ -34,8 +34,8 @@ public class UserInvitationService {
    * Creates a new user with invitation flow.
    * 
    * <p>This method:
-   * 1. Saves the user to the local database
-   * 2. Creates the user in Auth0 with invitation email
+   * 1. Creates the user in Auth0 with invitation email
+   * 2. Saves the user to the local database with Auth0 ID in a single transaction
    * 3. Handles rollback if Auth0 creation fails
    * 
    *
@@ -48,26 +48,22 @@ public class UserInvitationService {
   public UserDto createUserWithInvitation(UserDto userDto) throws Auth0Exception {
     log.info("Creating user with invitation flow for email: {}", userDto.getEmail());
     
-    // Step 1: Save user to local database
-    UserDto savedUser = userManagementService.createUser(userDto);
-    log.info("Successfully saved user to local database with ID: {}", savedUser.getId());
-    
     try {
-      // Step 2: Create Auth0 user with invitation
+      // Step 1: Create Auth0 user with invitation first
       Auth0InvitationDto invitationDto = buildInvitationDto(userDto);
       Auth0UserDto auth0User = auth0InvitationService.createUserWithInvitation(invitationDto);
       
       log.info("Successfully created Auth0 user with invitation. Auth0 ID: {}", auth0User.getUserId());
       
-      // Step 3: Update local user with Auth0 ID (optional - for future reference)
-      // This could be stored in user metadata or a separate field
+      // Step 2: Save user to local database with Auth0 ID in the same transaction
+      UserDto savedUser = userManagementService.createUser(userDto, auth0User.getUserId());
+      log.info("Successfully saved user to local database with ID: {} and Auth0 ID: {}", 
+               savedUser.getId(), auth0User.getUserId());
       
       return savedUser;
       
     } catch (Auth0Exception e) {
-      log.error("Failed to create Auth0 user with invitation for email: {}. Rolling back local user creation.", userDto.getEmail(), e);
-      
-      log.info("Marked user {} as inactive pending email confirmation", savedUser.getId());
+      log.error("Failed to create Auth0 user with invitation for email: {}. No local user was created.", userDto.getEmail(), e);
       throw e;
     }
   }
