@@ -10,6 +10,7 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +33,9 @@ public class ClaimDto {
   @NotNull(message = "Service date is required")
   private LocalDate serviceDate;
 
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private LocalDateTime processedDate;
+
   @NotNull(message = "Consumer info is required")
   @Valid
   private ConsumerDto consumer;
@@ -41,9 +45,18 @@ public class ClaimDto {
   @Digits(integer = 17, fraction = 2, message = "Amount must have max 2 decimals")
   private BigDecimal amount;
 
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  @NotNull(message = "Plan ID is required")
-  private UUID planId;
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private BigDecimal approvedAmount;
+
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private String deniedReason;
+
+  @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+  private String notes;
+
+  @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+  @NotNull(message = "Enrollment ID is required")
+  private UUID enrollmentId;
 
   @JsonProperty(access = JsonProperty.Access.READ_ONLY)
   private String planName;

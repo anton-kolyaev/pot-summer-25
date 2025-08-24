@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +17,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +34,7 @@ public class Claim extends Auditable {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
-  @Column(name = "claim_number", nullable = false, length = 100, unique = true)
+  @Column(name = "claim_number", nullable = false, length = 100, unique = true, updatable = false)
   private String claimNumber;
 
   @Enumerated(EnumType.STRING)
@@ -42,16 +44,29 @@ public class Claim extends Auditable {
   @Column(name = "service_date", nullable = false)
   private LocalDate serviceDate;
 
+  @Column(name = "processed_date")
+  private LocalDateTime processedDate;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
   private User consumer;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "plan_id", nullable = false)
-  private Plan plan;
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "enrollment_id", nullable = false,
+      foreignKey = @ForeignKey(name = "fk_claim_enrollment"))
+  private Enrollment enrollment;
 
   @Column(name = "amount", nullable = false)
   private BigDecimal amount;
+
+  @Column(name = "approved_amount")
+  private BigDecimal approvedAmount;
+
+  @Column(name = "notes")
+  private String notes;
+
+  @Column(name = "denied_reason")
+  private String deniedReason;
 
   @PrePersist
   void assignClaimNumber() {
@@ -59,4 +74,5 @@ public class Claim extends Auditable {
       claimNumber = id.toString();
     }
   }
+
 }

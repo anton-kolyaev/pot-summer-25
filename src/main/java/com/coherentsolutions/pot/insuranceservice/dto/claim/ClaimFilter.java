@@ -20,6 +20,7 @@ public class ClaimFilter {
   private BigDecimal amountMax;
   private LocalDate serviceDateFrom;
   private LocalDate serviceDateTo;
+  private UUID enrollmentId;
   private UUID userId;
   private UUID companyId;
 }
