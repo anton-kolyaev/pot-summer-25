@@ -8,6 +8,7 @@ import com.coherentsolutions.pot.insuranceservice.service.UserManagementService;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -38,10 +39,9 @@ public class AdminUserManagementController {
 
   /**
    * Creates a new user with invitation flow.
-   * 
+   *
    * <p>This endpoint:
-   * 1. Saves the user data to the local database
-   * 2. Creates the user in Auth0 with invitation email
+   * 1. Saves the user data to the local database 2. Creates the user in Auth0 with invitation email
    * 3. The invited user will receive an email to set up their account
    */
   @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
@@ -61,8 +61,11 @@ public class AdminUserManagementController {
    */
   @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @GetMapping
-  public Page<UserDto> getUsersOfCompany(@PathVariable UUID companyId, UserFilter filter,
-      Pageable pageable) {
+  public Page<UserDto> getUsersOfCompany(
+      @PathVariable UUID companyId,
+      @ParameterObject UserFilter filter,
+      @ParameterObject Pageable pageable
+  ) {
     filter.setCompanyId(companyId);
     return userManagementService.getUsersWithFilters(filter, pageable);
   }
@@ -97,15 +100,11 @@ public class AdminUserManagementController {
   }
 
   /**
-
    * Resends invitation email to the user.
-   * 
    *
-   * @param id the user ID
-   *
+   * @param id          the user ID
    * @param auth0UserId the Auth0 user ID
-   *
-   * @param email the user's email
+   * @param email       the user's email
    */
   @PostMapping("/{id}/resend-invitation")
   @ResponseStatus(HttpStatus.OK)
@@ -121,8 +120,8 @@ public class AdminUserManagementController {
   }
 
   /**
-   * Retrieves user details by ID. If the user does not exist, throws {@link
-   * ResponseStatusException} with 404 NOT FOUND.
+   * Retrieves user details by ID. If the user does not exist, throws
+   * {@link ResponseStatusException} with 404 NOT FOUND.
    */
   @PreAuthorize("@companyAdminSecurityService.canAccessCompanyResource(#companyId, 'ROLE_FUNC_COMPANY_USER_MANAGER')")
   @GetMapping("/{id}")
