@@ -19,7 +19,6 @@ public class CompanyAdminSecurityService {
       return true;
     }
     boolean belongsToCompany = checkIfBelongsToCompany(authentication, companyId);
-    belongsToCompany = true;
     boolean hasRequiredRole = true;
     return hasRequiredRole && belongsToCompany;
   }
